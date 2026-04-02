@@ -79,7 +79,7 @@ npm install
 Tạo file `.env` ngay trong thư mục `backend-nettech/`:
 
 
-Sau đó mở file `.env` và dán nội dung sau vào:
+Sau đó mở file `.env` và bỏ cái dòng ở dưới vô:
 
 ```env
 MONGODB_URI="mongodb+srv://nettech_db:nettech19@nettechdatabase.z1l7rpg.mongodb.net/my_store_db?retryWrites=true&w=majority"
@@ -112,7 +112,7 @@ pnpm install
 Tạo file `.env.local` ngay trong thư mục `frontend-nettech/`:
 
 
-Dán nội dung sau vào file `.env.local`:
+Cũng bỏ cái dòng ở dưới vô file `.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -156,7 +156,7 @@ Frontend đang chạy tại: **http://localhost:3000**
 
 ### Mở trình duyệt
 
-Truy cập **http://localhost:3000** để xem giao diện của ứng dụng.
+Truy cập **http://localhost:3000** để xem giao diện của NetTech siêu sale 9 tháng 9
 
 ---
 
