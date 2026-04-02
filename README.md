@@ -49,9 +49,10 @@ NetTech_Project/
 ---
 
 ## 3. Clone dự án
+Ae hãy tạo 1 folder để chứa trước nha
 
 ```bash
-git clone <https://github.com/KNguyn0511/KLTN-GR19.git>
+git clone -b connect-db <https://github.com/KNguyn0511/KLTN-GR19.git> . (nhớ có dấu chấm cuối để khỏi bị tạo thừa 1 thư mục từ Repo git về)
 cd NetTech_Project
 ```
 
