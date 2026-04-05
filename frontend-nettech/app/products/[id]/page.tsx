@@ -38,7 +38,7 @@ const ProductPage = () => {
       try {
         // Gửi request GET /products/:id đến Backend NestJS
         const response = await axiosInstance.get<ApiProductResponse>(
-          `/products/${id}`
+          `/products/${id}`,
         );
 
         // Chuyển đổi dữ liệu API sang định dạng mà các component UI cần
@@ -63,25 +63,25 @@ const ProductPage = () => {
   // ── Trạng thái đang tải: hiển thị skeleton placeholder ──────────────────────
   if (loading) {
     return (
-      <main className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 lg:px-12 xl:px-16 lg:py-10 flex-1">
-        <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:gap-12 xl:gap-16 animate-pulse">
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 md:px-8 lg:px-12 lg:py-10 xl:px-16">
+        <div className="mt-6 flex animate-pulse flex-col gap-8 lg:flex-row lg:gap-12 xl:gap-16">
           {/* Skeleton cho ảnh sản phẩm */}
-          <div className="w-full lg:w-[45%] xl:w-1/2 aspect-square rounded-2xl bg-gray-200" />
+          <div className="aspect-square w-full rounded-2xl bg-gray-200 lg:w-[45%] xl:w-1/2" />
 
           {/* Skeleton cho thông tin sản phẩm */}
-          <div className="w-full flex-1 flex flex-col gap-4 pt-2">
-            <div className="h-10 bg-gray-200 rounded-lg w-3/4" />
-            <div className="h-5 bg-gray-200 rounded-lg w-1/3" />
-            <div className="h-24 bg-gray-200 rounded-xl mt-4" />
-            <div className="h-36 bg-gray-200 rounded-xl" />
-            <div className="h-14 bg-gray-200 rounded-xl" />
+          <div className="flex w-full flex-1 flex-col gap-4 pt-2">
+            <div className="h-10 w-3/4 rounded-lg bg-gray-200" />
+            <div className="h-5 w-1/3 rounded-lg bg-gray-200" />
+            <div className="mt-4 h-24 rounded-xl bg-gray-200" />
+            <div className="h-36 rounded-xl bg-gray-200" />
+            <div className="h-14 rounded-xl bg-gray-200" />
           </div>
         </div>
 
         {/* Skeleton cho phần thông số và điểm nổi bật */}
         <div className="mt-12 flex flex-col gap-8 lg:flex-row lg:gap-12 xl:gap-16">
-          <div className="w-full lg:w-[60%] xl:w-2/3 h-64 bg-gray-200 rounded-xl" />
-          <div className="w-full lg:w-[40%] xl:w-1/3 h-64 bg-gray-200 rounded-xl" />
+          <div className="h-64 w-full rounded-xl bg-gray-200 lg:w-[60%] xl:w-2/3" />
+          <div className="h-64 w-full rounded-xl bg-gray-200 lg:w-[40%] xl:w-1/3" />
         </div>
       </main>
     );
@@ -90,18 +90,18 @@ const ProductPage = () => {
   // ── Trạng thái lỗi hoặc không tìm thấy sản phẩm ─────────────────────────────
   if (error || !product) {
     return (
-      <main className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 lg:px-12 xl:px-16 lg:py-10 flex-1">
+      <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 md:px-8 lg:px-12 lg:py-10 xl:px-16">
         <div className="mt-20 flex flex-col items-center justify-center gap-4 text-center">
           <div className="text-7xl select-none">😕</div>
           <h2 className="text-2xl font-bold text-gray-800">
             {error ?? "Không tìm thấy sản phẩm"}
           </h2>
-          <p className="text-gray-500 text-sm">
+          <p className="text-sm text-gray-500">
             Sản phẩm có thể đã bị xóa hoặc đường dẫn không đúng.
           </p>
           <a
             href="/products"
-            className="mt-2 rounded-lg bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary/90 transition-colors"
+            className="bg-primary hover:bg-primary/90 mt-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-colors"
           >
             Quay lại danh sách sản phẩm
           </a>
@@ -112,7 +112,7 @@ const ProductPage = () => {
 
   // ── Hiển thị trang chi tiết sản phẩm với dữ liệu thật từ API ────────────────
   return (
-    <main className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 lg:px-12 xl:px-16 lg:py-10 flex-1">
+    <main className="mx-auto w-full max-w-[1440px] flex-1 px-4 py-6 md:px-8 lg:px-12 lg:py-10 xl:px-16">
       {/* Breadcrumb (Placeholder) */}
 
       {/* Khối Trên (Top Section) */}
@@ -126,7 +126,7 @@ const ProductPage = () => {
       </div>
 
       {/* Khối Dưới (Bottom Section) */}
-      <div className="mt-12 md:mt-16 flex flex-col gap-8 lg:flex-row lg:gap-12 xl:gap-16">
+      <div className="mt-12 flex flex-col gap-8 md:mt-16 lg:flex-row lg:gap-12 xl:gap-16">
         <div className="w-full lg:w-[60%] xl:w-2/3">
           <ProductSpecs specs={product.specs} />
         </div>
@@ -137,7 +137,10 @@ const ProductPage = () => {
 
       {/* Sản phẩm tương tự (tạm dùng mock, sau có thể gọi API lấy sản phẩm cùng danh mục) */}
       <div className="mt-16 w-full">
-        <ProductList title="SẢN PHẨM TƯƠNG TỰ" products={mockProducts.slice(0, 5)} />
+        <ProductList
+          title="SẢN PHẨM TƯƠNG TỰ"
+          products={mockProducts.slice(0, 5)}
+        />
       </div>
     </main>
   );

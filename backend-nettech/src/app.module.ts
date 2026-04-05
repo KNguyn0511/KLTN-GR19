@@ -5,6 +5,7 @@ import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { SalesModule } from './sales/sales.module';
 import { BranchesModule } from './branches/branches.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { BranchesModule } from './branches/branches.module';
     UsersModule,
     SalesModule,
     BranchesModule, // Module quản lý danh sách chi nhánh cửa hàng
+    CartModule, // Module quản lý giỏ hàng của người dùng
   ],
 })
 export class AppModule {}

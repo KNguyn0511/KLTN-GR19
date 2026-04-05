@@ -19,6 +19,7 @@ interface CartStore {
   removeItem: (cartItemId: string) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   clearCart: () => void;
+  setItems: (items: CartItem[]) => void; // Dùng để đồng bộ toàn bộ giỏ từ API về store
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }
@@ -59,6 +60,9 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
 
   clearCart: () => set({ items: [] }),
+
+  // Thay thế toàn bộ items — dùng sau khi fetch giỏ hàng từ API để đồng bộ badge Header
+  setItems: (newItems) => set({ items: newItems }),
 
   getTotalItems: () => {
     return get().items.reduce((total, item) => total + item.quantity, 0);

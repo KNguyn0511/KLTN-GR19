@@ -7,30 +7,75 @@ import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockPr
 import { useCartStore } from "@/store/useCartStore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import axiosInstance from "@/lib/axiosInstance";
+
+// TODO: Thay bằng userId thật khi tích hợp JWT
+const TEMP_USER_ID = "guest_user_001";
 
 export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
   const [activeConfig, setActiveConfig] = useState<ProductConfig>(product.configurations[0]);
   const addItem = useCartStore((state) => state.addItem);
   const router = useRouter();
 
-  const handleAddToCart = () => {
+  // Hàm dùng chung: build payload và gọi API POST /cart/add, trả về true/false
+  const callAddToCartApi = async (): Promise<boolean> => {
+    const price = product.basePrice + activeConfig.priceDelta;
+    const cartItemId = `${product.id}-${activeConfig.id}`;
+
+    // Cập nhật Zustand ngay lập tức để badge Header phản hồi nhanh (optimistic update)
     addItem({
       id: product.id,
-      cartItemId: `${product.id}-${activeConfig.id}`,
+      cartItemId,
       name: product.name,
-      price: product.basePrice + activeConfig.priceDelta,
+      price,
       image: product.images[0],
       quantity: 1,
       configName: activeConfig.name,
       sku: product.sku,
     });
-    
-    toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
+
+    // Gọi API POST /cart/add để lưu vào MongoDB — đây là nguồn dữ liệu thật
+    try {
+      await axiosInstance.post("/cart/add", {
+        userId: TEMP_USER_ID,
+        productId: String(product.id),
+        cartItemId,
+        name: product.name,
+        price,
+        // images[0] có thể là StaticImport (mock) hoặc string URL (API) — chỉ gửi string
+        image: typeof product.images[0] === "string" ? product.images[0] : "",
+        quantity: 1,
+        configName: activeConfig.name,
+        sku: product.sku,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
-    router.push("/cart");
+  // ── Nút THÊM VÀO GIỎ: thêm vào giỏ rồi ở lại trang hiện tại ──────────────
+  const handleAddToCart = async () => {
+    const ok = await callAddToCartApi();
+    if (ok) {
+      toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
+    } else {
+      // API lỗi nhưng Zustand đã có — cảnh báo nhẹ, không chặn UX
+      toast.warning("Thêm vào giỏ thành công nhưng chưa đồng bộ được với server!");
+    }
+  };
+
+  // ── Nút MUA NGAY: thêm vào giỏ -> chờ API xong -> chuyển thẳng sang Checkout ──
+  const handleBuyNow = async () => {
+    const ok = await callAddToCartApi();
+
+    if (!ok) {
+      // API thất bại: cảnh báo nhưng vẫn cho qua checkout vì Zustand đã có item
+      toast.warning("Chưa đồng bộ được với server, nhưng bạn vẫn có thể tiếp tục thanh toán!");
+    }
+
+    // Chuyển ngay sang trang Checkout — không dừng lại ở trang giỏ hàng
+    router.push("/checkout");
   };
 
   const vndFormatter = new Intl.NumberFormat("vi-VN", {

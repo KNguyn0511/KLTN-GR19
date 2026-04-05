@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 
 // Enum trạng thái chi nhánh
 export enum BranchStatus {
-  ACTIVE = 'active',           // Đang hoạt động bình thường
+  ACTIVE = 'active', // Đang hoạt động bình thường
   MAINTENANCE = 'maintenance', // Đang bảo trì, tạm ngừng
 }
 
@@ -33,10 +33,10 @@ export class Branch extends Document {
 
   @ApiProperty({
     example: 'https://maps.google.com/?q=NetTech+Quan1',
-    description: 'Link nhúng Google Maps để hiển thị bản đồ (không bắt buộc)',
+    description: 'Link nhúng Google Maps để hiển thị bản đồ',
     required: false,
   })
-  @Prop() // Link nhúng Google Maps (không bắt buộc, thêm sau cũng được)
+  @Prop() // Link nhúng Google Maps (thêm sau cũng được)
   mapUrl: string;
 
   @ApiProperty({
