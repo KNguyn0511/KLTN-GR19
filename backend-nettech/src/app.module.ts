@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { SalesModule } from './sales/sales.module';
+import { BranchesModule } from './branches/branches.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SalesModule } from './sales/sales.module';
     ProductsModule,
     UsersModule,
     SalesModule,
+    BranchesModule, // Module quản lý danh sách chi nhánh cửa hàng
   ],
 })
 export class AppModule {}
