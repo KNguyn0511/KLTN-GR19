@@ -21,7 +21,7 @@ export const vietnamProvincesApi = {
       const res = await fetch('https://provinces.open-api.vn/api/p/');
       if (!res.ok) throw new Error("Failed to fetch provinces");
       const data = await res.json();
-      return data.map((item: any) => ({ code: item.code, name: item.name }));
+      return data.map((item: VietnamProvince) => ({ code: item.code, name: item.name }));
     } catch (error) {
       console.error(error);
       return [];
@@ -35,7 +35,7 @@ export const vietnamProvincesApi = {
       if (!res.ok) throw new Error("Failed to fetch districts");
       const data = await res.json();
       if (!data || !data.districts) return [];
-      return data.districts.map((item: any) => ({ code: item.code, name: item.name, province_code: provinceCode }));
+      return data.districts.map((item: { code: number; name: string }) => ({ code: item.code, name: item.name, province_code: provinceCode }));
     } catch (error) {
       console.error(error);
       return [];
@@ -49,7 +49,7 @@ export const vietnamProvincesApi = {
       if (!res.ok) throw new Error("Failed to fetch wards");
       const data = await res.json();
       if (!data || !data.wards) return [];
-      return data.wards.map((item: any) => ({ code: item.code, name: item.name, district_code: districtCode }));
+      return data.wards.map((item: { code: number; name: string }) => ({ code: item.code, name: item.name, district_code: districtCode }));
     } catch (error) {
       console.error(error);
       return [];

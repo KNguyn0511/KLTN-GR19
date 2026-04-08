@@ -1,6 +1,4 @@
 import { create } from "zustand";
-import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
-import { ProductType } from "@/components/shared/ProductCard";
 
 export interface CartItem {
   id: string | number; // ID gốc của sản phẩm

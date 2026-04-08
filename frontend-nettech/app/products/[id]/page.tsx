@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { ProductList } from "@/components/shared";
 import {
   ProductGallery,
@@ -99,12 +100,12 @@ const ProductPage = () => {
           <p className="text-sm text-gray-500">
             Sản phẩm có thể đã bị xóa hoặc đường dẫn không đúng.
           </p>
-          <a
+          <Link
             href="/products"
             className="bg-primary hover:bg-primary/90 mt-2 rounded-lg px-6 py-3 text-sm font-bold text-white transition-colors"
           >
             Quay lại danh sách sản phẩm
-          </a>
+          </Link>
         </div>
       </main>
     );

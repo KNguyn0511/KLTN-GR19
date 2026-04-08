@@ -51,7 +51,7 @@ export default function CheckoutPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormData>({
-    // @ts-ignore
+    // @ts-expect-error - zodResolver type mismatch with react-hook-form version
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
       </div>
 
       <form
-        onSubmit={handleSubmit(onSubmit as any)}
+        onSubmit={handleSubmit(onSubmit as Parameters<typeof handleSubmit>[0])}
         className="flex flex-col gap-8 lg:flex-row lg:gap-12"
       >
         {/* Lõi Cột Trái Form */}
@@ -646,7 +646,7 @@ export default function CheckoutPage() {
             </Button>
 
             <p className="mt-4 px-2 text-center text-[11px] leading-relaxed text-gray-500">
-              Nhấn "Đặt hàng" đồng nghĩa với việc <br />
+              Nhấn &quot;Đặt hàng&quot; đồng nghĩa với việc <br />
               <a
                 href="#"
                 className="text-primary font-semibold hover:underline"

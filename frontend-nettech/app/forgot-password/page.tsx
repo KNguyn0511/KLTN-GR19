@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordFormData>({
-    // @ts-ignore
+    // @ts-expect-error - zodResolver type mismatch with react-hook-form version
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
   });

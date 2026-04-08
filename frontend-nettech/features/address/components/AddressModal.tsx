@@ -16,6 +16,7 @@ export function AddressModal({ isOpen, onClose, addresses, onSelect, selectedId 
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTempSelectedId(selectedId || (addresses.length > 0 ? addresses[0].id : undefined));
     }
   }, [isOpen, selectedId, addresses]);

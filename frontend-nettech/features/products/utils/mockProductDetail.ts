@@ -14,7 +14,7 @@ export interface DetailedProduct {
   basePrice: number;
   originalPrice: number | null;
   discount: string | null;
-  images: any[];
+  images: (string | { src: string })[];
   configurations: ProductConfig[];
   features: string[];
   specs: {
