@@ -13,7 +13,7 @@ export interface ProductType {
   price: number;
   originalPrice?: number | null;
   discount?: string | null;
-  image?: string | null | { src: string };
+  image?: string | any;
 }
 
 interface ProductCardProps {

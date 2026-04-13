@@ -4,9 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { SalesModule } from './sales/sales.module';
-import { BranchesModule } from './branches/branches.module';
-import { CartModule } from './cart/cart.module';
-import { StockManagementModule } from './stock-management/stock-management.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -21,9 +19,7 @@ import { StockManagementModule } from './stock-management/stock-management.modul
     ProductsModule,
     UsersModule,
     SalesModule,
-    BranchesModule,        // Module quản lý danh sách chi nhánh cửa hàng
-    CartModule,            // Module quản lý giỏ hàng của người dùng
-    StockManagementModule, // Module quản lý kho: phiếu yêu cầu & chuyển hàng
+    CategoriesModule,
   ],
 })
 export class AppModule {}

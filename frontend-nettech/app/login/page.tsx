@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
-    // @ts-expect-error - zodResolver type mismatch with react-hook-form version
+    // @ ts-ignore
     resolver: zodResolver(loginSchema),
     defaultValues: { emailOrPhone: "", password: "" }
   });

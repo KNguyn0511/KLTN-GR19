@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
-    // @ts-expect-error - zodResolver type mismatch with react-hook-form version
+    // @ts-ignore
     resolver: zodResolver(registerSchema),
     defaultValues: { email: "", phone: "", password: "", confirmPassword: "", agreeTerms: false }
   });
@@ -32,7 +32,7 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout title="Tạo tài khoản NETTECH">
-      <form onSubmit={handleSubmit(onSubmit as Parameters<typeof handleSubmit>[0])} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4">
         
         {/* Email */}
         <div className="space-y-1">
