@@ -4,6 +4,8 @@ import "./globals.css";
 import { ToastProvider } from "@/components/shared";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 
+import AuthProvider from "@/features/auth/components/AuthProvider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,11 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
       >
-        <SiteLayout>
-          {children}
-        </SiteLayout>
+        <AuthProvider>
+          <SiteLayout>{children}</SiteLayout>
+        </AuthProvider>
         <ToastProvider />
       </body>
     </html>
