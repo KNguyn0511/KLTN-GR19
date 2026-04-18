@@ -1,0 +1,1 @@
+{"version":3,"file":"update-stock.dto.js","sourceRoot":"","sources":["../../../src/products/dto/update-stock.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAC9C,qDAA2C;AAE3C,MAAa,cAAc;IAMzB,cAAc,CAAS;CACxB;AAPD,wCAOC;AADC;IALC,IAAA,qBAAW,EAAC;QACX,OAAO,EAAE,CAAC,CAAC;QACX,WAAW,EAAE,8DAA8D;KAC5E,CAAC;IACD,IAAA,0BAAQ,GAAE;;sDACY"}
