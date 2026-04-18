@@ -1,0 +1,10 @@
+packages:
+  - 'backend-nettech'
+  - 'frontend-nettech'
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@scarf/scarf'
+  - msw

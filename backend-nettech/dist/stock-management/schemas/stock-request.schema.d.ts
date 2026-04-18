@@ -9,17 +9,7 @@ export declare class StockRequestItem {
     productId: Types.ObjectId;
     quantity: number;
 }
-export declare const StockRequestItemSchema: import("mongoose").Schema<StockRequestItem, import("mongoose").Model<StockRequestItem, any, any, any, (Document<unknown, any, StockRequestItem, any, import("mongoose").DefaultSchemaOptions> & StockRequestItem & {
-    _id: Types.ObjectId;
-} & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, StockRequestItem, any, import("mongoose").DefaultSchemaOptions> & StockRequestItem & {
-    _id: Types.ObjectId;
-} & {
-    __v: number;
-}), any, StockRequestItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockRequestItem, Document<unknown, {}, StockRequestItem, {
+export declare const StockRequestItemSchema: import("mongoose").Schema<StockRequestItem, import("mongoose").Model<StockRequestItem, any, any, any, any, any, StockRequestItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockRequestItem, Document<unknown, {}, StockRequestItem, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequestItem & {
     _id: Types.ObjectId;
@@ -55,17 +45,7 @@ export declare class StockRequest extends Document {
     status: StockRequestStatus;
     note: string;
 }
-export declare const StockRequestSchema: import("mongoose").Schema<StockRequest, import("mongoose").Model<StockRequest, any, any, any, (Document<unknown, any, StockRequest, any, import("mongoose").DefaultSchemaOptions> & StockRequest & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, StockRequest, any, import("mongoose").DefaultSchemaOptions> & StockRequest & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, StockRequest>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockRequest, Document<unknown, {}, StockRequest, {
+export declare const StockRequestSchema: import("mongoose").Schema<StockRequest, import("mongoose").Model<StockRequest, any, any, any, any, any, StockRequest>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockRequest, Document<unknown, {}, StockRequest, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequest & Required<{
     _id: Types.ObjectId;

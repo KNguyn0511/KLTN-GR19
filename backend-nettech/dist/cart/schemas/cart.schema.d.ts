@@ -9,17 +9,7 @@ export declare class CartItem {
     configName?: string;
     sku?: string;
 }
-export declare const CartItemSchema: import("mongoose").Schema<CartItem, import("mongoose").Model<CartItem, any, any, any, (Document<unknown, any, CartItem, any, import("mongoose").DefaultSchemaOptions> & CartItem & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, CartItem, any, import("mongoose").DefaultSchemaOptions> & CartItem & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-}), any, CartItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, CartItem, Document<unknown, {}, CartItem, {
+export declare const CartItemSchema: import("mongoose").Schema<CartItem, import("mongoose").Model<CartItem, any, any, any, any, any, CartItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, CartItem, Document<unknown, {}, CartItem, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<CartItem & {
     _id: import("mongoose").Types.ObjectId;
@@ -105,17 +95,7 @@ export declare class Cart extends Document {
     userId: string;
     items: CartItem[];
 }
-export declare const CartSchema: import("mongoose").Schema<Cart, import("mongoose").Model<Cart, any, any, any, (Document<unknown, any, Cart, any, import("mongoose").DefaultSchemaOptions> & Cart & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, Cart, any, import("mongoose").DefaultSchemaOptions> & Cart & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-}), any, Cart>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Cart, Document<unknown, {}, Cart, {
+export declare const CartSchema: import("mongoose").Schema<Cart, import("mongoose").Model<Cart, any, any, any, any, any, Cart>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Cart, Document<unknown, {}, Cart, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<Cart & Required<{
     _id: import("mongoose").Types.ObjectId;

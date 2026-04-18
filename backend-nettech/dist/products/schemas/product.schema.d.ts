@@ -11,17 +11,7 @@ export declare class Product extends Document {
     images: string[];
     sku: string;
 }
-export declare const ProductSchema: import("mongoose").Schema<Product, import("mongoose").Model<Product, any, any, any, (Document<unknown, any, Product, any, import("mongoose").DefaultSchemaOptions> & Product & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, Product, any, import("mongoose").DefaultSchemaOptions> & Product & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, Product>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Product, Document<unknown, {}, Product, {
+export declare const ProductSchema: import("mongoose").Schema<Product, import("mongoose").Model<Product, any, any, any, any, any, Product>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Product, Document<unknown, {}, Product, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<Product & Required<{
     _id: Types.ObjectId;

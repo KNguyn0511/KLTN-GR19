@@ -10,17 +10,7 @@ export declare class Branch extends Document {
     mapUrl: string;
     status: BranchStatus;
 }
-export declare const BranchSchema: import("mongoose").Schema<Branch, import("mongoose").Model<Branch, any, any, any, (Document<unknown, any, Branch, any, import("mongoose").DefaultSchemaOptions> & Branch & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, Branch, any, import("mongoose").DefaultSchemaOptions> & Branch & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-}), any, Branch>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Branch, Document<unknown, {}, Branch, {
+export declare const BranchSchema: import("mongoose").Schema<Branch, import("mongoose").Model<Branch, any, any, any, any, any, Branch>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Branch, Document<unknown, {}, Branch, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<Branch & Required<{
     _id: import("mongoose").Types.ObjectId;

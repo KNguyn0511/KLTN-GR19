@@ -5,17 +5,7 @@ export declare class Order extends Document {
     totalAmount: number;
     status: string;
 }
-export declare const OrderSchema: import("mongoose").Schema<Order, import("mongoose").Model<Order, any, any, any, (Document<unknown, any, Order, any, import("mongoose").DefaultSchemaOptions> & Order & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, Order, any, import("mongoose").DefaultSchemaOptions> & Order & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, Order>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Order, Document<unknown, {}, Order, {
+export declare const OrderSchema: import("mongoose").Schema<Order, import("mongoose").Model<Order, any, any, any, any, any, Order>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Order, Document<unknown, {}, Order, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<Order & Required<{
     _id: Types.ObjectId;

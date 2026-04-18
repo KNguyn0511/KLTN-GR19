@@ -4,17 +4,7 @@ export declare class BranchInventory extends Document {
     productId: Types.ObjectId;
     quantity: number;
 }
-export declare const BranchInventorySchema: import("mongoose").Schema<BranchInventory, import("mongoose").Model<BranchInventory, any, any, any, (Document<unknown, any, BranchInventory, any, import("mongoose").DefaultSchemaOptions> & BranchInventory & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, BranchInventory, any, import("mongoose").DefaultSchemaOptions> & BranchInventory & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, BranchInventory>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, BranchInventory, Document<unknown, {}, BranchInventory, {
+export declare const BranchInventorySchema: import("mongoose").Schema<BranchInventory, import("mongoose").Model<BranchInventory, any, any, any, any, any, BranchInventory>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, BranchInventory, Document<unknown, {}, BranchInventory, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<BranchInventory & Required<{
     _id: Types.ObjectId;

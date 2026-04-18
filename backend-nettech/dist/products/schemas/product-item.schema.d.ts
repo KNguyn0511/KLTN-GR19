@@ -4,17 +4,7 @@ export declare class ProductItem extends Document {
     serialNumber: string;
     status: string;
 }
-export declare const ProductItemSchema: import("mongoose").Schema<ProductItem, import("mongoose").Model<ProductItem, any, any, any, (Document<unknown, any, ProductItem, any, import("mongoose").DefaultSchemaOptions> & ProductItem & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, ProductItem, any, import("mongoose").DefaultSchemaOptions> & ProductItem & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, ProductItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ProductItem, Document<unknown, {}, ProductItem, {
+export declare const ProductItemSchema: import("mongoose").Schema<ProductItem, import("mongoose").Model<ProductItem, any, any, any, any, any, ProductItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, ProductItem, Document<unknown, {}, ProductItem, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<ProductItem & Required<{
     _id: Types.ObjectId;

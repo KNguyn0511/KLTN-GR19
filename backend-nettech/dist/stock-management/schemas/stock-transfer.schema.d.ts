@@ -8,17 +8,7 @@ export declare class StockTransferItem {
     productId: Types.ObjectId;
     quantity: number;
 }
-export declare const StockTransferItemSchema: import("mongoose").Schema<StockTransferItem, import("mongoose").Model<StockTransferItem, any, any, any, (Document<unknown, any, StockTransferItem, any, import("mongoose").DefaultSchemaOptions> & StockTransferItem & {
-    _id: Types.ObjectId;
-} & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, StockTransferItem, any, import("mongoose").DefaultSchemaOptions> & StockTransferItem & {
-    _id: Types.ObjectId;
-} & {
-    __v: number;
-}), any, StockTransferItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockTransferItem, Document<unknown, {}, StockTransferItem, {
+export declare const StockTransferItemSchema: import("mongoose").Schema<StockTransferItem, import("mongoose").Model<StockTransferItem, any, any, any, any, any, StockTransferItem>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockTransferItem, Document<unknown, {}, StockTransferItem, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<StockTransferItem & {
     _id: Types.ObjectId;
@@ -54,17 +44,7 @@ export declare class StockTransfer extends Document {
     status: StockTransferStatus;
     transferDate: Date;
 }
-export declare const StockTransferSchema: import("mongoose").Schema<StockTransfer, import("mongoose").Model<StockTransfer, any, any, any, (Document<unknown, any, StockTransfer, any, import("mongoose").DefaultSchemaOptions> & StockTransfer & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, StockTransfer, any, import("mongoose").DefaultSchemaOptions> & StockTransfer & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}), any, StockTransfer>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockTransfer, Document<unknown, {}, StockTransfer, {
+export declare const StockTransferSchema: import("mongoose").Schema<StockTransfer, import("mongoose").Model<StockTransfer, any, any, any, any, any, StockTransfer>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, StockTransfer, Document<unknown, {}, StockTransfer, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<StockTransfer & Required<{
     _id: Types.ObjectId;

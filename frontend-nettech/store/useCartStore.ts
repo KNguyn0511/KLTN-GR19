@@ -1,10 +1,4 @@
 import { create } from "zustand";
-<<<<<<< Updated upstream
-
-export interface CartItem {
-  id: string | number; // ID gốc của sản phẩm
-  cartItemId: string; // ID phân biệt (id + config) trong giỏ
-=======
 import { persist } from "zustand/middleware";
 import { cartApi } from "@/features/storefront/cart/api/cartApi";
 import { useAuthStore } from "./useAuthStore";
@@ -12,7 +6,6 @@ import { useAuthStore } from "./useAuthStore";
 export interface CartItem {
   id: string | number;
   cartItemId: string;
->>>>>>> Stashed changes
   name: string;
   price: number;
   image: string;
@@ -23,73 +16,15 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-<<<<<<< Updated upstream
-  addItem: (item: CartItem) => void;
-  removeItem: (cartItemId: string) => void;
-  updateQuantity: (cartItemId: string, quantity: number) => void;
-  clearCart: () => void;
-  setItems: (items: CartItem[]) => void; // Dùng để đồng bộ toàn bộ giỏ từ API về store
-=======
   addItem: (item: CartItem) => Promise<void>;
   removeItem: (cartItemId: string) => Promise<void>;
   updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   fetchAndSyncCart: () => Promise<void>;
->>>>>>> Stashed changes
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }
 
-<<<<<<< Updated upstream
-export const useCartStore = create<CartStore>((set, get) => ({
-  items: [],
-  
-  addItem: (newItem: CartItem) => {
-    set((state) => {
-      const existingItemIndex = state.items.findIndex(
-        (item) => item.cartItemId === newItem.cartItemId
-      );
-
-      // Nếu món hàng + đúng cấu hình đó đã có trong giỏ -> Tăng số lượng
-      if (existingItemIndex >= 0) {
-        const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += newItem.quantity;
-        return { items: updatedItems };
-      }
-
-      // Nếu chưa có -> Thêm mới vào
-      return { items: [...state.items, newItem] };
-    });
-  },
-
-  removeItem: (cartItemId: string) => {
-    set((state) => ({
-      items: state.items.filter((item) => item.cartItemId !== cartItemId),
-    }));
-  },
-
-  updateQuantity: (cartItemId: string, quantity: number) => {
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.cartItemId === cartItemId ? { ...item, quantity: Math.max(1, quantity) } : item
-      ),
-    }));
-  },
-
-  clearCart: () => set({ items: [] }),
-
-  // Thay thế toàn bộ items — dùng sau khi fetch giỏ hàng từ API để đồng bộ badge Header
-  setItems: (newItems) => set({ items: newItems }),
-
-  getTotalItems: () => {
-    return get().items.reduce((total, item) => total + item.quantity, 0);
-  },
-
-  getTotalPrice: () => {
-    return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
-  },
-}));
-=======
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
@@ -212,4 +147,3 @@ export const useCartStore = create<CartStore>()(
     }
   )
 );
->>>>>>> Stashed changes

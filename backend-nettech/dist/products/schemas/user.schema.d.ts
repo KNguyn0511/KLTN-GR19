@@ -5,17 +5,7 @@ export declare class User extends Document {
     fullName: string;
     role: string;
 }
-export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, (Document<unknown, any, User, any, import("mongoose").DefaultSchemaOptions> & User & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-} & {
-    id: string;
-}) | (Document<unknown, any, User, any, import("mongoose").DefaultSchemaOptions> & User & Required<{
-    _id: import("mongoose").Types.ObjectId;
-}> & {
-    __v: number;
-}), any, User>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User, Document<unknown, {}, User, {
+export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, any, any, User>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User, Document<unknown, {}, User, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<User & Required<{
     _id: import("mongoose").Types.ObjectId;
