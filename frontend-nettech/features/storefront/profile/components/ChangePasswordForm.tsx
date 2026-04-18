@@ -101,9 +101,9 @@ export const ChangePasswordForm = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               />
-              <button type="button" className="text-left text-[13px] font-medium text-primary hover:underline w-fit">
+              <Button type="button" className="text-left text-[13px] font-medium text-primary hover:underline w-fit">
                 Quên mật khẩu?
-              </button>
+              </Button>
             </div>
           </div>
 

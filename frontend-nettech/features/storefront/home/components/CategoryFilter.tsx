@@ -1,6 +1,6 @@
 "use client";
 import { CardCategory } from "@/components/shared";
-import { category } from "@/features/home/utils/category";
+import { category } from "@/features/storefront/home/utils/category";
 import { useState } from "react";
 const CategoryFilter = () => {
   const [activeCategory, setActiveCategory] = useState("Build PC");

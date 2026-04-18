@@ -15,7 +15,7 @@ export interface BuildPartProps {
     name: string;
     specs: string;
     price: number | string;
-    image?: string | { src: string };
+    image?: any;
     inStock?: boolean;
   };
   onSelect?: () => void;
@@ -114,20 +114,20 @@ export const BuildPartItem = ({
                 {formattedPrice}
               </span>
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   onClick={onEdit}
                   className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
                   aria-label="Edit"
                 >
                   <Edit2 className="h-3.5 w-3.5" />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={onRemove}
                   className="flex h-8 w-8 items-center justify-center rounded-md bg-red-50 text-red-500 transition-colors hover:bg-red-100 hover:text-red-700"
                   aria-label="Remove"
                 >
                   <X className="h-4 w-4" strokeWidth={2.5} />
-                </button>
+                </Button>
               </div>
             </div>
           </>

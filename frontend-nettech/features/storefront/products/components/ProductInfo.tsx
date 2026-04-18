@@ -3,20 +3,28 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct, ProductConfig } from "@/features/storefront/products/utils/mockProductDetail";
 import { useCartStore } from "@/store/useCartStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+<<<<<<<< HEAD:frontend-nettech/features/products/components/ProductInfo.tsx
 import axiosInstance from "@/lib/axiosInstance";
 
 // TODO: Thay bằng userId thật khi tích hợp JWT
 const TEMP_USER_ID = "guest_user_001";
+========
+import { cartApi } from "@/features/storefront/cart/api/cartApi";
+>>>>>>>> origin/develop:features/storefront/products/components/ProductInfo.tsx
 
 export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
   const [activeConfig, setActiveConfig] = useState<ProductConfig>(product.configurations[0]);
+  const [isAdding, setIsAdding] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
+  const { isLoggedIn, user } = useAuthStore();
   const router = useRouter();
 
+<<<<<<<< HEAD:frontend-nettech/features/products/components/ProductInfo.tsx
   // Hàm dùng chung: build payload và gọi API POST /cart/add, trả về true/false
   const callAddToCartApi = async (): Promise<boolean> => {
     const price = product.basePrice + activeConfig.priceDelta;
@@ -44,10 +52,34 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
         price,
         // images[0] có thể là StaticImport (mock) hoặc string URL (API) — chỉ gửi string
         image: typeof product.images[0] === "string" ? product.images[0] : "",
+========
+  const handleAddToCart = async () => {
+    if (!isLoggedIn || !user) {
+      toast.warning("Vui lòng đăng nhập để thêm sản phẩm vào giỏ!");
+      router.push("/login");
+      return;
+    }
+
+    try {
+      setIsAdding(true);
+      const cartItemId = `${product.id}-${activeConfig.id}`;
+      const price = product.basePrice + activeConfig.priceDelta;
+
+      // The store's addItem is now asynchronous and automatically background-syncs via cartApi!
+      await addItem({
+        id: product.id,
+        cartItemId,
+        name: product.name,
+        price,
+        image: typeof product.images?.[0] === "string" 
+                 ? product.images[0] 
+                 : (product.images?.[0] as any)?.src || "",
+>>>>>>>> origin/develop:features/storefront/products/components/ProductInfo.tsx
         quantity: 1,
         configName: activeConfig.name,
         sku: product.sku,
       });
+<<<<<<<< HEAD:frontend-nettech/features/products/components/ProductInfo.tsx
       return true;
     } catch {
       return false;
@@ -76,6 +108,22 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
 
     // Chuyển ngay sang trang Checkout — không dừng lại ở trang giỏ hàng
     router.push("/checkout");
+========
+      
+      toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
+    } catch (error: any) {
+      toast.error(error.message || "Lỗi thêm giỏ hàng!");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    await handleAddToCart();
+    if (isLoggedIn && user) {
+      router.push("/cart");
+    }
+>>>>>>>> origin/develop:features/storefront/products/components/ProductInfo.tsx
   };
 
   const vndFormatter = new Intl.NumberFormat("vi-VN", {
@@ -122,7 +170,7 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
         <h3 className="text-base font-bold text-gray-900">Cấu hình đang chọn:</h3>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {product.configurations.map((config) => (
-            <button
+            <Button
               key={config.id}
               onClick={() => setActiveConfig(config)}
               className={cn(
@@ -149,7 +197,7 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
                   + {formatPrice(config.priceDelta)}
                 </span>
               )}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -167,19 +215,26 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
         </ul>
       </div>
 
-      {/* Nút Hành động */}
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <Button 
           onClick={handleBuyNow}
+          disabled={isAdding}
           className="flex-1 cursor-pointer bg-destructive hover:bg-destructive/90 h-14 text-lg font-bold text-white shadow-md flex-col items-center justify-center">
-          <span>MUA NGAY</span>
+          <span>{isAdding ? "ĐANG XỬ LÝ..." : "MUA NGAY"}</span>
           <span className="text-xs font-normal opacity-90">Giao hàng tận nơi hoặc nhận tại shop</span>
         </Button>
         <Button 
           onClick={handleAddToCart}
+          disabled={isAdding}
           className="flex-1 cursor-pointer bg-primary hover:bg-primary-hover/90 h-14 text-lg font-bold text-white shadow-md flex items-center justify-center gap-2">
-          <ShoppingCart className="h-5 w-5" />
-          <span>THÊM VÀO GIỎ</span>
+          {isAdding ? (
+            <span>ĐANG XỬ LÝ...</span>
+          ) : (
+            <>
+              <ShoppingCart className="h-5 w-5" />
+              <span>THÊM VÀO GIỎ</span>
+            </>
+          )}
         </Button>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { UserAddress } from "@/features/address/api/addressApi";
+import { UserAddress } from "@/features/storefront/address/api/addressApi";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -29,9 +29,9 @@ export function AddressModal({ isOpen, onClose, addresses, onSelect, selectedId 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 p-4">
           <h2 className="text-lg font-bold text-gray-900">Chọn địa chỉ nhận hàng</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+          <Button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* List Body */}

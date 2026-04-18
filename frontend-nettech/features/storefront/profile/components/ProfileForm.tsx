@@ -26,7 +26,6 @@ export const ProfileForm = () => {
 
   useEffect(() => {
     if (user) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         name: user.name || "",
         phone: user.phone || "",
@@ -82,9 +81,9 @@ export const ProfileForm = () => {
             className="flex-1 h-10 w-full md:w-auto"
             readOnly
           />
-          <button className="w-[60px] text-left text-[13px] font-medium text-primary hover:underline md:ml-4">
+          <Button className="w-[60px] text-left text-[13px] font-medium text-primary hover:underline md:ml-4">
             Thay đổi
-          </button>
+          </Button>
         </div>
 
         {/* Email */}

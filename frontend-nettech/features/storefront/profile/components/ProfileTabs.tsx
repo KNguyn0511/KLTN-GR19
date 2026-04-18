@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +18,7 @@ export function ProfileTabs<T extends string>({ tabs, activeTab, onChange }: Pro
         {tabs.map((tab) => {
           const isActive = activeTab === tab;
           return (
-            <button
+            <Button
               key={tab}
               onClick={() => onChange(tab)}
               className={cn(
@@ -28,7 +30,7 @@ export function ProfileTabs<T extends string>({ tabs, activeTab, onChange }: Pro
               {isActive && (
                 <div className="absolute bottom-0 left-0 h-[2px] w-full bg-primary" />
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

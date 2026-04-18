@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -64,12 +66,12 @@ export const ProfileSidebar = () => {
         <div className="mx-5 my-1 h-px bg-gray-100" />
 
         {/* Logout Button */}
-        <button
+        <Button
           onClick={handleLogout}
           className="flex h-12 w-full items-center px-5 text-[14px] font-semibold text-destructive transition-colors hover:bg-red-50 border-l-4 border-transparent pl-[16px]"
         >
           Đăng xuất
-        </button>
+        </Button>
       </div>
     </div>
   );

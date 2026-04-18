@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { addressApi, UserAddress } from "@/features/address/api/addressApi";
-import { AddressFormModal } from "@/features/address/components/AddressFormModal";
+import { addressApi, UserAddress } from "@/features/storefront/address/api/addressApi";
+import { AddressFormModal } from "@/features/storefront/address/components/AddressFormModal";
 import { Button } from "@/components/ui/button";
 
 export const ProfileAddressBook = () => {
@@ -21,7 +21,6 @@ export const ProfileAddressBook = () => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAddresses();
   }, []);
 
@@ -93,12 +92,12 @@ export const ProfileAddressBook = () => {
               {/* Actions Right */}
               <div className="flex flex-col md:items-end gap-3 mt-2 md:mt-0 md:w-32 shrink-0">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => handleOpenEdit(addr)} className="text-[14px] font-medium text-primary hover:underline">
+                  <Button onClick={() => handleOpenEdit(addr)} className="text-[14px] font-medium text-primary hover:underline">
                     Cập nhật
-                  </button>
-                  <button onClick={() => handleDelete(addr.id)} className="text-[14px] font-medium text-destructive hover:underline">
+                  </Button>
+                  <Button onClick={() => handleDelete(addr.id)} className="text-[14px] font-medium text-destructive hover:underline">
                     Xóa
-                  </button>
+                  </Button>
                 </div>
 
                 {!addr.isDefault && (

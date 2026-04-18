@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
+<<<<<<<< HEAD:frontend-nettech/components/layout/Header.tsx
 import { Input } from "../ui/input";
+========
+import { Input } from "@/components/ui/input";
+>>>>>>>> origin/develop:components/layouts/storefront/Header.tsx
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
@@ -13,10 +17,15 @@ function Header() {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const [mounted, setMounted] = useState(false);
 
+  const fetchAndSyncCart = useCartStore((state) => state.fetchAndSyncCart);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-  }, []);
+    if (isLoggedIn && user) {
+      fetchAndSyncCart();
+    }
+  }, [isLoggedIn, user, fetchAndSyncCart]);
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 transition-all md:px-8 lg:px-12 lg:py-6.25 xl:px-16">

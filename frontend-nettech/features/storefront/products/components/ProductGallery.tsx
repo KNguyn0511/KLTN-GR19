@@ -1,8 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
 import Image from "next/image";
-import { DetailedProduct } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct } from "@/features/storefront/products/utils/mockProductDetail";
 
 export const ProductGallery = ({ product }: { product: DetailedProduct }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -22,7 +24,7 @@ export const ProductGallery = ({ product }: { product: DetailedProduct }) => {
       {/* Thumbnails */}
       <div className="flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden">
         {product.images.map((img, index) => (
-          <button
+          <Button
             key={index}
             onClick={() => setActiveIndex(index)}
             className={`cursor-pointer relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border-2 bg-gray-50 flex items-center justify-center transition-colors ${
@@ -37,7 +39,7 @@ export const ProductGallery = ({ product }: { product: DetailedProduct }) => {
               fill
               className="object-contain p-2 mix-blend-multiply"
             />
-          </button>
+          </Button>
         ))}
       </div>
     </div>

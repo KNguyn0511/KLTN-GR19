@@ -67,7 +67,7 @@ export const addressApi = {
             id: `addr_${Date.now()}`
           };
           
-          const updated = [...current, newAddress];
+          let updated = [...current, newAddress];
           // Force sort default to top
           updated.sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
 
@@ -90,7 +90,7 @@ export const addressApi = {
           current = current.map((i) => ({ ...i, isDefault: false }));
         }
 
-        const mapRes = current.map((item) => (item.id === address.id ? address : item));
+        let mapRes = current.map((item) => (item.id === address.id ? address : item));
         mapRes.sort((a, b) => (a.isDefault === b.isDefault ? 0 : a.isDefault ? -1 : 1));
 
         if (typeof window !== 'undefined') {
@@ -106,7 +106,7 @@ export const addressApi = {
       setTimeout(() => {
         const currentStr = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
         if (!currentStr) return resolve();
-        const current: UserAddress[] = JSON.parse(currentStr);
+        let current: UserAddress[] = JSON.parse(currentStr);
         const filtered = current.filter((item) => item.id !== id);
         
         if (typeof window !== 'undefined') {
@@ -126,7 +126,7 @@ export const addressApi = {
       setTimeout(() => {
         const currentStr = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
         if (!currentStr) return resolve();
-        const current: UserAddress[] = JSON.parse(currentStr);
+        let current: UserAddress[] = JSON.parse(currentStr);
         const result = current.map((item) => ({
           ...item,
           isDefault: item.id === id,

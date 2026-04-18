@@ -7,8 +7,10 @@ export interface Product {
   price: number;
   originalPrice: number | null;
   discount: string | null;
-  image: string | { src: string } | null;
+  image: any;
   categorySlug: string;
+  sku?: string;
+  totalStock?: number;
   
   // Dynamic filter fields matching SidebarFilter
   brand?: string;

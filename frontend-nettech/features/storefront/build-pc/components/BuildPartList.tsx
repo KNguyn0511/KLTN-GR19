@@ -2,7 +2,7 @@
 
 import React from "react";
 import { BuildPartItem } from "./BuildPartItem";
-import { mockProducts } from "@/features/products/utils/mockData";
+import { mockProducts } from "@/features/storefront/products/utils/mockData";
 
 export const BuildPartList = () => {
   // Hardcoded mock state as requested to match UI
@@ -108,8 +108,8 @@ export const BuildPartList = () => {
                     name: part.data.name,
                     specs: part.data.specs,
                     price: part.data.price,
-                    image: (part.data as { image?: string | { src: string } }).image,
-                    inStock: (part.data as { inStock?: boolean }).inStock !== false, // Default true
+                    image: (part.data as any).image,
+                    inStock: (part.data as any).inStock !== false, // Default true
                   }
                 : undefined
             }

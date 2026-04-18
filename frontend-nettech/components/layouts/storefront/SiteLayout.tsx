@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { Header, Navigation, Footer } from "@/components/layout";
+import { Header, Navigation, Footer } from "@/components/layouts/storefront";
 import { ScrollToTop } from "@/components/shared";
 
 export const SiteLayout = ({ children }: { children: React.ReactNode }) => {

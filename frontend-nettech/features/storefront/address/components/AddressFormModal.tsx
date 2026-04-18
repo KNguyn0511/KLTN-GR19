@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { UserAddress } from "@/features/address/api/addressApi";
+import { UserAddress } from "@/features/storefront/address/api/addressApi";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,6 @@ export function AddressFormModal({ isOpen, onClose, onSave, initialData }: Addre
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFormData({ ...initialData, isDefault: !!initialData.isDefault });
       } else {
         setFormData({
@@ -68,9 +67,9 @@ export function AddressFormModal({ isOpen, onClose, onSave, initialData }: Addre
           <h2 className="text-lg font-bold text-gray-900">
             {initialData ? "Cập nhật địa chỉ" : "Thêm địa chỉ mới"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+          <Button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors p-1">
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Body */}
