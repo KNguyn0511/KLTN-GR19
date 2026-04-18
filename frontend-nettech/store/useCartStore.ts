@@ -1,11 +1,10 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import { cartApi } from "@/features/storefront/cart/api/cartApi";
-import { useAuthStore } from "./useAuthStore";
+import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
+import { ProductType } from "@/components/shared/ProductCard";
 
 export interface CartItem {
-  id: string | number;
-  cartItemId: string;
+  id: string | number; // ID gốc của sản phẩm
+  cartItemId: string; // ID phân biệt (id + config) trong giỏ
   name: string;
   price: number;
   image: string;
@@ -16,134 +15,56 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-  addItem: (item: CartItem) => Promise<void>;
-  removeItem: (cartItemId: string) => Promise<void>;
-  updateQuantity: (cartItemId: string, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
-  fetchAndSyncCart: () => Promise<void>;
+  addItem: (item: CartItem) => void;
+  removeItem: (cartItemId: string) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
+  clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }
 
-export const useCartStore = create<CartStore>()(
-  persist(
-    (set, get) => ({
-      items: [],
+export const useCartStore = create<CartStore>((set, get) => ({
+  items: [],
+  
+  addItem: (newItem: CartItem) => {
+    set((state) => {
+      const existingItemIndex = state.items.findIndex(
+        (item) => item.cartItemId === newItem.cartItemId
+      );
 
-      fetchAndSyncCart: async () => {
-        const { user, isLoggedIn } = useAuthStore.getState();
-        if (isLoggedIn && user?.id) {
-          try {
-            // Assume API returns direct array `{ data: CartItem[] }` or `CartItem[]`
-            const data = await cartApi.getCart(user.id);
-            // Handling the case wherever data payload might be wrapped
-            const serverItems = Array.isArray(data) ? data : data?.items || [];
-            
-            set({ items: serverItems });
-          } catch (error) {
-            console.error("Cart sync failed:", error);
-          }
-        }
-      },
+      // Nếu món hàng + đúng cấu hình đó đã có trong giỏ -> Tăng số lượng
+      if (existingItemIndex >= 0) {
+        const updatedItems = [...state.items];
+        updatedItems[existingItemIndex].quantity += newItem.quantity;
+        return { items: updatedItems };
+      }
 
-      addItem: async (newItem: CartItem) => {
-        // --- 1. OPTIMISTIC UI UPDATE ---
-        set((state) => {
-          const existingItemIndex = state.items.findIndex(
-            (item) => item.cartItemId === newItem.cartItemId
-          );
-          if (existingItemIndex >= 0) {
-            const updatedItems = [...state.items];
-            updatedItems[existingItemIndex].quantity += newItem.quantity;
-            return { items: updatedItems };
-          }
-          return { items: [...state.items, newItem] };
-        });
+      // Nếu chưa có -> Thêm mới vào
+      return { items: [...state.items, newItem] };
+    });
+  },
 
-        // --- 2. BACKEND SYNC BACKGROUND ---
-        const { user, isLoggedIn } = useAuthStore.getState();
-        if (isLoggedIn && user?.id) {
-          try {
-            await cartApi.addToCart({
-              userId: user.id,
-              productId: newItem.id.toString(),
-              cartItemId: newItem.cartItemId,
-              name: newItem.name,
-              price: newItem.price,
-              image: newItem.image,
-              quantity: newItem.quantity,
-              configName: newItem.configName,
-              sku: newItem.sku,
-            });
-          } catch (e) {
-            console.error("Lỗi khi đồng bộ addItem lên máy chủ", e);
-            // Optionally: revert state here if failure happens
-          }
-        }
-      },
+  removeItem: (cartItemId: string) => {
+    set((state) => ({
+      items: state.items.filter((item) => item.cartItemId !== cartItemId),
+    }));
+  },
 
-      removeItem: async (cartItemId: string) => {
-        // Optimistic Remove
-        set((state) => ({
-          items: state.items.filter((item) => item.cartItemId !== cartItemId),
-        }));
+  updateQuantity: (cartItemId: string, quantity: number) => {
+    set((state) => ({
+      items: state.items.map((item) =>
+        item.cartItemId === cartItemId ? { ...item, quantity: Math.max(1, quantity) } : item
+      ),
+    }));
+  },
 
-        const { user, isLoggedIn } = useAuthStore.getState();
-        if (isLoggedIn && user?.id) {
-          try {
-            await cartApi.removeItem(user.id, cartItemId);
-          } catch (e) {
-            console.error("Lỗi xóa sản phẩm Database", e);
-          }
-        }
-      },
+  clearCart: () => set({ items: [] }),
 
-      updateQuantity: async (cartItemId: string, quantity: number) => {
-        // Optimistic Update
-        const targetQ = Math.max(1, quantity);
-        set((state) => ({
-          items: state.items.map((item) =>
-            item.cartItemId === cartItemId ? { ...item, quantity: targetQ } : item
-          ),
-        }));
+  getTotalItems: () => {
+    return get().items.reduce((total, item) => total + item.quantity, 0);
+  },
 
-        const { user, isLoggedIn } = useAuthStore.getState();
-        if (isLoggedIn && user?.id) {
-          try {
-            await cartApi.updateQuantity({
-              userId: user.id,
-              cartItemId,
-              quantity: targetQ,
-            });
-          } catch (e) {
-            console.error("Lỗi cập nhật quantity Database", e);
-          }
-        }
-      },
-
-      clearCart: async () => {
-        set({ items: [] });
-        
-        const { user, isLoggedIn } = useAuthStore.getState();
-        if (isLoggedIn && user?.id) {
-          try {
-            await cartApi.clearCart(user.id);
-          } catch (e) {
-            console.error("Lỗi Clear Cart", e);
-          }
-        }
-      },
-
-      getTotalItems: () => {
-        return get().items.reduce((total, item) => total + item.quantity, 0);
-      },
-
-      getTotalPrice: () => {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
-      },
-    }),
-    {
-      name: "cart-storage", // Cho phép lưu giỏ hàng của khách vô danh local
-    }
-  )
-);
+  getTotalPrice: () => {
+    return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
+  },
+}));

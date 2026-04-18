@@ -2,30 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useCartStore } from "@/store/useCartStore";
-import { useAuthStore } from "@/store/useAuthStore";
-<<<<<<<< HEAD:frontend-nettech/components/layout/Header.tsx
 import { Input } from "../ui/input";
-========
-import { Input } from "@/components/ui/input";
->>>>>>>> origin/develop:components/layouts/storefront/Header.tsx
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
 function Header() {
-  const { isLoggedIn, user } = useAuthStore();
+  // Use state to avoid hydration mismatch when reading from local storage (if Zustand persists)
   const totalItems = useCartStore((state) => state.getTotalItems());
   const [mounted, setMounted] = useState(false);
 
-  const fetchAndSyncCart = useCartStore((state) => state.fetchAndSyncCart);
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    if (isLoggedIn && user) {
-      fetchAndSyncCart();
-    }
-  }, [isLoggedIn, user, fetchAndSyncCart]);
+  }, []);
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 transition-all md:px-8 lg:px-12 lg:py-6.25 xl:px-16">
@@ -62,37 +51,24 @@ function Header() {
           <p className="hidden md:block">Giỏ hàng</p>
         </Link>
         <div className="flex items-center gap-2 lg:h-10">
-          {mounted && isLoggedIn && user ? (
-            <Link href="/profile" className="flex items-center gap-2 ml-4 cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#005BAA] text-[15px] font-bold text-white shadow-sm">
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </div>
-              <span className="hidden text-[14px] font-bold text-heading md:block whitespace-nowrap">
-                {user?.name || "User"}
-              </span>
-            </Link>
-          ) : (
-            <>
-              <Link href="/login">
-                <Button
-                  className={cn(
-                    "hover:bg-primary-hover/90 h-8 cursor-pointer px-3 text-sm text-white md:h-10 md:px-4 lg:w-30 lg:text-base",
-                  )}
-                >
-                  Đăng nhập
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button
-                  className={cn(
-                    "hover:bg-primary-hover/90 h-8 cursor-pointer px-3 text-sm text-white md:h-10 md:px-4 lg:w-30 lg:text-base",
-                  )}
-                >
-                  Đăng ký
-                </Button>
-              </Link>
-            </>
-          )}
+          <Link href="/login">
+            <Button
+              className={cn(
+                "hover:bg-primary-hover/90 h-8 cursor-pointer px-3 text-sm text-white md:h-10 md:px-4 lg:w-30 lg:text-base",
+              )}
+            >
+              Đăng nhập
+            </Button>
+          </Link>
+          <Link href="/register">
+            <Button
+              className={cn(
+                "hover:bg-primary-hover/90 h-8 cursor-pointer px-3 text-sm text-white md:h-10 md:px-4 lg:w-30 lg:text-base",
+              )}
+            >
+              Đăng ký
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
