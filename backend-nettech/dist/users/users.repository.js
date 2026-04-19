@@ -23,14 +23,33 @@ let UsersRepository = class UsersRepository {
         this.userModel = userModel;
     }
     async findByEmail(email) {
-        return await this.userModel.findOne({ email }).lean();
+        return await this.userModel.findOne({ email, isDeleted: false }).lean();
     }
     async findByEmailWithPassword(email) {
-        return await this.userModel.findOne({ email }).select('+password').lean();
+        return await this.userModel
+            .findOne({ email, isDeleted: false })
+            .select('+password')
+            .lean();
     }
     async create(userData) {
         const newUser = new this.userModel(userData);
         return await newUser.save();
+    }
+    async findAll() {
+        return await this.userModel.find({ isDeleted: false }).exec();
+    }
+    async findById(id) {
+        return await this.userModel.findOne({ _id: id, isDeleted: false }).exec();
+    }
+    async update(id, updateData) {
+        return await this.userModel
+            .findOneAndUpdate({ _id: id, isDeleted: false }, updateData, { new: true })
+            .exec();
+    }
+    async delete(id) {
+        return await this.userModel
+            .findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+            .exec();
     }
 };
 exports.UsersRepository = UsersRepository;

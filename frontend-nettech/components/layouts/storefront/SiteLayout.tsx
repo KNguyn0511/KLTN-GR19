@@ -2,8 +2,10 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { Header, Navigation, Footer } from "@/components/layouts/storefront";
-import { ScrollToTop } from "@/components/shared";
+import  Header  from "@/components/layouts/storefront/Header";
+import  Navigation  from "@/components/layouts/storefront/Navigation";
+import  Footer  from "@/components/layouts/storefront/Footer";
+import  ScrollToTop  from "../../shared/ScrollToTop";
 
 export const SiteLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();

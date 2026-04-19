@@ -99,7 +99,7 @@ export function ProductTable() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1.5">
-                        {badges.map((badge, idx) => (
+                        {badges.map((badge: string, idx: number) => (
                           <span
                             key={idx}
                             className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-500 whitespace-nowrap"

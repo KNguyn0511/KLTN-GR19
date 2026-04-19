@@ -1,4 +1,4 @@
-import axiosInstance from "@/lib/axiosInstance";
+import http from "@/lib/axios";
 /** Cấu hình kỹ thuật của sản phẩm (specifications) */
 export interface ProductSpecifications {
   cpu?: string;
@@ -76,10 +76,8 @@ export interface ProductQueryParams {
  * Lấy danh sách sản phẩm (có phân trang, lọc giá, lọc CPU/VGA)
  * Endpoint: GET /products
  */
-export const getProducts = async (
-  params: ProductQueryParams = {},
-): Promise<ProductListResponse> => {
-  const response = await axiosInstance.get<ProductListResponse>("/products", {
+export const getProducts = async (params: ProductQueryParams = {}): Promise<ProductListResponse> => {
+  const response = await http.get<ProductListResponse>("/products", {
     params,
   });
   return response.data;
@@ -90,7 +88,7 @@ export const getProducts = async (
  * Endpoint: GET /products/:id
  */
 export const getProductById = async (id: string): Promise<ProductDetail> => {
-  const response = await axiosInstance.get<ProductDetail>(`/products/${id}`);
+  const response = await http.get<ProductDetail>(`/products/${id}`);
   return response.data;
 };
 

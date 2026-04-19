@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
-import { mockProductDetail } from "@/features/products/utils/mockProductDetail";
-import { mockProducts } from "@/features/products/utils/mockData";
+import { mockProductDetail } from "@/features/storefront/products/utils/mockProductDetail";
+import { mockProducts } from "@/features/storefront/products/utils/mockData";
 import { ProductList } from "@/components/shared";
 import {
   ProductGallery,
   ProductInfo,
   ProductSpecs,
   ProductHighlights,
-} from "@/features/products/components";
+} from "@/features/storefront/products/components";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
@@ -26,9 +26,6 @@ const ProductPage = async ({ params }: ProductPageProps) => {
 
   return (
     <main className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 lg:px-12 xl:px-16 lg:py-10 flex-1">
-      {/* Breadcrumb (Placeholder) */}
-      
-
       {/* Khối Trên (Top Section) */}
       <div className="mt-6 flex flex-col gap-8 lg:flex-row lg:gap-12 xl:gap-16">
         <div className="w-full lg:w-[45%] xl:w-1/2">

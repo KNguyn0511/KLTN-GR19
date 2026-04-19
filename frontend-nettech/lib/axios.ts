@@ -3,7 +3,7 @@ import axios from "axios";
 // Khởi tạo một instance cố định của axios
 // Tất cả các request sau này gọi qua http.get() sẽ tự động dùng baseURL này
 const http = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
+  baseURL: "http://localhost:3001",
   headers: {
     "Content-Type": "application/json",
   },

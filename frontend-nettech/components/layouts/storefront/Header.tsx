@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useCartStore } from "@/store/useCartStore";
-import { Input } from "../ui/input";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";

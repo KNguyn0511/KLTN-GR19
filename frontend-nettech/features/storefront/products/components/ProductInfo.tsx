@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
+import { DetailedProduct, ProductConfig } from "@/features/storefront/products/utils/mockProductDetail";
 import { useCartStore } from "@/store/useCartStore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";

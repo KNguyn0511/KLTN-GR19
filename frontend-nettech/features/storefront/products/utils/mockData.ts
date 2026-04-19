@@ -1,6 +1,20 @@
 import mockAvt from "@/public/images/pink.jpg";
 
-export const mockProducts = [
+export interface Product {
+  id: string | number;
+  name: string;
+  specs: string;
+  price: number;
+  originalPrice: number | null;
+  discount: string | null;
+  image: any;
+  categorySlug?: string;
+  brand?: string;
+  totalStock?: number;
+  sku?: string;
+}
+
+export const mockProducts: Product[] = [
   {
     id: 1,
     name: "Dell XPS 13 Plus",

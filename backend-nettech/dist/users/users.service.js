@@ -42,6 +42,33 @@ let UsersService = class UsersService {
             },
         };
     }
+    async create(createUserDto) {
+        const exists = await this.userRepository.findByEmail(createUserDto.email);
+        if (exists)
+            throw new common_1.ConflictException('Email đã tồn tại trong hệ thống!');
+        return await this.userRepository.create(createUserDto);
+    }
+    async findAll() {
+        return await this.userRepository.findAll();
+    }
+    async findOne(id) {
+        const user = await this.userRepository.findById(id);
+        if (!user)
+            throw new common_1.NotFoundException('Không tìm thấy tài khoản!');
+        return user;
+    }
+    async update(id, updateData) {
+        const updatedUser = await this.userRepository.update(id, updateData);
+        if (!updatedUser)
+            throw new common_1.NotFoundException('Không tìm thấy tài khoản để cập nhật!');
+        return updatedUser;
+    }
+    async remove(id) {
+        const deleted = await this.userRepository.delete(id);
+        if (!deleted)
+            throw new common_1.NotFoundException('Không tìm thấy tài khoản để xóa!');
+        return { message: 'Đã xóa tài khoản thành công!' };
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

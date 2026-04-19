@@ -13,9 +13,7 @@ const config_1 = require("@nestjs/config");
 const products_module_1 = require("./products/products.module");
 const users_module_1 = require("./users/users.module");
 const sales_module_1 = require("./sales/sales.module");
-const branches_module_1 = require("./branches/branches.module");
-const cart_module_1 = require("./cart/cart.module");
-const stock_management_module_1 = require("./stock-management/stock-management.module");
+const categories_module_1 = require("./categories/categories.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,9 +31,7 @@ exports.AppModule = AppModule = __decorate([
             products_module_1.ProductsModule,
             users_module_1.UsersModule,
             sales_module_1.SalesModule,
-            branches_module_1.BranchesModule,
-            cart_module_1.CartModule,
-            stock_management_module_1.StockManagementModule,
+            categories_module_1.CategoriesModule,
         ],
     })
 ], AppModule);
