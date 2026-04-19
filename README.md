@@ -85,7 +85,7 @@ pnpm dev
 ---
 
 
-## 5. Xử lý sự cố thường gặp (Tips cho Huy)
+## 5. Xử lý sự cố thường gặp
 
 * **Lỗi 404 trang Web:** Chạy `rd /s /q .next` bên trong `frontend-nettech` rồi chạy lại `pnpm dev`.
 * **Lỗi "Module not found" (@/components/...):** Kiểm tra file `frontend-nettech/components/shared/index.ts` xem đã export component đó chưa.
