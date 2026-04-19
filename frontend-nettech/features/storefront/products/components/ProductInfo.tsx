@@ -4,17 +4,17 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DetailedProduct, ProductConfig } from "@/features/storefront/products/utils/mockProductDetail";
-import { useCartStore } from "@/store/useCartStore";
+import { useCart } from "@/features/storefront/cart/context/CartContext";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
   const [activeConfig, setActiveConfig] = useState<ProductConfig>(product.configurations[0]);
-  const addItem = useCartStore((state) => state.addItem);
+  const { addToCart } = useCart();
   const router = useRouter();
 
-  const handleAddToCart = () => {
-    addItem({
+  const handleAddToCart = async () => {
+    await addToCart({
       id: product.id,
       cartItemId: `${product.id}-${activeConfig.id}`,
       name: product.name,
@@ -24,12 +24,11 @@ export const ProductInfo = ({ product }: { product: DetailedProduct }) => {
       configName: activeConfig.name,
       sku: product.sku,
     });
-    
     toast.success(`Đã thêm ${product.name} vào giỏ hàng!`);
   };
 
-  const handleBuyNow = () => {
-    handleAddToCart();
+  const handleBuyNow = async () => {
+    await handleAddToCart();
     router.push("/cart");
   };
 

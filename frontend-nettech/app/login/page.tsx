@@ -10,11 +10,13 @@ import { Eye, EyeOff } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaApple } from "react-icons/fa";
 
-import { AuthLayout } from "@/components/layout/AuthLayout";
+import { AuthLayout } from "@/components/layouts/storefront/AuthLayout";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { loginSchema, LoginFormData } from "@/features/auth/utils/validation";
+import { loginSchema, LoginFormData } from "@/features/shared/auth/utils/validation";
+import { authApi } from "@/features/shared/auth/api/authApi";
+import { decodeJwtPayload } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,13 +30,30 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    // Mock Login action
-    await new Promise(resolve => setTimeout(resolve, 800));
-    console.log("Login data:", data);
-    
-    login(data);
-    toast.success("Đăng nhập thành công!", { autoClose: 2000 });
-    router.replace("/");
+    try {
+      // Gọi API đăng nhập thật
+      const res = await authApi.login(data);
+
+      // Giải mã JWT để lấy _id (backend không trả _id trực tiếp trong user object)
+      const decoded = decodeJwtPayload<{ id: string; email: string; role: string }>(
+        res.access_token,
+      );
+
+      login({
+        _id: decoded?.id ?? null,
+        email: res.user?.email ?? data.emailOrPhone,
+        fullName: res.user?.fullName ?? "",
+        role: res.user?.role ?? "CUSTOMER",
+        access_token: res.access_token,
+      });
+
+      toast.success(`Chào mừng ${res.user?.fullName ?? "bạn"} trở lại!`, { autoClose: 2000 });
+      router.replace("/");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ?? "Email hoặc mật khẩu không đúng. Vui lòng thử lại!";
+      toast.error(msg);
+    }
   };
 
   return (
