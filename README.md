@@ -1,204 +1,125 @@
-# NetTech Project — Hướng Dẫn Cài Đặt & Chạy Dự Án
+
+# # NetTech Project — Hướng Dẫn Cài Đặt & Chạy Dự Án (Version 2.0)
 
 > **Đồ án tốt nghiệp — Nhóm 19**
-> Stack: **NestJS** (Backend) · **Next.js** (Frontend) · **MongoDB Atlas** (Database)
+> Stack: **NestJS** (Backend) · **Next.js 16** (Frontend) · **MongoDB Atlas**
+> Quản lý gói: **pnpm** (Bắt buộc dùng pnpm cho cả 2 để đồng bộ Monorepo)
 
 ---
 
-## Mục lục
-
-1. [Yêu cầu môi trường](#1-yêu-cầu-môi-trường)
-2. [Cấu trúc thư mục](#2-cấu-trúc-thư-mục)
-3. [Clone dự án](#3-clone-dự-án)
-4. [Cài đặt Backend (NestJS)](#4-cài-đặt-backend-nestjs)
-5. [Cài đặt Frontend (Next.js)](#5-cài-đặt-frontend-nextjs)
-6. [Chạy dự án](#6-chạy-dự-án)
-7. [Kiểm tra API với Swagger](#7-kiểm-tra-api-với-swagger)
-8. [Tóm tắt nhanh](#8-tóm-tắt-nhanh)
-
----
+<h1> ANH EM LƯU Ý LÀ HÃY CLONE CODE VỀ CHỨ ĐỪNG TẢI FILE NÉN (RAR/Zip) TỪ GITHUB VỀ NHA </h1>
 
 ## 1. Yêu cầu môi trường
 
-Trước khi bắt đầu, hãy đảm bảo máy tính đã cài đặt đủ các công cụ sau:
+Để dự án chạy mượt mà, không bị lỗi ae đảm bảo hãy cài đặt đúng:
 
-| Công cụ | Phiên bản tối thiểu | Kiểm tra |
-|---------|---------------------|----------|
-| **Node.js** | >= 20.x LTS (Nếu dưới 20.x sẽ ko chạy được FE vì bị lệch Ver-) | `node -v` |
-| **npm** | >= 9.x (đi kèm Node.js) | `npm -v` |
-| **pnpm** | >= 8.x | `pnpm -v` |
+| Công cụ | Phiên bản | Lệnh kiểm tra |
+|---------|-----------|---------------|
+| **Node.js** | **>= 20.x** (LTS) | `node -v` |
+| **pnpm** | **>= 8.x** (Bắt buộc) | `pnpm -v` |
 
-### Cài pnpm nếu chưa có (Cài đặt bằng terminal ở window nha)
-
-```bash
-npm install -g pnpm
-```
+> **Lưu ý:** Tuyệt đối **KHÔNG** dùng `npm install` hay `yarn` để tránh làm hỏng file `pnpm-lock.yaml`. Nếu chưa có pnpm, chạy: `npm install -g pnpm` trên cmd của window.
 
 ---
 
-## 2. Cấu trúc thư mục
+## 2. Cấu trúc thư mục hiện tại
 
 ```
 NetTech_Project/
-├── backend-nettech/      # NestJS API — chạy ở cổng 3001
-├── frontend-nettech/     # Next.js App — chạy ở cổng 3000
-├── .gitignore
+├── backend-nettech/       # NestJS API — Cổng 3001
+├── frontend-nettech/      # Next.js 16 (Turbopack) — Cổng 3000
+│   ├── components/
+│   │   ├── layouts/       # Cấu trúc layouts mới (AuthLayout, StorefrontLayout)
+│   │   └── shared/        # Các UI dùng chung (ProductCard, v.v.)
+│   ├── features/          # Logic theo module (Cart, Products, Auth)
+│   └── lib/               # Cấu hình Axios, API Service
 └── README.md
 ```
 
 ---
 
-## 3. Clone dự án
-Ae hãy tạo 1 folder để chứa trước nha
+## 3. Cài đặt nhanh (Dành cho người mới)
 
+### Bước 1: Clone & Cài đặt Backend
 ```bash
-git clone -b connect-db <https://github.com/KNguyn0511/KLTN-GR19.git> . (nhớ có dấu chấm cuối để khỏi bị tạo thừa 1 thư mục từ Repo git về)
-cd NetTech_Project
-```
-
----
-
-## 4. Cài đặt Backend (NestJS)
-
-### Bước 4.1 — Di chuyển vào thư mục backend
-
-```bash
+# Mở terminal 1
 cd backend-nettech
-```
-
-### Bước 4.2 — Cài đặt thư viện
-
-```bash
-npm install
-```
-
-> Lệnh này sẽ cài toàn bộ dependencies trong `package.json`, bao gồm: NestJS, Mongoose, Swagger, JWT, class-validator, v.v.
-
-### Bước 4.3 — Tạo file `.env`
-
-Tạo file `.env` ngay trong thư mục `backend-nettech/`:
-
-
-Sau đó mở file `.env` và bỏ cái dòng ở dưới vô:
-
-```env
-MONGODB_URI="mongodb+srv://nettech_db:nettech19@nettechdatabase.z1l7rpg.mongodb.net/my_store_db?retryWrites=true&w=majority"
-```
-
----
-
-## 5. Cài đặt Frontend (Next.js)
-
-### Bước 5.1 — Di chuyển vào thư mục frontend
-
-Mở một terminal mới (giữ nguyên terminal backend), sau đó:
-
-```bash
-cd frontend-nettech
-```
-
-### Bước 5.2 — Cài đặt thư viện
-
-Frontend sử dụng **pnpm** (không dùng npm để đảm bảo đồng nhất với `pnpm-lock.yaml`):
-
-```bash
 pnpm install
 ```
+*Tạo file `.env` trong `backend-nettech/` và dán:*
+```env
+MONGODB_URI=mongodb://nettech_db:nettech19@ac-asb4ixc-shard-00-00.z1l7r…tlas-qv0230-shard-0&authSource=admin&appName=NettechDatabase
+```
 
-> Lệnh này sẽ cài toàn bộ dependencies, bao gồm: Next.js, React, Tailwind CSS, shadcn/ui, Axios, Zustand, React Hook Form, Zod, v.v.
-
-### Bước 5.3 — Tạo file `.env.local` (nếu chưa có)
-
-Tạo file `.env.local` ngay trong thư mục `frontend-nettech/`:
-
-
-Cũng bỏ cái dòng ở dưới vô file `.env.local`:
-
+### Bước 2: Cài đặt Frontend
+```bash
+# Mở terminal 2
+cd frontend-nettech
+pnpm install
+```
+*Tạo file `.env` trong `frontend-nettech/` và dán:*
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-## 6. Chạy dự án
+---
 
-Cần **2 terminal riêng biệt** để chạy đồng thời Backend và Frontend.
+## 4. Hướng dẫn chạy dự án
 
-### Terminal 1 — Chạy Backend (backend-nettech)
+Cần chạy Backend trước để Frontend có dữ liệu "thật":
 
+### Terminal 1: Backend
 ```bash
 cd backend-nettech
-npm run start:dev
+pnpm run start:dev
 ```
+👉 API chạy tại: **http://localhost:3001** | Swagger: **http://localhost:3001/api/docs**
 
-Kết quả thành công sẽ hiển thị tương tự:
-
-```
-[Nest] LOG [NestApplication] Nest application successfully started
-```
-
-Backend đang chạy tại: **http://localhost:3001**
-
-### Terminal 2 — Chạy Frontend (frontend-nettech)
-
+### Terminal 2: Frontend
 ```bash
 cd frontend-nettech
 pnpm dev
 ```
-
-Kết quả thành công sẽ hiển thị tương tự:
-
-```
-  ▲ Next.js 16.x.x
-  - Local:        http://localhost:3000
-  - Network:      http://0.0.0.0:3000
-```
-
-Frontend đang chạy tại: **http://localhost:3000**
-
-### Mở trình duyệt
-
-Truy cập **http://localhost:3000** để xem giao diện của NetTech siêu sale 9 tháng 9
+👉 Giao diện chạy tại: **http://localhost:3000**
 
 ---
 
-## 7. Kiểm tra API với Swagger
 
-Backend tích hợp sẵn **Swagger UI** để test API mà không cần Postman.
+## 5. Xử lý sự cố thường gặp
 
-Truy cập: **http://localhost:3001/api/docs**
-
-Tại đây mấy ae có thể:
-- Xem toàn bộ danh sách API endpoint (Products, Users, Sales)
-- Gửi request thử trực tiếp trên trình duyệt
-- Đăng nhập bằng Bearer Token (nhấn nút **Authorize** ở góc trên phải)
+* **Lỗi 404 trang Web:** Chạy `rd /s /q .next` bên trong `frontend-nettech` rồi chạy lại `pnpm dev`.
+* **Lỗi "Module not found" (@/components/...):** Kiểm tra file `frontend-nettech/components/shared/index.ts` xem đã export component đó chưa.
+* **Lỗi "Cast to ObjectId failed":** Tránh bấm thanh toán các sản phẩm có giá trị demo (ID=1, 2, 3). Chỉ test với sản phẩm thật được load từ Backend.
+* **Lỗi không hiện tên User sau Login:** F5 trang web hoặc kiểm tra xem `localStorage` đã có `access_token` chưa.
 
 ---
 
-## 8. Tóm tắt nhanh
-
-Sau khi đã cài đặt đầy đủ (chỉ cần làm **một lần**), mỗi lần làm việc chỉ cần:
-
-```bash
-# Terminal 1 — Backend
-cd NetTech_Project/backend-nettech
-npm run start:dev
-
-# Terminal 2 — Frontend
-cd NetTech_Project/frontend-nettech
-pnpm dev
-```
+## 6. Tóm tắt URLs
 
 | Loại | URL | Ghi chú |
 |---------|-----|---------|
-| Frontend (Next.js) | http://localhost:3000 | Giao diện người dùng |
-| Backend (NestJS) | http://localhost:3001 | REST API |
-| Swagger Docs | http://localhost:3001/api/docs | Tài liệu & test API |
+| **Trang chủ** | http://localhost:3000 | Shopping thôi! |
+| **Giỏ hàng** | http://localhost:3000/cart | Quản lý item |
+| **Swagger** | http://localhost:3001/api/docs | Soi API của Nguyên |
+| **DB Admin** | MongoDB Atlas | Kiểm tra đơn hàng |
 
 ---
 
-## Note
+## 7. Tài liệu API (Swagger UI) — "Vũ khí" của Backend
+Dự án tích hợp sẵn Swagger, giúp anh em có thể test toàn bộ logic Backend (Thêm sản phẩm, Đăng nhập, Đặt hàng,...) mà không cần mở Postman.
 
-- **`npm install` báo lỗi**: Kiểm tra phiên bản Node.js bằng `node -v`, cần >= 18.
-- **`pnpm install` báo lỗi**: Chạy `npm install -g pnpm` để cài pnpm trước.
-- **Backend không kết nối được database**: Kiểm tra lại chuỗi `MONGODB_URI` trong file `backend-nettech/.env` 
-- **Frontend không gọi được API**: Đảm bảo Backend đang chạy ở terminal khác và file `frontend-nettech/.env.local` tồn tại với giá trị `NEXT_PUBLIC_API_URL=http://localhost:3001`.
-- **Cổng bị chiếm dụng**: Đổi `PORT=3002` trong `backend-nettech/.env` và cập nhật `NEXT_PUBLIC_API_URL=http://localhost:3002` trong `frontend-nettech/.env.local`.
+Đường dẫn: http://localhost:3001/api/docs
+
+Lợi ích:
+
+Tự động cập nhật: Mọi thay đổi code của đều hiển thị ngay tại đây.
+
+Test trực tiếp: Nhấn nút "Try it out" để gửi request thật và xem kết quả trả về ngay lập tức.
+
+Bảo mật: Để test các API cần đăng nhập (như Cart/Order), hãy nhấn nút Authorize ở góc trên bên phải và dán access_token vào.
+
+💡 Mẹo: Nếu FE gọi API bị lỗi, hãy qua Swagger test trước. Nếu Swagger chạy đúng mà FE chạy sai -> Lỗi tại FE. Nếu Swagger cũng lỗi -> Lỗi tại BE. Đây là cách nhanh nhất để "bắt bệnh" và hiệu quả nhất khi tích hợp swagger !
+---
+*Dự án được bảo trì bởi Nhóm 19 — Chúc ae run server thành công* 🦾🔥
+
+---

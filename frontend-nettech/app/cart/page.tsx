@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useCartStore } from "@/store/useCartStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCart } from "@/features/storefront/cart/context/CartContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,8 +23,8 @@ import { Stepper } from "@/components/ui/stepper";
 
 export default function CartPage() {
   const router = useRouter();
-  const { items, updateQuantity, removeItem, getTotalItems, getTotalPrice } =
-    useCartStore();
+  const { items, updateQuantity: updateQuantityApi, removeFromCart, totalQuantity, totalPrice } =
+    useCart();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const [mounted, setMounted] = useState(false);
 
@@ -47,7 +48,7 @@ export default function CartPage() {
         <h1 className="flex items-baseline gap-2 text-2xl font-extrabold tracking-tight text-gray-900 uppercase md:text-[28px]">
           Giỏ hàng của bạn
           <span className="text-sm font-normal text-gray-500 normal-case">
-            ({getTotalItems()} sản phẩm)
+            ({totalQuantity} sản phẩm)
           </span>
         </h1>
 
@@ -92,7 +93,7 @@ export default function CartPage() {
                 >
                   {/* Nút Xoá (Mobile & Desktop) */}
                   <button
-                    onClick={() => removeItem(item.cartItemId)}
+                    onClick={() => removeFromCart(item.cartItemId)}
                     className="hover:text-destructive absolute top-4 right-4 text-gray-300 transition-colors group-hover:opacity-100 md:top-1/2 md:-translate-y-1/2 md:opacity-0"
                     title="Xoá sản phẩm"
                   >
@@ -145,7 +146,7 @@ export default function CartPage() {
                     <div className="flex items-center rounded-md border border-gray-200 bg-white md:bg-gray-50/50">
                       <button
                         onClick={() =>
-                          updateQuantity(item.cartItemId, item.quantity - 1)
+                          updateQuantityApi(item.cartItemId, item.quantity - 1)
                         }
                         className="flex h-8 w-8 items-center justify-center text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       >
@@ -156,7 +157,7 @@ export default function CartPage() {
                       </span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.cartItemId, item.quantity + 1)
+                          updateQuantityApi(item.cartItemId, item.quantity + 1)
                         }
                         className="flex h-8 w-8 items-center justify-center text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       >
@@ -203,7 +204,7 @@ export default function CartPage() {
                 <div className="mb-4 flex justify-between text-sm text-gray-600">
                   <span>Tạm tính:</span>
                   <span className="font-bold text-gray-900">
-                    {formatPrice(getTotalPrice())}
+                    {formatPrice(totalPrice)}
                   </span>
                 </div>
                 <div className="mb-6 flex justify-between text-sm text-gray-600">
@@ -231,7 +232,7 @@ export default function CartPage() {
                   </span>
                   <div className="flex flex-col items-end">
                     <span className="text-destructive text-2xl leading-none font-black">
-                      {formatPrice(getTotalPrice())}
+                      {formatPrice(totalPrice)}
                     </span>
                     <span className="mt-1 text-[10px] text-gray-400">
                       (Đã bao gồm VAT)

@@ -1,96 +1,82 @@
 "use client";
-
-import { useEffect, useState, useCallback } from "react";
-import { ProductCard } from "@/components/shared";
+import { useState, useEffect, useCallback } from "react";
 import {
   ProductSortBar,
   SidebarFilter,
   ProductPagination,
-} from "@/features/products/components";
-import {
-  getProducts,
-  mapProductToCard,
-  type Product,
-  type ProductQueryParams,
-} from "@/lib/api/productApi";
+} from "@/features/storefront/products/components";
+import ProductCard, { type ProductType } from "@/components/shared/ProductCard";
+import { getProducts, mapProductToCard, type ProductQueryParams } from "@/lib/api/productApi";
+import { mockProducts } from "@/features/storefront/products/utils/mockData";
 
-const LIMIT = 12;
+const PRODUCTS_PER_PAGE = 12;
 
-const Products = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
+export default function ProductsPage() {
+  const [products, setProducts] = useState<ProductType[]>(mockProducts);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<Partial<ProductQueryParams>>({});
+  const [sort, setSort] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Bộ lọc hiện tại
-  const [filters, setFilters] = useState<ProductQueryParams>({
-    page: 1,
-    limit: LIMIT,
-  });
-
-  const fetchProducts = useCallback(async (params: ProductQueryParams) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
     try {
-      const data = await getProducts(params);
-      setProducts(data.products);
+      const data = await getProducts({
+        page: currentPage,
+        limit: PRODUCTS_PER_PAGE,
+        sort: sort || undefined,
+        ...filters,
+      });
+      setProducts(data.products.map(mapProductToCard));
       setTotalPages(data.pagination.pages);
-      setCurrentPage(data.pagination.page);
     } catch {
-      setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
+      // Fallback to mock data if API is unavailable
+      setProducts(mockProducts);
+      setTotalPages(1);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, []);
+  }, [currentPage, sort, filters]);
 
   useEffect(() => {
-    fetchProducts(filters);
-  }, [filters, fetchProducts]);
-
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleFilterChange = (newFilters: Partial<ProductQueryParams>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters, page: 1 }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (newSort: string) => {
+    setSort(newSort);
+    setCurrentPage(1);
   };
 
   return (
-    <main className="min-h-screen bg-white px-4 py-6 md:px-8 lg:px-12 lg:py-10 xl:px-16">
-      <div className="mx-auto flex w-full max-w-350 flex-col items-start gap-8 lg:flex-row lg:gap-12">
-        <SidebarFilter onFilterChange={handleFilterChange} />
-        <div className="w-full flex-1">
-          <ProductSortBar
-            onSortChange={(sort) => setFilters((prev) => ({ ...prev, sort, page: 1 }))}
-          />
+    <main className="mx-auto w-full max-w-[1440px] px-4 py-6 md:px-8 lg:px-12 xl:px-16 lg:py-10 flex-1">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 lg:text-3xl">Tất cả sản phẩm</h1>
 
-          {isLoading && (
-            <div className="mt-10 flex justify-center">
-              <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-primary" />
+      <div className="flex flex-col gap-8 lg:flex-row">
+        <aside className="w-full lg:w-64 shrink-0">
+          <SidebarFilter onFilterChange={handleFilterChange} />
+        </aside>
+
+        <div className="flex-1 min-w-0">
+          <ProductSortBar onSortChange={handleSortChange} />
+
+          {loading ? (
+            <div className="mt-12 flex items-center justify-center text-gray-400">
+              Đang tải sản phẩm...
             </div>
-          )}
-
-          {error && !isLoading && (
-            <div className="mt-10 rounded-lg border border-red-200 bg-red-50 p-6 text-center text-red-600">
-              {error}
+          ) : products.length === 0 ? (
+            <div className="mt-12 flex items-center justify-center text-gray-400">
+              Không tìm thấy sản phẩm phù hợp.
             </div>
-          )}
-
-          {!isLoading && !error && products.length === 0 && (
-            <div className="mt-10 text-center text-gray-500">
-              Không tìm thấy sản phẩm nào phù hợp.
-            </div>
-          )}
-
-          {!isLoading && !error && products.length > 0 && (
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 2xl:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={mapProductToCard(product)}
-                />
+          ) : (
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 lg:gap-6">
+              {products.map((p) => (
+                <ProductCard key={p.id} product={p} />
               ))}
             </div>
           )}
@@ -98,12 +84,10 @@ const Products = () => {
           <ProductPagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={setCurrentPage}
           />
         </div>
       </div>
     </main>
   );
-};
-
-export default Products;
+}

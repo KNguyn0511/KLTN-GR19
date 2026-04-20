@@ -1,50 +1,38 @@
-import Image, { StaticImageData } from "next/image";
-
-interface Category {
-  image: StaticImageData;
-  nameCategory: string;
-}
-
-interface ActiveSelect extends Category {
-  isItemActive: boolean;
-}
-
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-const CardCategory = ({ image, nameCategory, isItemActive }: ActiveSelect) => {
+interface CardCategoryProps {
+  image: any;
+  nameCategory: string;
+  isItemActive?: boolean;
+}
+
+const CardCategory = ({ image, nameCategory, isItemActive }: CardCategoryProps) => {
   return (
     <div
       className={cn(
-        "group flex w-24 flex-col items-center justify-start gap-3 rounded-2xl border p-3 transition-all duration-300 sm:w-28 sm:p-4 lg:w-32 lg:gap-4",
+        "flex flex-col items-center gap-2 rounded-xl border px-4 py-3 transition-all",
         isItemActive
-          ? "border-primary bg-primary/5 ring-primary/20 shadow-md ring-1"
-          : "border-gray-200 bg-white hover:-translate-y-1 hover:border-gray-300 hover:shadow-sm",
+          ? "border-primary bg-primary/5 text-primary"
+          : "border-gray-200 bg-white text-gray-600 hover:border-primary/40 hover:text-primary",
       )}
     >
-      <div
-        className={cn(
-          "flex items-center justify-center overflow-hidden rounded-full p-1 transition-transform duration-300 group-hover:scale-110",
-          isItemActive ? "ring-primary ring-2 ring-offset-1" : "",
-        )}
-      >
+      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg">
         <Image
           src={image}
           alt={nameCategory}
-          width={56}
-          height={56}
-          className="aspect-square rounded-full object-cover"
+          fill
+          className="object-cover"
         />
       </div>
-      <p
+      <span
         className={cn(
-          "text-center text-xs font-bold transition-colors sm:text-sm",
-          isItemActive
-            ? "text-primary font-bold"
-            : "font-medium text-gray-700 group-hover:text-gray-900",
+          "whitespace-nowrap text-sm font-semibold",
+          isItemActive ? "text-primary" : "text-gray-700",
         )}
       >
         {nameCategory}
-      </p>
+      </span>
     </div>
   );
 };

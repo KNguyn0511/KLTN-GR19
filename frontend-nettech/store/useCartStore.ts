@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { DetailedProduct, ProductConfig } from "@/features/products/utils/mockProductDetail";
+import type { DetailedProduct, ProductConfig } from "@/features/storefront/products/utils/mockProductDetail";
 import { ProductType } from "@/components/shared/ProductCard";
 
 export interface CartItem {

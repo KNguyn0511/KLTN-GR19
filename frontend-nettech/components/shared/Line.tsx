@@ -1,7 +1,11 @@
-import React from "react";
+import { cn } from "@/lib/utils";
 
-const Line = () => {
-  return <div className="bg-primary mt-3.5 mb-6.5 lg:h-1 lg:w-25"></div>;
+interface LineProps {
+  className?: string;
+}
+
+const Line = ({ className }: LineProps) => {
+  return <hr className={cn("h-px w-full border-0 bg-gray-200", className)} />;
 };
 
 export default Line;
