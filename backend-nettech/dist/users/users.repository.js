@@ -23,27 +23,33 @@ let UsersRepository = class UsersRepository {
         this.userModel = userModel;
     }
     async findByEmail(email) {
-        return await this.userModel.findOne({ email, isDeleted: false }).lean();
+        return await this.userModel.findOne({
+            email,
+            isDeleted: { $ne: true }
+        }).lean();
     }
-    async findByEmailWithPassword(email) {
+    async findByEmailOrPhoneWithPassword(identifier) {
         return await this.userModel
-            .findOne({ email, isDeleted: false })
+            .findOne({
+            $or: [{ email: identifier }, { phone: identifier }],
+            isDeleted: { $ne: true },
+        })
             .select('+password')
             .lean();
     }
     async create(userData) {
-        const newUser = new this.userModel(userData);
+        const newUser = new this.userModel({ ...userData, isDeleted: false });
         return await newUser.save();
     }
     async findAll() {
-        return await this.userModel.find({ isDeleted: false }).exec();
+        return await this.userModel.find({ isDeleted: { $ne: true } }).exec();
     }
     async findById(id) {
-        return await this.userModel.findOne({ _id: id, isDeleted: false }).exec();
+        return await this.userModel.findOne({ _id: id, isDeleted: { $ne: true } }).exec();
     }
     async update(id, updateData) {
         return await this.userModel
-            .findOneAndUpdate({ _id: id, isDeleted: false }, updateData, { new: true })
+            .findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, updateData, { new: true })
             .exec();
     }
     async delete(id) {

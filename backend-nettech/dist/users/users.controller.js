@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
 const swagger_1 = require("@nestjs/swagger");
 const create_user_dto_1 = require("./dto/create-user.dto");
+const auth_guard_1 = require("./guards/auth.guard");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -27,6 +28,12 @@ let UsersController = class UsersController {
     }
     async login(loginData) {
         return await this.usersService.login(loginData);
+    }
+    getProfile(req) {
+        return {
+            message: 'Lấy thông tin thành công',
+            user: req.user,
+        };
     }
     create(createUserDto) {
         return this.usersService.create(createUserDto);
@@ -61,6 +68,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "login", null);
+__decorate([
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, common_1.Get)('auth/profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thông tin cá nhân (Cần Token)' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Post)('users'),
     (0, swagger_1.ApiOperation)({ summary: 'Thêm User mới vào hệ thống' }),

@@ -81,6 +81,15 @@ export declare const StockRequestSchema: import("mongoose").Schema<StockRequest,
     }, "id"> & {
         id: string;
     }> | undefined;
+    note?: import("mongoose").SchemaDefinitionProperty<string, StockRequest, Document<unknown, {}, StockRequest, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequest & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
     requester?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId, StockRequest, Document<unknown, {}, StockRequest, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequest & Required<{
@@ -100,15 +109,6 @@ export declare const StockRequestSchema: import("mongoose").Schema<StockRequest,
         id: string;
     }> | undefined;
     sourceBranchId?: import("mongoose").SchemaDefinitionProperty<Types.ObjectId | null, StockRequest, Document<unknown, {}, StockRequest, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequest & Required<{
-        _id: Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    note?: import("mongoose").SchemaDefinitionProperty<string, StockRequest, Document<unknown, {}, StockRequest, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<StockRequest & Required<{
         _id: Types.ObjectId;

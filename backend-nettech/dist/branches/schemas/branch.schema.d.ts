@@ -46,7 +46,7 @@ export declare const BranchSchema: import("mongoose").Schema<Branch, import("mon
     }, "id"> & {
         id: string;
     }> | undefined;
-    address?: import("mongoose").SchemaDefinitionProperty<string, Branch, Document<unknown, {}, Branch, {
+    phone?: import("mongoose").SchemaDefinitionProperty<string, Branch, Document<unknown, {}, Branch, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Branch & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -55,7 +55,7 @@ export declare const BranchSchema: import("mongoose").Schema<Branch, import("mon
     }, "id"> & {
         id: string;
     }> | undefined;
-    phone?: import("mongoose").SchemaDefinitionProperty<string, Branch, Document<unknown, {}, Branch, {
+    address?: import("mongoose").SchemaDefinitionProperty<string, Branch, Document<unknown, {}, Branch, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Branch & Required<{
         _id: import("mongoose").Types.ObjectId;

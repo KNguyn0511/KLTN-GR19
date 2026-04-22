@@ -18,6 +18,10 @@ export declare class UsersController {
             role: string;
         };
     }>;
+    getProfile(req: any): {
+        message: string;
+        user: any;
+    };
     create(createUserDto: CreateUserDto): Promise<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {

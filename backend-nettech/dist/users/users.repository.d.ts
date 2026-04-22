@@ -8,7 +8,7 @@ export declare class UsersRepository {
     }> & {
         __v: number;
     }) | null>;
-    findByEmailWithPassword(email: string): Promise<(User & Required<{
+    findByEmailOrPhoneWithPassword(identifier: string): Promise<(User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
