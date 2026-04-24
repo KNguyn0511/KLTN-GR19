@@ -35,7 +35,7 @@ function Header() {
     : user?.email?.[0]?.toUpperCase() ?? "U";
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-4 px-4 py-4 transition-all md:px-8 lg:px-12 lg:py-6.25 xl:px-16">
+    <header className="relative z-[100] flex flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8 lg:px-12 lg:py-6.25 xl:px-16">
       {/* Logo */}
       <div className="text-xl font-bold md:text-2xl lg:text-[32px]">
         <Link href={"/"}>

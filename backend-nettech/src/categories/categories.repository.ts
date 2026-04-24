@@ -19,6 +19,12 @@ export class CategoriesRepository {
       .exec();
   }
 
+  async findBySlug(slug: string) {
+    return await this.categoryModel
+      .findOne({ slug, isDeleted: false })
+      .exec();
+  }
+
   async create(categoryData: any) {
     const newCategory = new this.categoryModel(categoryData);
     return await newCategory.save();

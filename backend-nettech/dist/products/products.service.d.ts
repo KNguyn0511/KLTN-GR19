@@ -1,25 +1,28 @@
+import { Types } from 'mongoose';
 import { ProductsRepository } from './products.repository';
+import { CategoriesService } from '../categories/categories.service';
 export declare class ProductsService {
     private readonly productRepository;
-    constructor(productRepository: ProductsRepository);
+    private readonly categoriesService;
+    constructor(productRepository: ProductsRepository, categoriesService: CategoriesService);
     findAll(query?: any): Promise<any>;
     findOne(id: string): Promise<any>;
     create(productData: any): Promise<import("mongoose").Document<unknown, {}, import("./schemas/product.schema").Product, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/product.schema").Product & Required<{
-        _id: import("mongoose").Types.ObjectId;
+        _id: Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
     }>;
     update(id: string, updateData: any): Promise<import("mongoose").Document<unknown, {}, import("./schemas/product.schema").Product, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/product.schema").Product & Required<{
-        _id: import("mongoose").Types.ObjectId;
+        _id: Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
     }>;
     updateStock(id: string, quantityChange: number): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/product.schema").Product, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/product.schema").Product & Required<{
-        _id: import("mongoose").Types.ObjectId;
+        _id: Types.ObjectId;
     }> & {
         __v: number;
     } & {

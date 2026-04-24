@@ -5,18 +5,61 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { ProductsRepository } from './products.repository';
+import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly productRepository: ProductsRepository) {}
+  constructor(
+    private readonly productRepository: ProductsRepository,
+    private readonly categoriesService: CategoriesService,
+  ) {}
 
   async findAll(query: any = {}): Promise<any> {
-    const { page = 1, limit = 10, sort, cpu, vga, minPrice, maxPrice } = query;
+    const {
+      page = 1,
+      limit = 10,
+      sort,
+      cpu,
+      vga,
+      minPrice,
+      maxPrice,
+      brand,
+      search,
+      category,
+    } = query;
     const filter: any = {};
 
+    // Lọc theo specifications
     if (cpu) filter['specifications.cpu'] = new RegExp(String(cpu), 'i');
     if (vga) filter['specifications.vga'] = new RegExp(String(vga), 'i');
+
+    // Lọc theo thương hiệu (case-insensitive)
+    if (brand) filter.brand = new RegExp(String(brand), 'i');
+
+    // Tìm kiếm theo tên sản phẩm (text search)
+    if (search) filter.name = new RegExp(String(search), 'i');
+
+    // Lọc theo danh mục — hỗ trợ cả ObjectId lẫn slug (ví dụ: "cpu", "gpu", "ram")
+    if (category) {
+      if (Types.ObjectId.isValid(String(category))) {
+        // Đây là ObjectId hợp lệ → cast sang ObjectId để Mongoose khớp chính xác
+        filter.category = new Types.ObjectId(String(category));
+      } else {
+        // Đây là slug (ví dụ: "cpu") → tra cứu Category để lấy _id
+        try {
+          const cat = await this.categoriesService.findBySlug(String(category));
+          filter.category = (cat as any)._id;
+        } catch {
+          // Slug không tồn tại → trả về rỗng (không lọc gì)
+          return {
+            products: [],
+            pagination: { total: 0, page: Number(page), pages: 0 },
+          };
+        }
+      }
+    }
 
     if (minPrice || maxPrice) {
       filter.price = {};

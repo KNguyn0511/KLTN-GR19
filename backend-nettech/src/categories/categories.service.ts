@@ -19,6 +19,12 @@ export class CategoriesService {
     return category;
   }
 
+  async findBySlug(slug: string) {
+    const category = await this.categoriesRepository.findBySlug(slug);
+    if (!category) throw new NotFoundException(`Không tìm thấy danh mục với slug "${slug}"!`);
+    return category;
+  }
+
   async update(id: string, updateData: any) {
     const updatedCategory = await this.categoriesRepository.update(
       id,

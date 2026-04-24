@@ -11,19 +11,44 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductsService = void 0;
 const common_1 = require("@nestjs/common");
+const mongoose_1 = require("mongoose");
 const products_repository_1 = require("./products.repository");
+const categories_service_1 = require("../categories/categories.service");
 let ProductsService = class ProductsService {
     productRepository;
-    constructor(productRepository) {
+    categoriesService;
+    constructor(productRepository, categoriesService) {
         this.productRepository = productRepository;
+        this.categoriesService = categoriesService;
     }
     async findAll(query = {}) {
-        const { page = 1, limit = 10, sort, cpu, vga, minPrice, maxPrice } = query;
+        const { page = 1, limit = 10, sort, cpu, vga, minPrice, maxPrice, brand, search, category, } = query;
         const filter = {};
         if (cpu)
             filter['specifications.cpu'] = new RegExp(String(cpu), 'i');
         if (vga)
             filter['specifications.vga'] = new RegExp(String(vga), 'i');
+        if (brand)
+            filter.brand = new RegExp(String(brand), 'i');
+        if (search)
+            filter.name = new RegExp(String(search), 'i');
+        if (category) {
+            if (mongoose_1.Types.ObjectId.isValid(String(category))) {
+                filter.category = new mongoose_1.Types.ObjectId(String(category));
+            }
+            else {
+                try {
+                    const cat = await this.categoriesService.findBySlug(String(category));
+                    filter.category = cat._id;
+                }
+                catch {
+                    return {
+                        products: [],
+                        pagination: { total: 0, page: Number(page), pages: 0 },
+                    };
+                }
+            }
+        }
         if (minPrice || maxPrice) {
             filter.price = {};
             if (minPrice)
@@ -91,6 +116,7 @@ let ProductsService = class ProductsService {
 exports.ProductsService = ProductsService;
 exports.ProductsService = ProductsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [products_repository_1.ProductsRepository])
+    __metadata("design:paramtypes", [products_repository_1.ProductsRepository,
+        categories_service_1.CategoriesService])
 ], ProductsService);
 //# sourceMappingURL=products.service.js.map

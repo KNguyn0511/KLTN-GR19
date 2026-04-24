@@ -28,8 +28,15 @@ export class CategoriesController {
     return this.categoriesService.findAll();
   }
 
+  // IMPORTANT: this route must come BEFORE ':id' so NestJS doesn't treat "slug" as an ObjectId
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Tìm danh mục theo slug (ví dụ: cpu, gpu, ram)' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.categoriesService.findBySlug(slug);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Xem chi tiết 1 danh mục' })
+  @ApiOperation({ summary: 'Xem chi tiết 1 danh mục theo ObjectId' })
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);
   }

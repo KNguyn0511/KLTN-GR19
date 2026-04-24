@@ -5,20 +5,19 @@ import { ProductsController } from './products.controller';
 import { ProductsRepository } from './products.repository';
 import { ProductSchema } from './schemas/product.schema';
 import { ProductItemSchema } from './schemas/product-item.schema';
+import { CategoriesModule } from '../categories/categories.module';
 
 @Module({
   imports: [
-    // Khai báo các Model vào Module cho Mongoose xài
     MongooseModule.forFeature([
       { name: 'Product', schema: ProductSchema },
       { name: 'ProductItem', schema: ProductItemSchema },
     ]),
+    // Cần CategoriesService để resolve slug → ObjectId khi lọc sản phẩm theo danh mục
+    CategoriesModule,
   ],
   controllers: [ProductsController],
-  providers: [
-    ProductsService,
-    ProductsRepository, // Nhớ thêm Repository vào providers để Service dùng được
-  ],
-  exports: [ProductsService], // Export nếu sau này Module khác cần dùng tới Products
+  providers: [ProductsService, ProductsRepository],
+  exports: [ProductsService],
 })
 export class ProductsModule {}
