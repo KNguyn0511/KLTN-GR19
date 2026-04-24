@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
+
+import { 
+  checkCompatibilityRules, 
+  evaluateBuildWarnings 
+} from "@/features/storefront/build-pc/utils/pc-compatibility";
 
 import {
   BuildPCHeader,
@@ -27,6 +32,14 @@ export default function BuildPCPage() {
   // ─── State ────────────────────────────────────────────────────────────────
   // Linh kiện đã được chọn cho từng slot
   const [selectedParts, setSelectedParts] = useState<BuildState>({});
+
+  // THÊM ĐOẠN NÀY: Tính toán các cảnh báo cho toàn bộ cấu hình hiện tại
+  const buildWarnings = useMemo(() => {
+    return evaluateBuildWarnings(selectedParts);
+  }, [selectedParts]);
+
+  // Cập nhật lại nút Trạng thái tổng (Góc phải trên cùng)
+  const hasAnyWarning = Object.keys(buildWarnings).length > 0;
 
   // Slot nào đang mở modal chọn sản phẩm (null = modal đóng)
   const [openModalFor, setOpenModalFor] = useState<BuildSlotKey | null>(null);
@@ -131,7 +144,7 @@ export default function BuildPCPage() {
   return (
     <div className="container mx-auto max-w-screen-xl px-4">
       {/* Tiêu đề trang */}
-      <BuildPCHeader />
+      <BuildPCHeader hasWarning={hasAnyWarning} />
 
       {/* Layout chính: danh sách slot (trái) + sidebar tổng tiền (phải) */}
       <div className="flex flex-col gap-6 pb-16 lg:flex-row lg:items-start">
@@ -139,6 +152,8 @@ export default function BuildPCPage() {
         <div className="min-w-0 flex-1">
           <BuildPartList
             selectedParts={selectedParts}
+            //TRUYỀN buildWarnings XUỐNG CHO COMPONENT LIST
+            warnings={buildWarnings}
             onSelectSlot={(slot) => setOpenModalFor(slot)}
             onRemoveSlot={handleRemovePart}
           />

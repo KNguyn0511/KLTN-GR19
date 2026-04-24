@@ -30,6 +30,7 @@ export interface SelectedPart {
   image?: string;
   specs?: string;
   brand?: string;
+  specifications?: Record<string, any>;
 }
 
 // Trạng thái toàn bộ bộ Build (mỗi slot có thể có hoặc không có linh kiện)

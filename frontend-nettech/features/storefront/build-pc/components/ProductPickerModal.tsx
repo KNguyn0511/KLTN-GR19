@@ -83,6 +83,7 @@ export const ProductPickerModal = ({
       image: p.images?.[0] ?? "",
       specs: specs || p.brand || "",
       brand: p.brand,
+      specifications: p.specifications,
     });
   };
 
@@ -104,7 +105,7 @@ export const ProductPickerModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between bg-heading px-5 py-4">
+        <div className="bg-heading flex shrink-0 items-center justify-between px-5 py-4">
           <div>
             <h2 className="text-[16px] font-bold text-white">
               Chọn {slotConfig.label}
@@ -124,7 +125,7 @@ export const ProductPickerModal = ({
         {/* Search bar */}
         <div className="shrink-0 border-b border-gray-100 p-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               className="h-10 pl-9 text-[14px]"
               placeholder={`Tìm tên, thương hiệu ${slotConfig.label}...`}
@@ -179,7 +180,7 @@ export const ProductPickerModal = ({
               {filtered.map((p) => (
                 <div
                   key={p._id}
-                  className="group flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-primary/40 hover:shadow-sm"
+                  className="group hover:border-primary/40 flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-3 transition-all hover:shadow-sm"
                 >
                   {/* Thumbnail */}
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-50">
@@ -191,8 +192,10 @@ export const ProductPickerModal = ({
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={(e) => {
                           // Hide broken image, show fallback
-                          (e.currentTarget as HTMLImageElement).style.display = "none";
-                          const parent = (e.currentTarget as HTMLImageElement).parentElement;
+                          (e.currentTarget as HTMLImageElement).style.display =
+                            "none";
+                          const parent = (e.currentTarget as HTMLImageElement)
+                            .parentElement;
                           if (parent) {
                             parent.innerHTML =
                               '<div class="flex h-full w-full items-center justify-center text-[10px] text-gray-300 font-medium">No img</div>';
@@ -208,7 +211,7 @@ export const ProductPickerModal = ({
 
                   {/* Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-[14px] font-bold text-gray-900 transition-colors group-hover:text-primary">
+                    <p className="group-hover:text-primary line-clamp-1 text-[14px] font-bold text-gray-900 transition-colors">
                       {p.name}
                     </p>
                     {p.brand && (
