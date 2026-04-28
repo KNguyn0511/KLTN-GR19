@@ -19,9 +19,9 @@ export const category = [
   {
     id: 3,
     // VGA: ảnh card đồ hoạ NVIDIA (confirmed)
-    image: "https://images.unsplash.com/photo-1714267853925-573c698e6a38?q=80&w=200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1591488320449-011701c6d4d4?q=80&w=200&auto=format&fit=crop",
     nameCategory: "VGA",
-    slug: "gpu",
+    slug: "vga",
   },
   {
     id: 4,

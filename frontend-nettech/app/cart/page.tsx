@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -106,11 +105,13 @@ export default function CartPage() {
                       href={`/products/${item.id}`}
                       className="relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-100 bg-gray-50 p-2 transition-transform hover:scale-105 md:h-24 md:w-24"
                     >
-                      <Image
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
                         src={item.image}
                         alt={item.name}
-                        fill
-                        className="object-contain p-2 mix-blend-multiply"
+                        className="max-h-full max-w-full object-contain p-2 mix-blend-multiply"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
                       />
                     </Link>
                     <div className="flex flex-col justify-center">

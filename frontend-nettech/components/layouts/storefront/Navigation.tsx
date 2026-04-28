@@ -53,12 +53,12 @@ function getDisplayName(name: string): string {
  * Matches the reference design exactly.
  */
 const LAPTOP_ITEMS = [
-  { label: "Laptop Gaming",              href: "/products?search=laptop+gaming" },
-  { label: "Laptop Văn phòng",           href: "/products?search=laptop+van+phong" },
-  { label: "Laptop Đồ họa / Kỹ thuật",  href: "/products?search=laptop+do+hoa" },
-  { label: "MacBook & iMac",             href: "/products?search=macbook" },
-  { label: "Máy tính bộ (PC Build sẵn)", href: "/products?search=may+tinh+bo" },
-  { label: "Mini PC",                    href: "/products?search=mini+pc" },
+  { label: "Laptop Gaming",              href: "/products?category=laptop-gaming" },
+  { label: "Laptop Văn phòng",           href: "/products?category=laptop-van-phong" },
+  { label: "Laptop Đồ họa / Kỹ thuật",  href: "/products?category=laptop-do-hoa" },
+  { label: "MacBook & iMac",             href: "/products?category=macbook" },
+  { label: "Máy tính bộ (PC Build sẵn)", href: "/products?category=may-tinh-bo" },
+  { label: "Mini PC",                    href: "/products?category=mini-pc" },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────

@@ -20,8 +20,19 @@ export class CategoriesService {
   }
 
   async findBySlug(slug: string) {
-    const category = await this.categoriesRepository.findBySlug(slug);
-    if (!category) throw new NotFoundException(`Không tìm thấy danh mục với slug "${slug}"!`);
+    const CATEGORY_SLUG_ALIASES: Record<string, string> = {
+      gpu: 'vga',
+      'ssd-hdd': 'ssd',
+      hdd: 'ssd',
+    };
+    const resolved =
+      CATEGORY_SLUG_ALIASES[slug.trim().toLowerCase()] ?? slug.trim();
+    const category =
+      await this.categoriesRepository.findBySlug(resolved);
+    if (!category)
+      throw new NotFoundException(
+        `Không tìm thấy danh mục với slug "${slug}"!`,
+      );
     return category;
   }
 

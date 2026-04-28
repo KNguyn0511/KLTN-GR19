@@ -51,7 +51,7 @@ export const productBuildPC = [
     name: "RTX 4080 Super",
     specs: "16GB GDDR6X",
     image:
-      "https://images.unsplash.com/photo-1714267853925-573c698e6a38?q=80&w=600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591488320449-011701c6d4d4?q=80&w=600&auto=format&fit=crop",
     price: 35_000_000,
   },
   {

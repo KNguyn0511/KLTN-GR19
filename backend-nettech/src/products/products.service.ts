@@ -41,15 +41,28 @@ export class ProductsService {
     // Tìm kiếm theo tên sản phẩm (text search)
     if (search) filter.name = new RegExp(String(search), 'i');
 
-    // Lọc theo danh mục — hỗ trợ cả ObjectId lẫn slug (ví dụ: "cpu", "gpu", "ram")
+    // Lọc theo danh mục — hỗ trợ ObjectId + slug (+ alias như gpu→vga, ssd-hdd→ssd khớp với mega menu/home)
+    const CATEGORY_SLUG_ALIASES: Record<string, string> = {
+      gpu: 'vga',
+      'ssd-hdd': 'ssd',
+      hdd: 'ssd',
+      'o-cung-ssd-hdd': 'ssd',
+    };
+
+    function resolveCategorySlug(raw: string): string {
+      const key = raw.trim().toLowerCase();
+      return CATEGORY_SLUG_ALIASES[key] ?? key;
+    }
+
     if (category) {
       if (Types.ObjectId.isValid(String(category))) {
         // Đây là ObjectId hợp lệ → cast sang ObjectId để Mongoose khớp chính xác
         filter.category = new Types.ObjectId(String(category));
       } else {
-        // Đây là slug (ví dụ: "cpu") → tra cứu Category để lấy _id
+        // Đây là slug (ví dụ: "cpu", "vga", alias "gpu") → tra cứu Category để lấy _id
         try {
-          const cat = await this.categoriesService.findBySlug(String(category));
+          const slugResolved = resolveCategorySlug(String(category));
+          const cat = await this.categoriesService.findBySlug(slugResolved);
           filter.category = (cat as any)._id;
         } catch {
           // Slug không tồn tại → trả về rỗng (không lọc gì)

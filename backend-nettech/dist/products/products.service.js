@@ -32,13 +32,24 @@ let ProductsService = class ProductsService {
             filter.brand = new RegExp(String(brand), 'i');
         if (search)
             filter.name = new RegExp(String(search), 'i');
+        const CATEGORY_SLUG_ALIASES = {
+            gpu: 'vga',
+            'ssd-hdd': 'ssd',
+            hdd: 'ssd',
+            'o-cung-ssd-hdd': 'ssd',
+        };
+        function resolveCategorySlug(raw) {
+            const key = raw.trim().toLowerCase();
+            return CATEGORY_SLUG_ALIASES[key] ?? key;
+        }
         if (category) {
             if (mongoose_1.Types.ObjectId.isValid(String(category))) {
                 filter.category = new mongoose_1.Types.ObjectId(String(category));
             }
             else {
                 try {
-                    const cat = await this.categoriesService.findBySlug(String(category));
+                    const slugResolved = resolveCategorySlug(String(category));
+                    const cat = await this.categoriesService.findBySlug(slugResolved);
                     filter.category = cat._id;
                 }
                 catch {
