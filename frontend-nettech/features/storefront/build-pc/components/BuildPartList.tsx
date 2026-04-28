@@ -6,12 +6,14 @@ import { type BuildSlotKey, type BuildState, SLOTS_CONFIG } from "../types";
 
 interface BuildPartListProps {
   selectedParts: BuildState;
+  warnings?: Record<string, string[]>;
   onSelectSlot: (slot: BuildSlotKey) => void;
   onRemoveSlot: (slot: BuildSlotKey) => void;
 }
 
 export const BuildPartList = ({
   selectedParts,
+  warnings = {},
   onSelectSlot,
   onRemoveSlot,
 }: BuildPartListProps) => {
@@ -42,6 +44,7 @@ export const BuildPartList = ({
               categoryLabel={label}
               emptyLabel={empty}
               buttonString={btn}
+              slotWarnings={warnings[key]}
               filledData={
                 selected
                   ? {
