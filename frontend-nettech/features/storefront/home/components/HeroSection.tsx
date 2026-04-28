@@ -39,9 +39,9 @@ const SLIDES = [
     title: "RTX 4090 SERIES",
     subtitle: "Chinh phục 4K gaming — Hiệu năng vô song",
     cta: "Khám phá",
-    href: "/products?category=gpu",
+    href: "/products?category=vga",
     image:
-      "https://images.unsplash.com/photo-1714267853925-573c698e6a38?q=80&w=1400&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591488320449-011701c6d4d4?q=80&w=1400&auto=format&fit=crop",
     gradient: "from-emerald-950/80 via-emerald-900/50 to-transparent",
   },
 ] as const;
@@ -53,8 +53,8 @@ const MINI_BANNERS = [
     label: "RTX 4090 Series",
     sub: "Flagship GPU 2024",
     image:
-      "https://images.unsplash.com/photo-1714267853925-573c698e6a38?q=80&w=700&auto=format&fit=crop&crop=entropy",
-    href: "/products?category=gpu",
+      "https://images.unsplash.com/photo-1591488320449-011701c6d4d4?q=80&w=700&auto=format&fit=crop&crop=entropy",
+    href: "/products?category=vga",
   },
   {
     label: "Linh Kiện Build PC",

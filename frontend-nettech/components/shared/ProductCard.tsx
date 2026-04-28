@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
 import { useRouter } from "next/navigation";
@@ -66,13 +65,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Ảnh sản phẩm */}
         <div className="relative mb-4 flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-gray-50 p-4">
           {product?.image ? (
-            <Image
+            // <img> thay vì next/image: URL ảnh từ seed/CDN rất đa dạng, tránh phải khai báo từng hostname trong next.config
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={product.image}
               alt={product?.name ?? "Product image"}
-              fill
-              className="object-contain p-4 mix-blend-multiply"
+              className="max-h-full max-w-full object-contain mix-blend-multiply"
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
               onError={(e) => {
-                // Ẩn ảnh nếu URL lỗi, hiển thị placeholder
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />

@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getProducts } from "@/features/storefront/products/api/productsApi";
@@ -65,13 +64,15 @@ export function ProductTable() {
                   <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 overflow-hidden rounded-md bg-slate-100 flex-shrink-0 relative">
+                        <div className="h-10 w-10 overflow-hidden rounded-md bg-slate-100 flex-shrink-0 relative flex items-center justify-center">
                           {product.image && (
-                            <Image 
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img 
                               src={product.image} 
                               alt={product.name} 
-                              fill
-                              className="object-cover" 
+                              className="max-h-full max-w-full object-cover" 
+                              loading="lazy"
+                              referrerPolicy="no-referrer"
                             />
                           )}
                         </div>

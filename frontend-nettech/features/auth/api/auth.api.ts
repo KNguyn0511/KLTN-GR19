@@ -1,6 +1,6 @@
 // features/auth/auth.api.ts (hoặc features/auth/api/auth.api.ts)
 import axiosInstance from "@/lib/axiosInstance";
-import { LoginFormData, RegisterFormData } from "../utils/validation"; // Import type từ file zod của bạn
+import { LoginFormData, RegisterFormData } from "@/features/shared/auth/utils/validation";
 
 export const loginApi = async (data: LoginFormData) => {
   const response = await axiosInstance.post("/auth/login", {
