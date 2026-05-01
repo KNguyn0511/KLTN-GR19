@@ -36,6 +36,41 @@ export declare class UsersController {
     } & {
         id: string;
     })[]>;
+    getCustomerStats(): Promise<{
+        totalMembers: number;
+        newThisMonth: {
+            count: number;
+            trend: string;
+            trendText: string;
+        };
+        vipMembers: number;
+    }>;
+    getCustomers(query: any): Promise<{
+        data: (import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+        pagination: {
+            page: number;
+            limit: number;
+            totalItems: number;
+            totalPages: number;
+        };
+    }>;
+    getStaffList(query: any): Promise<{
+        success: boolean;
+        data: (import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+        total: number;
+    }>;
     findOne(id: string): Promise<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -53,4 +88,11 @@ export declare class UsersController {
     remove(id: string): Promise<{
         message: string;
     }>;
+    toggleLock(id: string): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
 }

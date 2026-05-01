@@ -23,10 +23,12 @@ let UsersRepository = class UsersRepository {
         this.userModel = userModel;
     }
     async findByEmail(email) {
-        return await this.userModel.findOne({
+        return await this.userModel
+            .findOne({
             email,
-            isDeleted: { $ne: true }
-        }).lean();
+            isDeleted: { $ne: true },
+        })
+            .lean();
     }
     async findByEmailOrPhoneWithPassword(identifier) {
         return await this.userModel
@@ -45,16 +47,55 @@ let UsersRepository = class UsersRepository {
         return await this.userModel.find({ isDeleted: { $ne: true } }).exec();
     }
     async findById(id) {
-        return await this.userModel.findOne({ _id: id, isDeleted: { $ne: true } }).exec();
+        return await this.userModel
+            .findOne({ _id: id, isDeleted: { $ne: true } })
+            .exec();
     }
     async update(id, updateData) {
         return await this.userModel
-            .findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, updateData, { new: true })
+            .findOneAndUpdate({ _id: id, isDeleted: { $ne: true } }, updateData, {
+            new: true,
+        })
             .exec();
     }
     async delete(id) {
         return await this.userModel
             .findByIdAndUpdate(id, { isDeleted: true }, { new: true })
+            .exec();
+    }
+    async findCustomersWithPagination(filter, skip, limit) {
+        const finalFilter = {
+            ...filter,
+            role: 'CUSTOMER',
+            isDeleted: { $ne: true },
+        };
+        return await this.userModel
+            .find(finalFilter)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .exec();
+    }
+    async countCustomers(filter = {}) {
+        const finalFilter = {
+            ...filter,
+            role: 'CUSTOMER',
+            isDeleted: { $ne: true },
+        };
+        return await this.userModel.countDocuments(finalFilter).exec();
+    }
+    async findStaffList(filter) {
+        const finalFilter = {
+            ...filter,
+            isDeleted: { $ne: true },
+        };
+        if (!filter.role) {
+            finalFilter.role = { $nin: ['Customer', 'CUSTOMER'] };
+        }
+        return await this.userModel
+            .find(finalFilter)
+            .populate('branchId', 'name')
+            .sort({ createdAt: -1 })
             .exec();
     }
 };

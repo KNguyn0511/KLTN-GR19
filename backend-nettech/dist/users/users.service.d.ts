@@ -19,6 +19,30 @@ export declare class UsersService {
             role: string;
         };
     }>;
+    getCustomerList(query: any): Promise<{
+        data: (import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+        pagination: {
+            page: number;
+            limit: number;
+            totalItems: number;
+            totalPages: number;
+        };
+    }>;
+    getCustomerStats(): Promise<{
+        totalMembers: number;
+        newThisMonth: {
+            count: number;
+            trend: string;
+            trendText: string;
+        };
+        vipMembers: number;
+    }>;
     create(createUserDto: any): Promise<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -50,4 +74,22 @@ export declare class UsersService {
     remove(id: string): Promise<{
         message: string;
     }>;
+    getStaffList(query: any): Promise<{
+        success: boolean;
+        data: (import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        })[];
+        total: number;
+    }>;
+    toggleLock(id: string): Promise<(import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./schemas/user.schema").User & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
 }

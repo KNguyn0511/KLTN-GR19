@@ -85,13 +85,84 @@ let UsersService = class UsersService {
             user: { fullName: user.fullName, email: user.email, role: user.role },
         };
     }
+    async getCustomerList(query) {
+        const { page = 1, limit = 10, search, tier } = query;
+        const skip = (Number(page) - 1) * Number(limit);
+        const filter = {};
+        if (search) {
+            filter.$or = [
+                { fullName: new RegExp(search, 'i') },
+                { email: new RegExp(search, 'i') },
+                { phone: new RegExp(search, 'i') },
+                { memberCode: new RegExp(search, 'i') },
+            ];
+        }
+        if (tier && tier !== 'all') {
+            filter.tier = tier;
+        }
+        const [data, totalItems] = await Promise.all([
+            this.userRepository.findCustomersWithPagination(filter, skip, Number(limit)),
+            this.userRepository.countCustomers(filter),
+        ]);
+        return {
+            data,
+            pagination: {
+                page: Number(page),
+                limit: Number(limit),
+                totalItems,
+                totalPages: Math.ceil(totalItems / Number(limit)),
+            },
+        };
+    }
+    async getCustomerStats() {
+        const now = new Date();
+        const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const [totalMembers, newThisMonth, newLastMonth, vipMembers] = await Promise.all([
+            this.userRepository.countCustomers(),
+            this.userRepository.countCustomers({
+                createdAt: { $gte: startOfThisMonth },
+            }),
+            this.userRepository.countCustomers({
+                createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
+            }),
+            this.userRepository.countCustomers({
+                tier: { $in: ['Gold', 'Platinum'] },
+            }),
+        ]);
+        let trendPercent = 0;
+        if (newLastMonth > 0) {
+            trendPercent = ((newThisMonth - newLastMonth) / newLastMonth) * 100;
+        }
+        else if (newThisMonth > 0) {
+            trendPercent = 100;
+        }
+        return {
+            totalMembers,
+            newThisMonth: {
+                count: newThisMonth,
+                trend: trendPercent >= 0 ? 'up' : 'down',
+                trendText: `${Math.abs(Math.round(trendPercent))}% so với tháng trước`,
+            },
+            vipMembers,
+        };
+    }
     async create(createUserDto) {
-        const exists = await this.userRepository.findByEmail(createUserDto.email);
-        if (exists)
+        const emailExists = await this.userRepository.findByEmail(createUserDto.email);
+        if (emailExists) {
             throw new common_1.ConflictException('Email đã tồn tại trong hệ thống!');
+        }
+        const phoneExists = await this.userRepository.findByEmailOrPhoneWithPassword(createUserDto.phone);
+        if (phoneExists) {
+            throw new common_1.ConflictException('Số điện thoại đã tồn tại trong hệ thống!');
+        }
         const saltOrRounds = 10;
         const hashedPassword = await bcrypt.hash(createUserDto.password, saltOrRounds);
-        const newUser = { ...createUserDto, password: hashedPassword };
+        const newUser = {
+            ...createUserDto,
+            password: hashedPassword,
+            isDeleted: false,
+        };
         return await this.userRepository.create(newUser);
     }
     async findAll() {
@@ -114,6 +185,36 @@ let UsersService = class UsersService {
         if (!deleted)
             throw new common_1.NotFoundException('Không tìm thấy tài khoản để xóa!');
         return { message: 'Đã xóa tài khoản thành công!' };
+    }
+    async getStaffList(query) {
+        const { keyword, role, branchId, status } = query;
+        const filter = {};
+        if (keyword) {
+            filter.$or = [
+                { fullName: { $regex: keyword, $options: 'i' } },
+                { email: { $regex: keyword, $options: 'i' } },
+            ];
+        }
+        if (role)
+            filter.role = role;
+        if (branchId)
+            filter.branchId = branchId;
+        if (status === 'ACTIVE')
+            filter.isDeleted = false;
+        if (status === 'LOCKED')
+            filter.isDeleted = true;
+        const staffs = await this.userRepository.findStaffList(filter);
+        return {
+            success: true,
+            data: staffs,
+            total: staffs.length,
+        };
+    }
+    async toggleLock(id) {
+        const user = await this.userRepository.findById(id);
+        if (!user)
+            throw new common_1.NotFoundException('Không tìm thấy người dùng');
+        return await this.userRepository.update(id, { isDeleted: !user.isDeleted });
     }
 };
 exports.UsersService = UsersService;

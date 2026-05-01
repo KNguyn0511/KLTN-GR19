@@ -41,6 +41,15 @@ let UsersController = class UsersController {
     findAll() {
         return this.usersService.findAll();
     }
+    getCustomerStats() {
+        return this.usersService.getCustomerStats();
+    }
+    getCustomers(query) {
+        return this.usersService.getCustomerList(query);
+    }
+    getStaffList(query) {
+        return this.usersService.getStaffList(query);
+    }
     findOne(id) {
         return this.usersService.findOne(id);
     }
@@ -49,6 +58,9 @@ let UsersController = class UsersController {
     }
     remove(id) {
         return this.usersService.remove(id);
+    }
+    toggleLock(id) {
+        return this.usersService.toggleLock(id);
     }
 };
 exports.UsersController = UsersController;
@@ -93,6 +105,31 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('users/customers/stats'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy thống kê thẻ Khách hàng' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getCustomerStats", null);
+__decorate([
+    (0, common_1.Get)('users/customers/list'),
+    (0, swagger_1.ApiOperation)({ summary: 'Lấy danh sách Khách hàng (có phân trang & lọc)' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getCustomers", null);
+__decorate([
+    (0, common_1.Get)('users/staff/list'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Lấy danh sách Nhân viên (có lọc theo vai trò, chi nhánh)',
+    }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getStaffList", null);
+__decorate([
     (0, common_1.Get)('users/:id'),
     (0, swagger_1.ApiOperation)({ summary: 'Xem chi tiết 1 User' }),
     __param(0, (0, common_1.Param)('id')),
@@ -117,6 +154,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Patch)('users/:id/toggle-lock'),
+    (0, swagger_1.ApiOperation)({ summary: 'Khóa hoặc mở khóa tài khoản' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "toggleLock", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Quản lý User & Auth'),
     (0, common_1.Controller)(),

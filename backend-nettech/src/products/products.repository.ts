@@ -9,9 +9,11 @@ export class ProductsRepository {
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
   ) {}
 
+  // Trong file products.repository.ts, sửa lại hàm findAll một chút:
   async findAll(filter: any, sort: any, skip: number, limit: number) {
     return await this.productModel
-      .find(filter) // Ép kiểu để tránh lỗi Unsafe filter
+      .find(filter)
+      .populate('category', 'name') // <== THÊM DÒNG NÀY (lấy cột 'name' của bảng Category)
       .sort(sort)
       .skip(skip)
       .limit(limit)

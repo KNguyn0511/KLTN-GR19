@@ -48,4 +48,19 @@ export declare class UsersRepository {
     } & {
         id: string;
     }) | null>;
+    findCustomersWithPagination(filter: any, skip: number, limit: number): Promise<(import("mongoose").Document<unknown, {}, User, {}, import("mongoose").DefaultSchemaOptions> & User & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    })[]>;
+    countCustomers(filter?: any): Promise<number>;
+    findStaffList(filter: any): Promise<(import("mongoose").Document<unknown, {}, User, {}, import("mongoose").DefaultSchemaOptions> & User & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    })[]>;
 }

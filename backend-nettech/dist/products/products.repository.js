@@ -25,6 +25,7 @@ let ProductsRepository = class ProductsRepository {
     async findAll(filter, sort, skip, limit) {
         return await this.productModel
             .find(filter)
+            .populate('category', 'name')
             .sort(sort)
             .skip(skip)
             .limit(limit)
