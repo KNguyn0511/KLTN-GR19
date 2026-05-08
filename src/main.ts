@@ -25,6 +25,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document); // Đường dẫn sẽ là localhost:3001/api/docs
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
 bootstrap().catch((err) => console.error(err));
