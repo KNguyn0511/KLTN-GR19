@@ -15,7 +15,11 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
-  app.enableCors();
+  app.enableCors({
+    origin: 'https://net-tech-six.vercel.app', // Link FE của bạn
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
   configureUploads(app);
   const config = new DocumentBuilder()
     .setTitle('NetTech API')
