@@ -252,7 +252,7 @@ export default function SuperAdminOrdersPage() {
                   </span>
                 </div>
                 
-                {(selectedOrder.discountAmount > 0 || (subtotal > selectedOrder.totalAmount)) && (
+                {((selectedOrder.discountAmount ?? 0) > 0 || (subtotal > selectedOrder.totalAmount)) && (
                   <div className="flex justify-between text-sm text-red-600">
                     <span className="flex items-center gap-1 italic">
                       {selectedOrder.voucherCode ? (
@@ -264,7 +264,7 @@ export default function SuperAdminOrdersPage() {
                       )}
                     </span>
                     <span className="font-bold">
-                      -{Math.round(selectedOrder.discountAmount || (subtotal + (selectedOrder.shippingFee || 0) - selectedOrder.totalAmount)).toLocaleString("vi-VN")} đ
+                      -{Math.round((selectedOrder.discountAmount ?? 0) || (subtotal + (selectedOrder.shippingFee ?? 0) - selectedOrder.totalAmount)).toLocaleString("vi-VN")} đ
                     </span>
                   </div>
                 )}

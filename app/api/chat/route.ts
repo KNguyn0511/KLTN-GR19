@@ -1,5 +1,5 @@
 import { createVertex } from "@ai-sdk/google-vertex";
-import { streamText, convertToModelMessages, tool, type Message } from "ai";
+import { streamText, convertToModelMessages, tool, type UIMessage } from "ai";
 import { z } from "zod";
 
 export const maxDuration = 60;
@@ -12,11 +12,12 @@ const vertex = createVertex({
 
 export async function POST(req: Request) {
   try {
-    const { messages = [] }: { messages: Message[] } = await req.json();
+    const { messages = [] }: { messages: UIMessage[] } = await req.json();
     const modelMessages = await convertToModelMessages(messages);
 
     const result = await streamText({
       model: vertex("gemini-2.5-flash"),
+      // @ts-ignore
       maxSteps: 8,
       temperature: 0.3,
 
