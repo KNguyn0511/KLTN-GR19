@@ -12,7 +12,7 @@ export interface OrderCustomerInfo {
   district: string;
   ward: string;
   addressDetail: string;
-  paymentMethod: "COD" | "VNPAY" | "MOMO";
+  paymentMethod: "COD" | "VNPAY" | "MOMO" | "BANK_TRANSFER";
 }
 
 /** Payload gửi lên POST /sales/checkout (user lấy từ JWT, userId không bắt buộc) */
@@ -87,6 +87,7 @@ export function markMyOrdersStale(): void {
 
 export type MyOrdersApiStatus =
   | "PENDING_CONFIRMATION"
+  | "PAID"
   | "SHIPPING"
   | "COMPLETED"
   | "CANCELLED";
@@ -144,14 +145,16 @@ export function mapMyOrderApiToOrderData(o: MyOrderApi): OrderData {
 
 export async function getMyOrders(params?: {
   status?: MyOrdersApiStatus;
+  t?: number;
 }): Promise<{ orders: MyOrderApi[] }> {
+  const queryParams: any = {};
+  if (params?.status != null) queryParams.status = params.status;
+  if (params?.t != null) queryParams.t = params.t;
+
   const response = await http.get<{ orders: MyOrderApi[] }>(
     "/orders/my-orders",
     {
-      params:
-        params?.status != null
-          ? { status: params.status }
-          : undefined,
+      params: queryParams,
     },
   );
   return response.data;

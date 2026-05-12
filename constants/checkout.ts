@@ -1,4 +1,4 @@
-export const PAYMENT_METHODS = ["COD", "VNPAY", "MOMO"] as const;
+export const PAYMENT_METHODS = ["COD", "VNPAY", "MOMO", "BANK_TRANSFER"] as const;
 
 export const CHECKOUT_FEES = {
   SHIPPING_FEE: 50000,
