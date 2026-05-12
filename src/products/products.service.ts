@@ -44,7 +44,15 @@ export class ProductsService {
     if (brand) filter.brand = new RegExp(String(brand), 'i');
 
     // Tìm kiếm theo tên sản phẩm (text search)
-    if (search) filter.name = new RegExp(String(search), 'i');
+    if (search) {
+     // Loại bỏ khoảng trắng thừa ở hai đầu và tách chuỗi thành các từ
+     const searchTerms = String(search).trim().split(/\s+/);
+     
+     // Yêu cầu MongoDB tìm tên sản phẩm chứa TẤT CẢ các từ khóa vừa tách
+     filter.$and = searchTerms.map(term => ({
+       name: new RegExp(term, 'i')
+     }));
+   }
 
     // Lọc theo danh mục — hỗ trợ ObjectId + slug (+ alias như gpu→vga, ssd-hdd→ssd khớp với mega menu/home)
     const CATEGORY_SLUG_ALIASES: Record<string, string> = {
