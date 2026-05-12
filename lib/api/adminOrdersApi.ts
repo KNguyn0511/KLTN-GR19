@@ -20,6 +20,15 @@ export interface AdminOrderRow {
   totalAmount: number;
   channel: "ONLINE" | "O2O";
   status: string;
+  items?: Array<{
+    productName: string;
+    quantity: number;
+    variant: string;
+    price: number;
+  }>;
+  voucherCode?: string | null;
+  discountAmount?: number;
+  shippingFee?: number;
 }
 
 export interface AdminOrdersResponse {
@@ -51,6 +60,13 @@ export async function patchOrderStatus(
   const { data } = await axiosInstance.patch<AdminOrderRow>(
     `/orders/${orderId}/status`,
     { status },
+  );
+  return data;
+}
+
+export async function confirmOrder(orderId: string): Promise<AdminOrderRow> {
+  const { data } = await axiosInstance.patch<AdminOrderRow>(
+    `/orders/${orderId}/confirm`,
   );
   return data;
 }
