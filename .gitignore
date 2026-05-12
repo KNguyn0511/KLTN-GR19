@@ -49,3 +49,4 @@ dist/
 .env
 *.log
 build/
+nettech-ai-key.json

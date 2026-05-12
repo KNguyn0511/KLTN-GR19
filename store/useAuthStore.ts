@@ -36,12 +36,18 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      logout: () =>
+      logout: () => {
+        // Xóa token riêng lẻ trong localStorage để tránh useInitializeAuth tự đăng nhập lại
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("admin_token");
+        }
         set({
           isLoggedIn: false,
           user: null,
-          access_token: null, // Reset cả token khi logout
-        }),
+          access_token: null,
+        });
+      },
 
       updateUser: (data) =>
         set((state) => ({

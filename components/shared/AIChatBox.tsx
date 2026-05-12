@@ -9,6 +9,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
 import { useChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useCartStore } from "@/store/useCartStore";
+import { ShoppingCart } from "lucide-react";
+import { toast } from "react-toastify";
 
 // Helper: lấy text từ UIMessage parts
 function getMessageText(msg: UIMessage): string {
@@ -34,6 +39,38 @@ export const AIChatBox = () => {
   const { user } = useAuthStore();
   const currentUserId = user?.id || "guest";
   const { histories, setHistory } = useChatStore();
+  const { addItem } = useCartStore();
+
+  const handleAddToCart = async (urlStr: string) => {
+    try {
+      const url = new URL(urlStr);
+      const encodedData = url.searchParams.get("data");
+      if (!encodedData) return;
+
+      // Giải mã dữ liệu URI
+      const jsonStr = decodeURIComponent(encodedData);
+      const productInfo = JSON.parse(jsonStr);
+
+      if (!productInfo || !productInfo.id) {
+        toast.error("Dữ liệu sản phẩm không hợp lệ");
+        return;
+      }
+
+      await addItem({
+        id: productInfo.id,
+        cartItemId: productInfo.id,
+        name: productInfo.name,
+        price: Number(productInfo.price),
+        image: productInfo.image,
+        sku: productInfo.sku,
+        quantity: 1,
+      });
+      toast.success(`Đã thêm ${productInfo.name} vào giỏ hàng`);
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      toast.error("Lỗi khi giải mã thông tin sản phẩm");
+    }
+  };
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -86,14 +123,14 @@ export const AIChatBox = () => {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-[6.5rem] right-6 z-50 flex h-[500px] w-[350px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl transition-all duration-300 origin-bottom-right",
+          "fixed bottom-[6.5rem] right-6 z-50 flex h-[650px] w-[450px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl transition-all duration-300 origin-bottom-right",
           isOpen
             ? "scale-100 opacity-100"
             : "pointer-events-none scale-90 opacity-0"
         )}
       >
         {/* Header */}
-        <div className="bg-primary flex items-center justify-between px-4 py-3 text-white">
+        <div className="bg-primary flex-none flex items-center justify-between px-4 py-3 text-white z-10 shadow-sm">
           <div className="flex items-center gap-2">
             <Bot className="h-6 w-6" />
             <div>
@@ -140,13 +177,58 @@ export const AIChatBox = () => {
                 </div>
                 <div
                   className={cn(
-                    "rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap",
+                    "rounded-2xl px-3 py-2 text-sm",
                     msg.role === "user"
                       ? "bg-primary text-white rounded-tr-sm"
                       : "bg-white border text-slate-700 rounded-tl-sm shadow-sm"
                   )}
                 >
-                  {text}
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      img: ({ node, ...props }) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          {...props}
+                          className="max-w-full h-auto rounded-lg my-2 border shadow-sm block mx-auto"
+                          loading="lazy"
+                          alt={props.alt || "Product image"}
+                        />
+                      ),
+                      a: ({ node, ...props }) => {
+                        const href = props.href || "";
+                        if (href.startsWith("https://nettech.vn/cart/add")) {
+                          return (
+                            <Button
+                              size="sm"
+                              className="w-full mt-2 gap-2 bg-green-600 hover:bg-green-700 text-white border-none shadow-sm"
+                              onClick={() => handleAddToCart(href)}
+                            >
+                              <ShoppingCart className="h-4 w-4" />
+                              Thêm vào giỏ hàng
+                            </Button>
+                          );
+                        }
+                        return (
+                          <a
+                            {...props}
+                            className={cn(
+                              "font-medium hover:underline",
+                              msg.role === "user" ? "text-white underline" : "text-blue-600"
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          />
+                        );
+                      },
+                      p: ({ children }) => <div className="mb-1 last:mb-0">{children}</div>,
+                      ul: ({ children }) => <ul className="list-disc ml-4 my-1">{children}</ul>,
+                      li: ({ children }) => <li className="my-0.5">{children}</li>,
+                      strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                    }}
+                  >
+                    {text}
+                  </ReactMarkdown>
                 </div>
               </div>
             );
@@ -167,7 +249,7 @@ export const AIChatBox = () => {
         </div>
 
         {/* Input */}
-        <div className="border-t bg-white p-3">
+        <div className="border-t bg-white p-3 flex-none">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <Input
               value={inputValue}
