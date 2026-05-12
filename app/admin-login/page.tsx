@@ -23,7 +23,8 @@ export default function AdminLoginPage() {
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:3001/auth/login", data);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await axios.post(`${apiUrl}/auth/login`, data);
       
       console.log("DỮ LIỆU BACKEND TRẢ VỀ:", res.data);
 
