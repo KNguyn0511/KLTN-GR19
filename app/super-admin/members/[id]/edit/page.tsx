@@ -24,7 +24,8 @@ export default function EditMemberPage() {
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const res = await axios.get(`http://localhost:3001/users/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const res = await axios.get(`${apiUrl}/users/${id}`);
         // Reset form với dữ liệu lấy được
         reset({
           fullName: res.data.fullName,
@@ -48,7 +49,8 @@ export default function EditMemberPage() {
   const onSubmit = async (data: any) => {
     setIsSaving(true);
     try {
-      await axios.patch(`http://localhost:3001/users/${id}`, data);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      await axios.patch(`${apiUrl}/users/${id}`, data);
       alert("Cập nhật thành công!");
       router.push(`/super-admin/members/${id}`); // Cập nhật xong đẩy về trang chi tiết
     } catch (error) {
