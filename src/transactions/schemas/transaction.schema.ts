@@ -15,6 +15,7 @@ export enum PaymentMethod {
   VNPay = 'VNPay',
   Momo = 'Momo',
   CreditCard = 'CreditCard',
+  BankTransfer = 'BankTransfer',
 }
 
 export enum TransactionStatus {

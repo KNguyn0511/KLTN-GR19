@@ -11,6 +11,9 @@ import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { InventoryModule } from './inventory/inventory.module';
 
+import { CartModule } from './cart/cart.module';
+import { SepayModule } from './sepay/sepay.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,6 +33,8 @@ import { InventoryModule } from './inventory/inventory.module';
     AuthModule,
     DashboardModule,
     InventoryModule,
+    SepayModule,
+    CartModule,
   ],
 })
 export class AppModule {}

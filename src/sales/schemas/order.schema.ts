@@ -11,6 +11,7 @@ export type OrderChannel = (typeof ORDER_CHANNELS)[number];
  */
 export const ORDER_STATUSES = [
   'PENDING_CONFIRMATION',
+  'PAID',
   'PACKING',
   'SHIPPING',
   'COMPLETED',
