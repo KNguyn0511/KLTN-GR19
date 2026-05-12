@@ -1,12 +1,6 @@
 import { createVertex } from "@ai-sdk/google-vertex";
-import { streamText, convertToModelMessages, tool } from "ai";
+import { streamText, convertToModelMessages, tool, type Message } from "ai";
 import { z } from "zod";
-
-interface UIMessage {
-  role: "user" | "assistant" | "system";
-  content: string;
-  parts?: any[];
-}
 
 export const maxDuration = 60;
 
@@ -18,7 +12,7 @@ const vertex = createVertex({
 
 export async function POST(req: Request) {
   try {
-    const { messages = [] }: { messages: UIMessage[] } = await req.json();
+    const { messages = [] }: { messages: Message[] } = await req.json();
     const modelMessages = await convertToModelMessages(messages);
 
     const result = await streamText({
