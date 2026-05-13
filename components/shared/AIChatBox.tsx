@@ -14,6 +14,7 @@ import remarkGfm from "remark-gfm";
 import { useCartStore } from "@/store/useCartStore";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 // Helper: lấy text từ UIMessage parts
 function getMessageText(msg: UIMessage): string {
@@ -197,6 +198,8 @@ export const AIChatBox = () => {
                       ),
                       a: ({ node, ...props }) => {
                         const href = props.href || "";
+                        
+                        // Case 1: Add to cart button
                         if (href.startsWith("https://nettech.vn/cart/add")) {
                           return (
                             <Button
@@ -209,6 +212,21 @@ export const AIChatBox = () => {
                             </Button>
                           );
                         }
+
+                        // Case 2: Internal product links (use Next.js Link)
+                        if (href.includes("/products/")) {
+                          const relativePath = href.split("/products/")[1];
+                          return (
+                            <Link
+                              href={`/products/${relativePath}`}
+                              className="font-medium text-blue-600 hover:underline"
+                            >
+                              {props.children}
+                            </Link>
+                          );
+                        }
+
+                        // Case 3: Other external links
                         return (
                           <a
                             {...props}
