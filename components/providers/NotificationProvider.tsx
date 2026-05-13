@@ -24,6 +24,7 @@ export default function NotificationProvider({
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const socketRef = useRef<Socket | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const retryTimerRef = useRef<number | null>(null);
   const retryCountRef = useRef(0);
 
@@ -31,9 +32,9 @@ export default function NotificationProvider({
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const clearAll = () => setNotifications([]);
+
   const openNotification = (data: any) => {
-    console.log("[NotificationProvider] Adding new notification to stack...");
-    
     const newId = `${data.orderCode || "ORDER"}-${Date.now()}`;
     const newNotif: NotificationPayload = {
       id: newId,
@@ -43,33 +44,33 @@ export default function NotificationProvider({
       timestamp: new Date(),
     };
 
-    setNotifications((prev) => {
-      // Thêm vào cuối mảng để cái mới nhất nằm dưới cùng của stack
-      return [...prev, newNotif];
-    });
+    setNotifications((prev) => [...prev, newNotif]);
 
     if (audioRef.current) {
       const audio = audioRef.current;
       audio.currentTime = 0;
-      audio
-        .play()
-        .then(() => {
-          console.log("[NotificationProvider] Sound played successfully");
-          // Tự động ngắt sau 3s nếu cần
-          setTimeout(() => {
-            if (audio) {
-              audio.pause();
-              audio.currentTime = 0;
-            }
-          }, 3000);
-        })
-        .catch((e) => console.warn("[NotificationProvider] Sound blocked", e));
+      audio.play().catch((e) => console.warn("[NotificationProvider] Sound blocked", e));
+      setTimeout(() => {
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      }, 3000);
     }
   };
 
+  // Tự động cuộn xuống cuối khi có thông báo mới
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [notifications]);
+
   const connectSocket = () => {
     if (socketRef.current) return;
-
     const adminInfoRaw = localStorage.getItem("admin_info");
     let userRole = "";
     if (adminInfoRaw) {
@@ -80,58 +81,35 @@ export default function NotificationProvider({
         console.error("Failed to parse admin_info", e);
       }
     }
-
     const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "-");
-    if (normalizedRole !== "super-admin" && normalizedRole !== "store-manager") {
-      return;
-    }
+    if (normalizedRole !== "super-admin" && normalizedRole !== "store-manager") return;
 
     const socket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
-      auth: {
-        role: normalizedRole,
-        token: localStorage.getItem("admin_token"),
-      },
+      auth: { role: normalizedRole, token: localStorage.getItem("admin_token") },
       withCredentials: true,
     });
 
     socketRef.current = socket;
-    
-    socket.on("connect", () => {
-      console.log("SOCKET CONNECTED! ID:", socket.id);
-    });
-    
-    socket.on("NEW_ORDER_RECEIVED", (data) => {
-      console.log("[NotificationProvider] NEW_ORDER_RECEIVED:", data);
-      openNotification(data);
-    });
+    socket.on("NEW_ORDER_RECEIVED", (data) => openNotification(data));
   };
 
   useEffect(() => {
     setMounted(true);
     const tryConnect = () => {
       if (socketRef.current) return;
-      const adminInfoRaw = localStorage.getItem("admin_info");
-      if (!adminInfoRaw) {
+      if (!localStorage.getItem("admin_info")) {
         retryCountRef.current += 1;
-        if (retryCountRef.current <= 10) {
-          retryTimerRef.current = window.setTimeout(tryConnect, 500);
-        }
+        if (retryCountRef.current <= 10) retryTimerRef.current = window.setTimeout(tryConnect, 500);
         return;
       }
       connectSocket();
     };
-
     tryConnect();
-
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === "admin_info" && !socketRef.current && e.newValue) {
-        connectSocket();
-      }
+      if (e.key === "admin_info" && !socketRef.current && e.newValue) connectSocket();
     };
-
     window.addEventListener("storage", handleStorage);
-
     return () => {
       window.removeEventListener("storage", handleStorage);
       if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current);
@@ -140,9 +118,6 @@ export default function NotificationProvider({
     };
   }, []);
 
-  const visibleNotifications = notifications.slice(-3);
-  const hiddenCount = notifications.length - visibleNotifications.length;
-
   return (
     <>
       <audio ref={audioRef} src={SOUND_SRC} preload="auto" />
@@ -150,65 +125,96 @@ export default function NotificationProvider({
       {mounted && notifications.length > 0 && typeof document !== "undefined"
         ? createPortal(
             <div className="pointer-events-none fixed right-4 bottom-4 z-[99999] flex flex-col items-end gap-3 sm:right-6 sm:bottom-6">
-              {hiddenCount > 0 && (
-                <div className="animate-in fade-in slide-in-from-top-2 mb-1 rounded-full bg-blue-600/90 px-4 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur-sm">
-                  +{hiddenCount} đơn hàng khác đang chờ xử lý
-                </div>
-              )}
-              
-              {visibleNotifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className="pointer-events-auto w-[350px] animate-in slide-in-from-bottom-4 fade-in duration-500 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md"
-                >
-                  <div className="mb-3 flex items-start justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
-                        ĐƠN HÀNG MỚI
-                      </p>
-                      <h4 className="mt-1 font-bold text-white">#{notif.orderCode}</h4>
-                    </div>
-                    <button
-                      onClick={() => removeNotification(notif.id)}
-                      className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+              {/* Badge tổng số đơn chưa xử lý */}
+              <div className="pointer-events-auto flex items-center gap-3">
+                 {notifications.length > 3 && (
+                    <button 
+                      onClick={clearAll}
+                      className="rounded-full bg-slate-800/80 px-3 py-1 text-[10px] font-medium text-slate-400 hover:bg-slate-700 hover:text-white backdrop-blur-sm transition"
                     >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      Xóa tất cả
                     </button>
-                  </div>
+                 )}
+                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white shadow-lg animate-bounce">
+                    {notifications.length}
+                 </div>
+              </div>
 
-                  <div className="space-y-2 rounded-lg bg-white/5 p-3 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Khách hàng:</span>
-                      <span className="font-medium">{notif.customerName}</span>
+              {/* Container cuộn */}
+              <div 
+                ref={scrollRef}
+                className="pointer-events-auto flex max-h-[580px] w-[360px] flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide custom-scrollbar"
+                style={{ scrollBehavior: 'smooth' }}
+              >
+                {notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className="w-full shrink-0 animate-in slide-in-from-right-full fade-in duration-500 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md"
+                  >
+                    <div className="mb-3 flex items-start justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
+                          ĐƠN HÀNG MỚI
+                        </p>
+                        <h4 className="mt-1 font-bold text-white">#{notif.orderCode}</h4>
+                      </div>
+                      <button
+                        onClick={() => removeNotification(notif.id)}
+                        className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Tổng tiền:</span>
-                      <span className="font-bold text-emerald-400">
-                        {notif.totalPrice.toLocaleString("vi-VN")} ₫
+
+                    <div className="space-y-2 rounded-lg bg-white/5 p-3 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Khách hàng:</span>
+                        <span className="font-medium">{notif.customerName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Tổng tiền:</span>
+                        <span className="font-bold text-emerald-400">
+                          {notif.totalPrice.toLocaleString("vi-VN")} ₫
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-500">
+                        {notif.timestamp.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
                       </span>
+                      <a
+                        href={`/super-admin/orders?search=${notif.orderCode}`}
+                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-blue-500"
+                        onClick={() => removeNotification(notif.id)}
+                      >
+                        Chi tiết
+                      </a>
                     </div>
                   </div>
-
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500">
-                      {notif.timestamp.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <a
-                      href={`/super-admin/orders?search=${notif.orderCode}`}
-                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-blue-500"
-                      onClick={() => removeNotification(notif.id)}
-                    >
-                      Chi tiết
-                    </a>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>,
             document.body,
           )
         : null}
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      `}</style>
     </>
   );
 }
