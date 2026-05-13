@@ -80,3 +80,8 @@ export async function fetchRecentOrders(year: number, month: number) {
   );
   return data.orders;
 }
+
+export async function syncInventorySerials() {
+  const { data } = await axiosInstance.post("/products/sync-serials");
+  return data;
+}

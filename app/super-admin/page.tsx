@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { DollarSign, Package, User, AlertTriangle, Loader2 } from "lucide-react";
+import { DollarSign, Package, User, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
 import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { DashboardChart } from "@/features/super-admin/dashboard/components/DashboardChart";
@@ -12,6 +12,7 @@ import {
   fetchRevenueChart,
   fetchTopProducts,
   fetchRecentOrders,
+  syncInventorySerials,
   type DashboardStats,
   type RevenueChartWeek,
   type TopProductRow,
@@ -36,6 +37,7 @@ export default function SuperAdminPage() {
   const [chartWeeks, setChartWeeks] = useState<RevenueChartWeek[]>([]);
   const [topProducts, setTopProducts] = useState<TopProductRow[]>([]);
   const [recentOrders, setRecentOrders] = useState<RecentOrderRow[]>([]);
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +102,22 @@ export default function SuperAdminPage() {
   const growthTrend = (pct: number): "up" | "down" =>
     pct >= 0 ? "up" : "down";
 
+  const handleSyncInventory = async () => {
+    if (!confirm("Bạn có chắc chắn muốn đồng bộ lại toàn bộ mã Series? Hành động này sẽ xóa các mã cũ và sinh lại mới dựa trên tồn kho hiện tại.")) {
+      return;
+    }
+    setSyncLoading(true);
+    try {
+      const res = await syncInventorySerials();
+      toast.success(res.message || "Đồng bộ mã Series thành công!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi đồng bộ mã Series");
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   if (loading && !stats && !chartWeeks.length && !topProducts.length && !recentOrders.length) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8 text-slate-500">
@@ -116,26 +134,43 @@ export default function SuperAdminPage() {
         <h1 className="text-2xl font-bold text-slate-800">
           Báo cáo doanh thu toàn hệ thống
         </h1>
-        <div className="flex items-center gap-2">
-          {loading && (
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden />
-          )}
-          <select
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={`${sel.year}-${sel.month}`}
-            onChange={(e) => {
-              const opt = monthOptions.find(
-                (o) => `${o.year}-${o.month}` === e.target.value,
-              );
-              if (opt) setSel(opt);
-            }}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSyncInventory}
+            disabled={syncLoading}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-50"
           >
-            {monthOptions.map((o) => (
-              <option key={`${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+            {syncLoading ? (
+              <RefreshCw className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            Đồng bộ Kho hàng
+          </button>
+
+          <div className="h-8 w-[1px] bg-slate-200" />
+
+          <div className="flex items-center gap-2">
+            {loading && (
+              <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden />
+            )}
+            <select
+              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              value={`${sel.year}-${sel.month}`}
+              onChange={(e) => {
+                const opt = monthOptions.find(
+                  (o) => `${o.year}-${o.month}` === e.target.value,
+                );
+                if (opt) setSel(opt);
+              }}
+            >
+              {monthOptions.map((o) => (
+                <option key={`${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
