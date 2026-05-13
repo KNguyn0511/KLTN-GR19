@@ -6,6 +6,11 @@ import { io } from "socket.io-client";
 
 const SOUND_SRC = "/sounds/notification.mp3";
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
+console.log("[NotificationProvider] SOCKET_URL:", SOCKET_URL);
+console.log(
+  "[NotificationProvider] NEXT_PUBLIC_SOCKET_URL env:",
+  process.env.NEXT_PUBLIC_SOCKET_URL,
+);
 
 export type NotificationPayload = {
   orderCode: string;
