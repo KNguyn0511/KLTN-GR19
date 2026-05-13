@@ -95,13 +95,15 @@ QUY TẮC BẮT BUỘC:
                 };
                 const encodedData = encodeURIComponent(JSON.stringify(productData));
 
+                const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://net-tech-six.vercel.app").replace(/\/$/, "");
+
                 return {
                   id: p._id,
                   name: p.name || "Sản phẩm",
                   sku: p.sku || "N/A",
                   price: (p.price || 0).toLocaleString("vi-VN") + " VNĐ",
                   rawPrice: p.price || 0,
-                  link: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nettech-ai.vercel.app"}/products/${p._id}`,
+                  link: `${siteUrl}/products/${p._id}`,
                   image: imageUrl,
                   cartLink: "https://nettech.vn/cart/add?data=" + encodedData
                 };
