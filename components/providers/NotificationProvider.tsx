@@ -2,15 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { io } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 
 const SOUND_SRC = "/sounds/notification.mp3";
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
-console.log("[NotificationProvider] SOCKET_URL:", SOCKET_URL);
-console.log(
-  "[NotificationProvider] NEXT_PUBLIC_SOCKET_URL env:",
-  process.env.NEXT_PUBLIC_SOCKET_URL,
-);
 
 export type NotificationPayload = {
   orderCode: string;
@@ -27,6 +22,9 @@ export default function NotificationProvider({
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<NotificationPayload | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const retryTimerRef = useRef<number | null>(null);
+  const retryCountRef = useRef(0);
 
   const openNotification = (data: any) => {
     setShowModal(true);
@@ -38,68 +36,122 @@ export default function NotificationProvider({
 
     if (audioRef.current) {
       const audio = audioRef.current;
-      audio.currentTime = 0; // Luôn bắt đầu từ giây thứ 0
+      audio.currentTime = 0;
       audio.play().catch((e) => console.warn("Sound blocked", e));
-
-      // TỰ ĐỘNG DỪNG SAU 3 GIÂY
       setTimeout(() => {
         audio.pause();
-        audio.currentTime = 0; // Reset lại để lần sau kêu tiếp
-      }, 3000); 
+        audio.currentTime = 0;
+      }, 3000);
     }
   };
 
+  const connectSocket = () => {
+    if (socketRef.current) return;
 
-  useEffect(() => {
-    setMounted(true);
+    console.log("[NotificationProvider] runtime SOCKET_URL =", SOCKET_URL);
+    console.log(
+      "[NotificationProvider] runtime NEXT_PUBLIC_SOCKET_URL =",
+      process.env.NEXT_PUBLIC_SOCKET_URL,
+    );
 
-    const adminInfoRaw = localStorage.getItem('admin_info');
-    let userRole = '';
+    const adminInfoRaw = localStorage.getItem("admin_info");
+    console.log("DEBUG: Current admin_info from storage:", adminInfoRaw);
 
+    let userRole = "";
     if (adminInfoRaw) {
       try {
         const parsed = JSON.parse(adminInfoRaw) as {
           role?: string;
           user?: { role?: string };
         };
-        userRole = parsed.role || parsed.user?.role || '';
+        userRole = parsed.role || parsed.user?.role || "";
       } catch (e) {
-        console.error('Failed to parse admin_info', e);
+        console.error("Failed to parse admin_info", e);
       }
     }
 
-    console.log('DEBUG: Detected Role is:', userRole);
+    console.log("DEBUG: Detected Role is:", userRole);
 
-    const normalizedRole = userRole.toLowerCase().replace(/\s+/g, '-');
-    if (normalizedRole !== 'super-admin' && normalizedRole !== 'store-manager') {
-      console.log('Role not authorized');
+    const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "-");
+    if (normalizedRole !== "super-admin" && normalizedRole !== "store-manager") {
+      console.log("Role not authorized");
       return;
     }
 
     const socket = io(SOCKET_URL, {
-      transports: ["polling", "websocket"],
-      auth: { role: normalizedRole, token: localStorage.getItem("admin_token") },
+      transports: ["websocket", "polling"],
+      auth: {
+        role: normalizedRole,
+        token: localStorage.getItem("admin_token"),
+      },
       withCredentials: true,
     });
 
+    socketRef.current = socket;
     (window as any).socket = socket;
-    console.log('!!! WINDOW.SOCKET HAS BEEN ASSIGNED:', (window as any).socket);
     console.log("--- SOCKET FORCED TO WINDOW ---", socket);
+    console.log("!!! WINDOW.SOCKET HAS BEEN ASSIGNED:", (window as any).socket);
 
     socket.on("connect", () => {
       (window as any).socket = socket;
-      console.log('!!! WINDOW.SOCKET HAS BEEN ASSIGNED:', (window as any).socket);
       console.log("SOCKET CONNECTED SUCCESSFULLY! ID:", socket.id);
     });
-    socket.on("connect_error", (err) =>
-      console.error("SOCKET CONNECTION ERROR:", err),
-    );
+    socket.on("connect_error", (err) => {
+      console.error("SOCKET CONNECTION ERROR:", err);
+      console.error("[NotificationProvider] connect_error details:", {
+        url: SOCKET_URL,
+        transport: socket.io?.engine?.transport?.name,
+      });
+    });
+    socket.on("disconnect", (reason) => {
+      console.warn("[NotificationProvider] socket disconnected:", reason);
+    });
+    socket.on("reconnect", (attempt) => {
+      console.log("[NotificationProvider] socket reconnect attempt:", attempt);
+    });
     socket.on("NEW_ORDER_RECEIVED", (data) => {
+      console.log("[NotificationProvider] NEW_ORDER_RECEIVED:", data);
       openNotification(data);
     });
+  };
+
+  useEffect(() => {
+    setMounted(true);
+
+    const tryConnect = () => {
+      if (socketRef.current) return;
+      const adminInfoRaw = localStorage.getItem("admin_info");
+      if (!adminInfoRaw) {
+        retryCountRef.current += 1;
+        console.log(
+          `[NotificationProvider] admin_info not ready, retry ${retryCountRef.current}/10`,
+        );
+        if (retryCountRef.current <= 10) {
+          retryTimerRef.current = window.setTimeout(tryConnect, 500);
+        }
+        return;
+      }
+      connectSocket();
+    };
+
+    tryConnect();
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "admin_info" && !socketRef.current && e.newValue) {
+        console.log("[NotificationProvider] admin_info appeared in storage, connecting...");
+        connectSocket();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
 
     return () => {
-      socket.disconnect();
+      window.removeEventListener("storage", handleStorage);
+      if (retryTimerRef.current) {
+        window.clearTimeout(retryTimerRef.current);
+      }
+      socketRef.current?.disconnect();
+      socketRef.current = null;
     };
   }, []);
 
