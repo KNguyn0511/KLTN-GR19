@@ -137,9 +137,18 @@ export class SalesService {
         (savedOrder as any).customerName || (savedOrder as any).customer?.name || customerName || 'Khách hàng',
     };
 
-    console.log('Emitting to admin-room...');
-    this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
-    console.log('Order event emitted for:', payload.orderCode);
+    const paymentMethod = data.customerInfo?.paymentMethod || data.paymentMethod || 'COD';
+
+    console.log(`[SalesService] checkoutData received paymentMethod: ${paymentMethod}`);
+    console.log(`[SalesService] Full checkout data:`, JSON.stringify(data, null, 2));
+
+    if (paymentMethod === 'COD') {
+      console.log('Emitting to admin-room...');
+      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+      console.log('Order event emitted for:', payload.orderCode);
+    } else {
+      console.log(`Skipping order event emission. Payment method is ${paymentMethod}, waiting for payment confirmation.`);
+    }
 
     // 2. ✅ BƯỚC THẦN THÁNH: Tăng số lượng voucher đã dùng lên 1
     if (data.voucherCode) {
@@ -155,6 +164,23 @@ export class SalesService {
     }
 
     return savedOrder;
+  }
+
+  async emitOrderNotification(orderId: string) {
+    try {
+      const order = await this.orderModel.findById(orderId).populate('user', 'fullName').lean().exec();
+      if (!order) return;
+      const customerName = (order as any).user?.fullName || 'Khách hàng';
+      const payload = {
+        orderCode: (order as any).orderCode || 'N/A',
+        totalPrice: order.totalAmount || 0,
+        customerName: customerName,
+      };
+      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+      console.log('Order event emitted for (from emitOrderNotification):', payload.orderCode);
+    } catch (err) {
+      console.error('Failed to emit order notification:', err);
+    }
   }
 
   async findMyOrders(userId: string, statusFilter?: string) {
@@ -482,6 +508,7 @@ export class SalesService {
       channel: raw.channel === 'O2O' ? 'O2O' : 'ONLINE',
       totalAmount: Number(raw.totalAmount) || 0,
       items,
+      paidAt: raw.paidAt || null,
     };
   }
 
@@ -668,6 +695,7 @@ export class SalesService {
       shippingFee: Number(raw.shippingFee) || 0,
       shippingInfo: raw.shippingInfo || null,
       customerInfo: raw.customerInfo || null,
+      paidAt: raw.paidAt || null,
     };
   }
 
