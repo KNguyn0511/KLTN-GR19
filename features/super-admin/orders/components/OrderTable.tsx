@@ -56,8 +56,8 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
           <tbody className="divide-y divide-slate-100">
             {orders.map((order) => {
               const statusLabel = apiStatusToLabel(order.status);
-              const displayCode = order.orderCode.replace(/^#/, "");
-              const isNtStyle = /\bNT-/i.test(order.orderCode);
+              const displayCode = (order.orderCode || "").replace(/^#/, "");
+              const isNtStyle = /^NT-/i.test(order.orderCode || "");
               const sourceLabel =
                 order.channel === "ONLINE" ? "Website" : "Tại quầy Q.1";
               const next = nextApiStatus(order.status);
@@ -69,7 +69,7 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                         isNtStyle ? "text-blue-600" : "text-slate-800"
                       }
                     >
-                      {order.orderCode.startsWith("#")
+                      {(order.orderCode || "").startsWith("#")
                         ? order.orderCode
                         : `#${displayCode}`}
                     </span>
@@ -82,9 +82,30 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                       <span className="font-semibold text-slate-800">
                         {order.customerName}
                       </span>
-                      <span className="text-xs text-slate-400">
-                        {order.customerPhone}
-                      </span>
+                      {order.status === "SHIPPING" || order.status === "COMPLETED" ? (
+                        <div className="mt-1 flex flex-col gap-1">
+                          <div className="flex items-center gap-1">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">
+                              {order.shippingInfo?.carrier || "N/A"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-mono text-slate-500">
+                              {order.shippingInfo?.trackingNumber}
+                            </span>
+                            <a 
+                              href={`https://5sao.ghn.dev/tracking?order_code=${order.shippingInfo?.trackingNumber}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="text-[10px] text-blue-500 hover:underline flex items-center"
+                            >
+                              Tra cứu ↗
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 italic">Chưa có thông tin vận chuyển</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">
@@ -127,24 +148,42 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    {statusLabel === "Chờ xác nhận" || statusLabel === "Đã xác nhận" ? (
-                      <Button
-                        type="button"
-                        className={cn(
-                          "rounded-md px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors",
-                          statusLabel === "Chờ xác nhận" ? "bg-blue-600 hover:bg-blue-700" : "bg-indigo-600 hover:bg-indigo-700"
+                    {next ? (
+                      <div className="flex flex-col gap-1 items-center">
+                        <Button
+                          type="button"
+                          className={cn(
+                            "rounded-md px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors w-full",
+                            {
+                              "bg-blue-600 hover:bg-blue-700": order.status === "PENDING" || order.status === "PENDING_CONFIRMATION",
+                              "bg-indigo-600 hover:bg-indigo-700": order.status === "CONFIRMED",
+                              "bg-orange-600 hover:bg-orange-700": order.status === "PACKING",
+                              "bg-green-600 hover:bg-green-700": order.status === "SHIPPING",
+                            }
+                          )}
+                          onClick={() => onAdvance(order)}
+                        >
+                          {order.status === "PENDING" || order.status === "PENDING_CONFIRMATION" ? "XỬ LÝ" : 
+                           order.status === "CONFIRMED" ? "ĐÓNG GÓI" :
+                           order.status === "PACKING" ? "GIAO HÀNG" : "HOÀN TẤT"}
+                        </Button>
+                        
+                        {order.status === "SHIPPING" && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="h-6 text-[9px] border-orange-300 text-orange-500 hover:bg-orange-50 font-bold px-1 py-0"
+                            onClick={() => onAdvance({ ...order, status: 'FORCE_COMPLETE' } as any)}
+                            title="Giả lập GHN báo giao hàng thành công"
+                          >
+                            GIẢ LẬP GHN ✅
+                          </Button>
                         )}
-                        onClick={() => onAdvance(order)}
-                      >
-                        {statusLabel === "Chờ xác nhận" ? "XỬ LÝ" : "ĐÓNG GÓI"}
-                      </Button>
+                      </div>
                     ) : (
                       <Button
                         type="button"
                         className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors"
-                        onClick={() => {
-                          if (next) onAdvance(order);
-                        }}
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>

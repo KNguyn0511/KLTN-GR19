@@ -21,14 +21,22 @@ export interface AdminOrderRow {
   channel: "ONLINE" | "O2O";
   status: string;
   items?: Array<{
+    product?: string;
     productName: string;
     quantity: number;
     variant: string;
     price: number;
+    serialNumbers?: string[];
+    availableSerials?: string[];
   }>;
   voucherCode?: string | null;
   discountAmount?: number;
   shippingFee?: number;
+  shippingInfo?: {
+    carrier: string;
+    trackingNumber: string;
+    shippedAt: string;
+  } | null;
   customerInfo?: {
     fullName?: string;
     phone?: string;
@@ -76,7 +84,27 @@ export async function patchOrderStatus(
 
 export async function confirmOrder(orderId: string): Promise<AdminOrderRow> {
   const { data } = await axiosInstance.patch<AdminOrderRow>(
-    `/orders/${orderId}/confirm`,
+    `/orders/${orderId}/confirm`
   );
+  return data;
+}
+
+export async function packOrder(orderId: string, items: { productId: string, serialNumbers: string[] }[]): Promise<any> {
+  const { data } = await axiosInstance.post("/sales/pack-order", { orderId, items });
+  return data;
+}
+
+export async function shipOrder(orderId: string, carrier: string): Promise<any> {
+  const { data } = await axiosInstance.post("/sales/ship-order", { orderId, carrier });
+  return data;
+}
+
+export async function completeOrder(orderId: string, force = false): Promise<any> {
+  const { data } = await axiosInstance.post("/sales/complete-order", { orderId, force });
+  return data;
+}
+
+export async function syncAllOrders(): Promise<any> {
+  const { data } = await axiosInstance.post("/sales/sync-all-orders");
   return data;
 }
