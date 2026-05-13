@@ -56,6 +56,7 @@ export class SepayService {
       this.logger.log(`Order ${orderCode} payment received (${amount}). Keeping status at PENDING_CONFIRMATION for Admin review.`);
       // Đánh dấu đã nhận thanh toán mà không thay đổi trạng thái workflow
       await this.salesService.markOrderAsPaid(String(order._id));
+      await this.salesService.emitOrderNotification(String(order._id));
     } else {
       this.logger.warn(`Amount ${amount} is less than order total ${order.totalAmount}. Order status not updated.`);
     }
