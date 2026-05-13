@@ -101,7 +101,7 @@ QUY TẮC BẮT BUỘC:
                   sku: p.sku || "N/A",
                   price: (p.price || 0).toLocaleString("vi-VN") + " VNĐ",
                   rawPrice: p.price || 0,
-                  link: "http://localhost:3000/products/" + p._id,
+                  link: `${process.env.NEXT_PUBLIC_SITE_URL || "https://nettech-ai.vercel.app"}/products/${p._id}`,
                   image: imageUrl,
                   cartLink: "https://nettech.vn/cart/add?data=" + encodedData
                 };
