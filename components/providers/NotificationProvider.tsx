@@ -40,10 +40,18 @@ export default function NotificationProvider({
       audio.currentTime = 0;
       audio
         .play()
-        .then(() => console.log("[NotificationProvider] Sound played successfully"))
+        .then(() => {
+          console.log("[NotificationProvider] Sound played successfully");
+          // Chỉ cho phép chạy 3 giây rồi ngắt (vì âm thanh gốc dài 6s)
+          setTimeout(() => {
+            if (audio) {
+              audio.pause();
+              audio.currentTime = 0;
+            }
+          }, 3000);
+        })
         .catch((e) => {
           console.warn("[NotificationProvider] Sound blocked or failed", e);
-          // Fallback: try to play again after a small delay if blocked
         });
     } else {
       console.warn("[NotificationProvider] Audio ref is null, cannot play sound");
