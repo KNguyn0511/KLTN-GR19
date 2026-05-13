@@ -304,12 +304,101 @@ export class ProductsService {
       );
     }
 
-    return await this.productRepository.update(id, { totalStock: newStock });
+    const updated = await this.productRepository.update(id, {
+      totalStock: newStock,
+    });
+
+    // Nếu tăng kho, tự động sinh thêm series
+    if (quantityChange > 0) {
+      await this.autoGenerateSerials(
+        id,
+        (product as any).sku,
+        quantityChange,
+        (product as any).importPrice || (product as any).price * 0.75,
+      );
+    }
+
+    return updated;
   }
 
   async remove(id: string) {
     const result = await this.productRepository.delete(id);
     if (!result) throw new NotFoundException('Không tìm thấy sản phẩm để xóa!');
     return { message: 'Xóa sản phẩm thành công!' };
+  }
+
+  // --- SERIAL NUMBER MANAGEMENT ---
+
+  /**
+   * Xóa sạch productitems và sinh lại toàn bộ dựa trên totalStock hiện tại
+   */
+  async cleanupAndSyncSerialNumbers() {
+    console.log('[ProductsService] Starting cleanup and sync serial numbers...');
+
+    // 1. Xóa sạch
+    await this.productRepository.clearAllItems();
+
+    // 2. Lấy 1 chi nhánh mặc định để gán locationId (cho đúng mẫu data sếp gửi)
+    let defaultLocationId: any = null;
+    try {
+      // Giả sử có module branches, nếu không có ta sẽ để null
+      // Ở đây tôi sẽ thử tìm trong DB xem có branch nào không
+      const branches = await (this as any).categoriesService.findAllRaw ? [] : []; 
+      // Tạm thời hardcode hoặc lấy từ env nếu cần, nhưng tốt nhất là lấy cái đầu tiên trong DB
+    } catch(e) {}
+
+    // 3. Lấy tất cả sản phẩm
+    const allProducts = await this.productRepository.findAllRaw();
+    let totalItemsCreated = 0;
+
+    for (const product of allProducts) {
+      const stock = product.totalStock || 0;
+      if (stock > 0) {
+        const items = [];
+        for (let i = 1; i <= stock; i++) {
+          const skuClean = (product.sku || 'PROD').replace(/\s+/g, '-');
+          items.push({
+            productId: product._id,
+            serialNumber: `SN-${skuClean}-${String(i).padStart(3, '0')}`, // Bỏ phần random cho đẹp như mẫu
+            status: 'In Stock',
+            importPrice: product.importPrice || Math.round(product.price * 0.75),
+            importDate: new Date(),
+            // Nếu bạn có ID chi nhánh cụ thể, hãy thay vào đây
+            locationId: new Types.ObjectId('65af10000000000000000001'), 
+          });
+        }
+        if (items.length > 0) {
+          await this.productRepository.insertManyItems(items);
+          totalItemsCreated += items.length;
+        }
+      }
+    }
+
+    console.log(`[ProductsService] Sync complete! Created ${totalItemsCreated} items.`);
+    return {
+      message: 'Đồng bộ mã Series thành công!',
+      totalProducts: allProducts.length,
+      totalItemsCreated,
+    };
+  }
+
+  async autoGenerateSerials(
+    productId: string,
+    sku: string,
+    count: number,
+    importPrice: number,
+  ) {
+    const items = [];
+    const skuClean = (sku || 'PROD').replace(/\s+/g, '-');
+    for (let i = 1; i <= count; i++) {
+      items.push({
+        productId: new Types.ObjectId(productId),
+        serialNumber: `SN-${skuClean}-NEW-${Date.now()}-${i}`,
+        status: 'In Stock',
+        importPrice: importPrice,
+        importDate: new Date(),
+      });
+    }
+    return await this.productRepository.insertManyItems(items);
   }
 }

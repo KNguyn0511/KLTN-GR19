@@ -246,7 +246,7 @@ export class SalesService {
         // 2. Cập nhật trạng thái ProductItem thành SOLD
         await this.productItemModel.updateMany(
           { serialNumber: { $in: pData.serialNumbers } },
-          { $set: { status: 'SOLD' } }
+          { $set: { status: 'Sold' } }
         );
       }
     }
@@ -663,8 +663,8 @@ export class SalesService {
     const items = await Promise.all((raw.items || []).map(async (it: any) => {
       // Lấy danh sách Serial đang AVAILABLE của sản phẩm này
       const availableItems = await this.productItemModel.find({
-        product: it.product,
-        status: 'AVAILABLE'
+        productId: it.product,
+        status: 'In Stock'
       }).select('serialNumber').lean();
       
       return {
