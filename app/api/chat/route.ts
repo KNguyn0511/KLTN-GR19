@@ -5,13 +5,13 @@ import { z } from "zod";
 export const maxDuration = 60;
 
 const vertex = createVertex({
+  project: process.env.GOOGLE_VERTEX_PROJECT,
+  location: process.env.GOOGLE_VERTEX_LOCATION || "global",
   googleAuthOptions: {
     credentials: {
       client_email: process.env.GCP_CLIENT_EMAIL,
       private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     },
-    projectId: process.env.GOOGLE_VERTEX_PROJECT,
-    location: process.env.GOOGLE_VERTEX_LOCATION || "global",
   },
 });
 
