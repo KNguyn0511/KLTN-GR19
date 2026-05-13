@@ -6,6 +6,7 @@ import type { AdminOrderRow } from "@/lib/api/adminOrdersApi";
 export function apiStatusToLabel(status: string): string {
   if (status === "PENDING" || status === "PENDING_CONFIRMATION")
     return "Chờ xác nhận";
+  if (status === "CONFIRMED") return "Đã xác nhận";
   if (status === "PACKING") return "Đang đóng gói";
   if (status === "SHIPPING") return "Đang giao hàng";
   if (status === "COMPLETED") return "Hoàn thành";
@@ -14,7 +15,8 @@ export function apiStatusToLabel(status: string): string {
 }
 
 export function nextApiStatus(status: string): string | null {
-  if (status === "PENDING" || status === "PENDING_CONFIRMATION") return "PACKING";
+  if (status === "PENDING" || status === "PENDING_CONFIRMATION") return "CONFIRMED";
+  if (status === "CONFIRMED") return "PACKING";
   if (status === "PACKING") return "SHIPPING";
   if (status === "SHIPPING") return "COMPLETED";
   return null;
@@ -109,6 +111,8 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                           "bg-yellow-100 text-yellow-700":
                             statusLabel === "Chờ xác nhận",
                           "bg-blue-100 text-blue-700":
+                            statusLabel === "Đã xác nhận",
+                          "bg-indigo-100 text-indigo-700":
                             statusLabel === "Đang đóng gói" ||
                             statusLabel === "Đang giao hàng",
                           "bg-green-100 text-green-700":
@@ -123,13 +127,16 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    {statusLabel === "Chờ xác nhận" ? (
+                    {statusLabel === "Chờ xác nhận" || statusLabel === "Đã xác nhận" ? (
                       <Button
                         type="button"
-                        className="rounded-md bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors"
+                        className={cn(
+                          "rounded-md px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors",
+                          statusLabel === "Chờ xác nhận" ? "bg-blue-600 hover:bg-blue-700" : "bg-indigo-600 hover:bg-indigo-700"
+                        )}
                         onClick={() => onAdvance(order)}
                       >
-                        XỬ LÝ
+                        {statusLabel === "Chờ xác nhận" ? "XỬ LÝ" : "ĐÓNG GÓI"}
                       </Button>
                     ) : (
                       <Button

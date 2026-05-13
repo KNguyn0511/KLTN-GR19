@@ -16,7 +16,8 @@ export default function SuperAdminPromotionsPage() {
   const fetchPromotions = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3001/promotions");
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      const res = await axios.get(`${apiUrl}/promotions`);
       setPromotions(res.data);
     } catch (error) {
       console.error("Lỗi lấy danh sách khuyến mãi:", error);

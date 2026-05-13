@@ -13,12 +13,21 @@ import {
 import {
   fetchAdminOrders,
   patchOrderStatus,
+  confirmOrder,
   type AdminOrderChannel,
   type AdminOrderDate,
   type AdminOrderRow,
   type AdminOrderStats,
   type AdminOrderTab,
 } from "@/lib/api/adminOrdersApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function SuperAdminOrdersPage() {
   const [tab, setTab] = useState<AdminOrderTab>("all");
@@ -29,6 +38,11 @@ export default function SuperAdminOrdersPage() {
 
   const [stats, setStats] = useState<AdminOrderStats | null>(null);
   const [orders, setOrders] = useState<AdminOrderRow[]>([]);
+  
+  // Confirmation Modal state
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrderRow | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400);
@@ -58,6 +72,12 @@ export default function SuperAdminOrdersPage() {
   }, [load]);
 
   const handleAdvance = async (order: AdminOrderRow) => {
+    if (order.status === "PENDING_CONFIRMATION" || order.status === "PENDING") {
+      setSelectedOrder(order);
+      setIsConfirmOpen(true);
+      return;
+    }
+
     const next = nextApiStatus(order.status);
     if (!next) return;
     try {
@@ -67,6 +87,23 @@ export default function SuperAdminOrdersPage() {
     } catch (e) {
       console.error(e);
       toast.error("Không cập nhật được trạng thái.");
+    }
+  };
+
+  const handleConfirmOrder = async () => {
+    if (!selectedOrder) return;
+    setIsProcessing(true);
+    try {
+      await confirmOrder(selectedOrder._id);
+      toast.success(`Đã xác nhận đơn hàng ${selectedOrder.orderCode}`);
+      setIsConfirmOpen(false);
+      setSelectedOrder(null);
+      await load();
+    } catch (e) {
+      console.error(e);
+      toast.error("Lỗi khi xác nhận đơn hàng.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -152,6 +189,140 @@ export default function SuperAdminOrdersPage() {
 
       {/* Data Table */}
       <OrderTable orders={orders} onAdvance={handleAdvance} />
+
+      {/* Confirmation Modal */}
+      <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-800">Xác nhận đơn hàng</DialogTitle>
+            <DialogDescription>
+              Kiểm tra thông tin khách hàng và đơn hàng trước khi bắt đầu xử lý.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrder && (() => {
+            const subtotal = (selectedOrder.items?.reduce((acc, it) => acc + (it.price * it.quantity), 0)) || 0;
+            return (
+            <div className="flex flex-col gap-5 py-4">
+              {/* Customer Info Mini Card */}
+              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-slate-400 uppercase font-bold">Mã đơn</span>
+                    <span className="font-bold text-blue-600">{selectedOrder.orderCode}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-slate-400 uppercase font-bold text-right">Khách hàng</span>
+                    <span className="font-semibold text-slate-800">{selectedOrder.customerName}</span>
+                  </div>
+                </div>
+                {selectedOrder.customerInfo && (
+                  <div className="mt-1 flex flex-col gap-0.5 text-slate-600">
+                    {selectedOrder.customerInfo.phone && (
+                      <span>📞 {selectedOrder.customerInfo.phone}</span>
+                    )}
+                    {selectedOrder.customerInfo.addressDetail && (
+                      <span className="text-[10px] text-slate-500">
+                        📍 {selectedOrder.customerInfo.addressDetail}, {selectedOrder.customerInfo.ward}, {selectedOrder.customerInfo.district}, {selectedOrder.customerInfo.city}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 1. Product List (TOP) */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Chi tiết sản phẩm:</span>
+                <div className="max-h-[160px] overflow-y-auto rounded-lg border border-slate-100 bg-white p-2">
+                  {selectedOrder.items?.map((item, idx) => (
+                    <div key={idx} className="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+                      <div className="flex flex-col gap-0.5 max-w-[65%]">
+                        <span className="text-sm font-medium text-slate-800 leading-tight">
+                          {item.productName}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {item.variant}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs font-bold text-slate-700">
+                          {Math.round(item.price).toLocaleString("vi-VN")} đ
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          x{item.quantity}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Pricing Summary (BOTTOM) */}
+              <div className="rounded-lg bg-slate-50 p-4 border border-slate-100 flex flex-col gap-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Tạm tính:</span>
+                  <span className="font-medium">
+                    {Math.round(subtotal).toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+                
+                {((selectedOrder.discountAmount ?? 0) > 0 || (subtotal > selectedOrder.totalAmount)) && (
+                  <div className="flex justify-between text-sm text-red-600">
+                    <span className="flex items-center gap-1 italic">
+                      {selectedOrder.voucherCode ? (
+                        <>
+                          Mã giảm giá <span className="not-italic font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-100 text-[10px] ml-1">{selectedOrder.voucherCode}</span>:
+                        </>
+                      ) : (
+                        "Khuyến mãi / Giảm giá:"
+                      )}
+                    </span>
+                    <span className="font-bold">
+                      -{Math.round((selectedOrder.discountAmount ?? 0) || (subtotal + (selectedOrder.shippingFee ?? 0) - selectedOrder.totalAmount)).toLocaleString("vi-VN")} đ
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between text-sm text-slate-700">
+                  <span className="text-slate-500">Phí vận chuyển:</span>
+                  <span>+{Math.round(selectedOrder.shippingFee || 0).toLocaleString("vi-VN")} đ</span>
+                </div>
+                
+                <div className="flex justify-between border-t border-slate-200 pt-3 mt-1">
+                  <span className="text-slate-900 font-bold">Thành tiền:</span>
+                  <span className="font-bold text-xl text-blue-600">
+                    {Math.round(selectedOrder.totalAmount).toLocaleString("vi-VN")} đ
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400 italic text-center">
+                * Sau khi xác nhận, khách hàng sẽ nhận được thông báo trạng thái đơn hàng.
+              </p>
+            </div>
+            );
+          })()}
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsConfirmOpen(false)}
+              disabled={isProcessing}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              onClick={handleConfirmOrder}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Đang xử lý..." : "Xác nhận & Xử lý"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

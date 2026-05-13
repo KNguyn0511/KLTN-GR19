@@ -56,7 +56,8 @@ export default function MemberDetailPage() {
 
     setIsLocking(true);
     try {
-      await axios.patch(`http://localhost:3001/users/${id}/toggle-lock`);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      await axios.patch(`${apiUrl}/users/${id}/toggle-lock`);
       // Đảo ngược trạng thái isDeleted trên giao diện ngay lập tức mà không cần load lại trang
       setMember((prev: any) => ({ ...prev, isDeleted: !prev.isDeleted }));
     } catch (error) {

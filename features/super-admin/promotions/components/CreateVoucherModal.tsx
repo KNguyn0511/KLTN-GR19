@@ -54,7 +54,8 @@ export function CreateVoucherModal({
       };
 
       // Gọi API tạo mới
-      await axios.post("http://localhost:3001/promotions", payload);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      await axios.post(`${apiUrl}/promotions`, payload);
       
       alert("Tạo mã khuyến mãi thành công!");
       

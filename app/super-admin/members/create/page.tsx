@@ -32,7 +32,7 @@ export default function CreateMemberPage() {
   const onSubmit = async (data: CreateMemberInput) => {
     try {
       // ✅ PHẢI CÓ DÒNG NÀY THÌ DỮ LIỆU MỚI BAY VỀ DATABASE
-      await axiosInstance.post("http://localhost:3001/users", data); 
+      await axiosInstance.post("/users", data); 
       
       toast.success("Tạo thành viên mới thành công!");
       router.push("/super-admin/members");

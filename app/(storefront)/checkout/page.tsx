@@ -15,6 +15,7 @@ import {
   mapCartItemsToOrderItems,
   hasMockItems,
   markMyOrdersStale,
+  getMyOrders,
 } from "@/lib/api/orderApi";
 import { addressApi, UserAddress } from "@/features/storefront/address/api/addressApi";
 import { vietnamProvincesApi, VietnamProvince, VietnamDistrict, VietnamWard } from "@/features/storefront/address/api/vietnamProvincesApi";
@@ -41,6 +42,8 @@ export default function CheckoutPage() {
 
   const [mounted, setMounted] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isWaitingPayment, setIsWaitingPayment] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes = 600 seconds
   const [orderResult, setOrderResult] = useState<{
     orderId: string;
     customer: CheckoutFormData;
@@ -89,6 +92,26 @@ export default function CheckoutPage() {
   const selectedPayment = watch("paymentMethod");
 
   useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isWaitingPayment && orderResult) {
+      interval = setInterval(async () => {
+        try {
+          const res = await getMyOrders({ t: Date.now() });
+          const order = res.orders.find(o => o.orderCode === orderResult.orderId.replace("#", ""));
+          if (order && order.status === 'PAID') {
+            setIsWaitingPayment(false);
+            setIsSuccess(true);
+            toast.success("Thanh toán thành công!", { autoClose: 3000 });
+          }
+        } catch (error) {
+          console.error("Polling error", error);
+        }
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [isWaitingPayment, orderResult]);
+
+  useEffect(() => {
     setMounted(true);
     // Nếu chưa đăng nhập, đá về trang login
     if (!useAuthStore.getState().isLoggedIn) {
@@ -118,6 +141,22 @@ export default function CheckoutPage() {
       setDistricts([]);
     }
   }, [selectedCity, provinces]);
+
+  // Countdown timer for payment
+  useEffect(() => {
+    if (isWaitingPayment && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [isWaitingPayment, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   // Load wards when district changes
   useEffect(() => {
@@ -180,6 +219,8 @@ export default function CheckoutPage() {
           totalAmount: finalPrice,
           channel: "ONLINE",
           voucherCode: appliedVoucher,
+          discountAmount: totalDiscount,
+          shippingFee: CHECKOUT_FEES.SHIPPING_FEE,
           customerInfo: {
             fullName: data.fullName,
             phone: data.phone,
@@ -188,19 +229,11 @@ export default function CheckoutPage() {
             district: data.district,
             ward: data.ward,
             addressDetail: data.addressDetail,
-            paymentMethod: data.paymentMethod as "COD" | "VNPAY" | "MOMO",
+            paymentMethod: data.paymentMethod as "COD" | "VNPAY" | "MOMO" | "BANK_TRANSFER",
           },
         });
 
-        // ==========================================
-        // 3. TÍCH HỢP LOGIC NHẢY TRANG VNPAY
-        // ==========================================
-        if (data.paymentMethod === "VNPAY" && (result as any).paymentUrl) {
-          await clearCart();
-          resetVoucher();
-          window.location.href = (result as any).paymentUrl;
-          return; // Dừng tại đây, không show UI "Thành công" giả
-        }
+
 
         const code =
           result.orderCode != null && String(result.orderCode).length > 0
@@ -220,22 +253,95 @@ export default function CheckoutPage() {
       }
     }
 
-    toast.success("Đặt hàng thành công!", { autoClose: 3000 });
-
     setOrderResult({
       orderId: generatedOrderId,
       customer: data,
       total: finalPrice,
     });
-    setIsSuccess(true);
     
-    // Dọn dẹp giỏ hàng và voucher sau khi mua COD
+    // Dọn dẹp giỏ hàng và voucher sau khi mua
     await clearCart();
     resetVoucher();
+
+    if (data.paymentMethod === "BANK_TRANSFER" || data.paymentMethod === "VNPAY" || data.paymentMethod === "MOMO") {
+      setIsWaitingPayment(true);
+      setTimeLeft(600); // Reset timer to 10 minutes when showing QR
+      return;
+    }
+
+    toast.success("Đặt hàng thành công!", { autoClose: 3000 });
+    setIsSuccess(true);
   };
 
-  if (!mounted || !isLoggedIn || (items.length === 0 && !isSuccess))
+  if (!mounted || !isLoggedIn || (items.length === 0 && !isSuccess && !isWaitingPayment))
     return <div className="min-h-screen bg-white" />;
+
+  if (isWaitingPayment && orderResult) {
+    return (
+      <main className="mx-auto flex min-h-[80vh] w-full max-w-360 flex-col items-center justify-center bg-white px-4 py-8 md:px-8 lg:px-12 lg:py-10 xl:px-16">
+        <div className="flex w-full max-w-200 flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+          {timeLeft > 0 ? (
+            <>
+              <h2 className="mb-2 text-center text-2xl font-black tracking-tight text-gray-900">
+                Chờ thanh toán
+              </h2>
+              <p className="mb-6 text-center text-sm font-medium text-gray-600">
+                Đơn hàng của bạn đã được tạo thành công. Vui lòng thanh toán để hoàn tất.
+              </p>
+              
+              <div className="mb-6 w-full rounded-lg bg-blue-50/50 p-4 text-center text-sm font-semibold text-blue-800 border border-blue-100">
+                Mã đơn hàng: <span className="font-bold text-primary">{orderResult.orderId}</span>
+                <br />
+                Tổng thanh toán: <span className="text-destructive text-lg font-black">{formatPrice(orderResult.total)}</span>
+              </div>
+
+              <div className="mb-4 text-center">
+                <span className="text-sm text-gray-500">Thời gian còn lại: </span>
+                <span className="text-2xl font-black text-red-600 animate-pulse">{formatTime(timeLeft)}</span>
+              </div>
+
+              <div className="overflow-hidden rounded-xl border-2 border-dashed border-primary/50 bg-gray-50 p-3">
+                <img
+                  src={`https://qr.sepay.vn/img?acc=00003919800&bank=TPB&amount=${orderResult.total}&des=${orderResult.orderId.replace("#", "")}`}
+                  alt="QR Thanh Toán"
+                  className="h-64 w-64 object-contain mix-blend-multiply md:h-80 md:w-80"
+                />
+              </div>
+              
+              <p className="mt-6 text-center text-sm font-medium text-gray-600">
+                Hệ thống đang chờ nhận thanh toán...
+                <br />
+                (Màn hình sẽ tự động chuyển sau khi thanh toán thành công)
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="mb-6 rounded-full bg-red-100 p-4">
+                <svg className="h-12 w-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </div>
+              <h2 className="mb-2 text-center text-2xl font-black tracking-tight text-red-600">
+                Giao dịch đã bị hủy
+              </h2>
+              <p className="mb-8 text-center text-sm font-medium text-gray-600">
+                Thời gian chờ thanh toán đã kết thúc. Vui lòng đặt lại đơn hàng mới.
+              </p>
+              <Button
+                variant="default"
+                onClick={() => {
+                  router.push("/cart");
+                }}
+                className="w-full sm:w-auto h-12 px-8 font-bold text-white shadow-lg shadow-primary/20"
+              >
+                Quay lại giỏ hàng
+              </Button>
+            </>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   const ErrorMsg = ({ msg }: { msg?: string }) => {
     return msg ? (
@@ -321,7 +427,9 @@ export default function CheckoutPage() {
                     ? "Thanh toán khi nhận hàng (COD)"
                     : orderResult.customer.paymentMethod === "VNPAY"
                       ? "Thanh toán qua VNPAY"
-                      : "Ví điện tử MOMO"}
+                      : orderResult.customer.paymentMethod === "BANK_TRANSFER"
+                        ? "Chuyển khoản qua Ngân hàng"
+                        : "Ví điện tử MOMO"}
                 </p>
               </div>
               <div>
@@ -355,6 +463,8 @@ export default function CheckoutPage() {
             trong ít phút nữa.
           </div>
         </div>
+
+
 
         {/* Action Buttons */}
         <div className="mt-10 mb-10 flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
@@ -597,7 +707,7 @@ export default function CheckoutPage() {
                   <div className="ms-3 flex grow items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-gray-900">
-                        Thanh toán qua VNPAY
+                        VNPAY (Tự động xác nhận)
                       </span>
                       <span className="text-success text-xs font-bold">
                         Giảm thêm 300k
@@ -621,9 +731,29 @@ export default function CheckoutPage() {
                   </div>
                   <div className="ms-3 flex grow items-center justify-between">
                     <span className="text-sm font-bold text-gray-900">
-                      Ví điện tử Momo
+                      MOMO (Tự động xác nhận)
                     </span>
                     <span className="text-momo text-xs font-black">MOMO</span>
+                  </div>
+                </label>
+
+                {/* Option 4: BANK TRANSFER (SePay) */}
+                <label
+                  className={`flex h-16 cursor-pointer items-center rounded-lg border px-4 py-3 transition-all ${selectedPayment === "BANK_TRANSFER" ? "border-primary ring-primary/20 bg-primary/5 ring-1" : "border-gray-200 hover:border-gray-300"}`}
+                >
+                  <div className="flex h-5 items-center">
+                    <input
+                      type="radio"
+                      value="BANK_TRANSFER"
+                      {...register("paymentMethod")}
+                      className="text-primary focus:ring-primary accent-primary h-4 w-4 border-gray-300 bg-gray-100"
+                    />
+                  </div>
+                  <div className="ms-3 flex grow items-center justify-between">
+                    <span className="text-sm font-bold text-gray-900">
+                      Ngân hàng (Tự động xác nhận)
+                    </span>
+                    <span className="text-blue-600 text-xs font-black">BANK</span>
                   </div>
                 </label>
               </div>
