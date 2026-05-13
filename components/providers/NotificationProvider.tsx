@@ -44,9 +44,8 @@ export default function NotificationProvider({
     };
 
     setNotifications((prev) => {
-      // Giữ tối đa 5 thông báo mới nhất để tránh tràn màn hình
-      const updated = [newNotif, ...prev].slice(0, 8);
-      return updated;
+      // Thêm vào cuối mảng để cái mới nhất nằm dưới cùng của stack
+      return [...prev, newNotif];
     });
 
     if (audioRef.current) {
@@ -141,17 +140,26 @@ export default function NotificationProvider({
     };
   }, []);
 
+  const visibleNotifications = notifications.slice(-3);
+  const hiddenCount = notifications.length - visibleNotifications.length;
+
   return (
     <>
       <audio ref={audioRef} src={SOUND_SRC} preload="auto" />
       {children}
       {mounted && notifications.length > 0 && typeof document !== "undefined"
         ? createPortal(
-            <div className="pointer-events-none fixed right-4 bottom-4 z-[99999] flex flex-col gap-3 sm:right-6 sm:bottom-6">
-              {notifications.map((notif) => (
+            <div className="pointer-events-none fixed right-4 bottom-4 z-[99999] flex flex-col items-end gap-3 sm:right-6 sm:bottom-6">
+              {hiddenCount > 0 && (
+                <div className="animate-in fade-in slide-in-from-top-2 mb-1 rounded-full bg-blue-600/90 px-4 py-1.5 text-[11px] font-bold text-white shadow-lg backdrop-blur-sm">
+                  +{hiddenCount} đơn hàng khác đang chờ xử lý
+                </div>
+              )}
+              
+              {visibleNotifications.map((notif) => (
                 <div
                   key={notif.id}
-                  className="pointer-events-auto w-[350px] animate-in slide-in-from-right-full duration-500 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md"
+                  className="pointer-events-auto w-[350px] animate-in slide-in-from-bottom-4 fade-in duration-500 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md"
                 >
                   <div className="mb-3 flex items-start justify-between">
                     <div>
@@ -197,14 +205,6 @@ export default function NotificationProvider({
                   </div>
                 </div>
               ))}
-              
-              {notifications.length >= 8 && (
-                <div className="text-center">
-                  <p className="text-[11px] font-medium text-slate-400">
-                    ... và thêm các đơn hàng khác đang chờ
-                  </p>
-                </div>
-              )}
             </div>,
             document.body,
           )
