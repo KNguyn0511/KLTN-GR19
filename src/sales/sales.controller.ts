@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Patch, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SalesService } from './sales.service';
@@ -9,16 +9,11 @@ import { OptionalJwtAuthGuard } from '../users/guards/auth.guard';
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
-  /**
-   * Gắn user từ JWT nếu có Bearer token; không có token thì dùng `userId` trong body (API cũ).
-   */
   @UseGuards(OptionalJwtAuthGuard)
   @Post('checkout')
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Đặt hàng',
-    description:
-      'Có Bearer token: user lấy từ JWT. Không có token: gửi userId trong body như phiên bản trước.',
   })
   async checkout(
     @Req() req: Request & { user?: { id?: string; sub?: string } },
@@ -33,5 +28,32 @@ export class SalesController {
           ? String(bodyId)
           : '';
     return await this.salesService.checkout(userId, checkoutData);
+  }
+
+  @Post('pack-order')
+  async packOrder(@Body() body: { orderId: string, items: { productId: string, serialNumbers: string[] }[] }) {
+    return await this.salesService.packOrder(body.orderId, body);
+  }
+
+  @Post('ship-order')
+  async shipOrder(@Body() body: { orderId: string, carrier: string }) {
+    return await this.salesService.shipOrder(body.orderId, body.carrier);
+  }
+
+  @Post('complete-order')
+  async completeOrder(@Body() body: { orderId: string, force?: boolean }) {
+    return await this.salesService.completeOrder(body.orderId, body.force);
+  }
+
+  @Post('ghn-webhook')
+  async ghnWebhook(@Body() body: any) {
+    console.log('--- RECEIVED GHN WEBHOOK ---');
+    console.log(JSON.stringify(body, null, 2));
+    return await this.salesService.handleGHNWebhook(body);
+  }
+
+  @Post('sync-all-orders')
+  async syncAllOrders() {
+    return await this.salesService.syncAllOrdersWithGHN();
   }
 }

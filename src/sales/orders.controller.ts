@@ -67,4 +67,17 @@ export class OrdersController {
   ) {
     return this.salesService.updateOrderStatus(id, body.status);
   }
+
+  @UseGuards(AuthGuard, AdminDashboardGuard)
+  @Patch(':id/confirm')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Quản trị: xác nhận đơn hàng' })
+  async adminConfirm(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { id?: string; sub?: string } },
+  ) {
+    const u = req.user;
+    const staffId = String(u?.id ?? u?.sub ?? '');
+    return this.salesService.confirmOrder(id, staffId);
+  }
 }

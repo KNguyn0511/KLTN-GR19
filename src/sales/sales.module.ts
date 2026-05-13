@@ -7,6 +7,7 @@ import { OrdersController } from './orders.controller';
 import { Order, OrderSchema } from './schemas/order.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { ProductItem, ProductItemSchema } from '../products/schemas/product-item.schema';
 import { UsersModule } from '../users/users.module';
 import { AdminDashboardGuard } from '../dashboard/guards/admin-dashboard.guard';
 import { Promotion, PromotionSchema } from '../promotions/schemas/promotion.schema';
@@ -24,6 +25,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
       { name: Product.name, schema: ProductSchema },
       { name: User.name, schema: UserSchema },
       { name: Promotion.name, schema: PromotionSchema },
+      { name: ProductItem.name, schema: ProductItemSchema },
     ]),
     UsersModule,
     NotificationsModule,

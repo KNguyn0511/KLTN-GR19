@@ -47,13 +47,15 @@ export class SepayService {
       return;
     }
 
-    if (order.status === 'COMPLETED' || order.status === 'CANCELLED' || order.status === 'PAID') {
+    if (order.status === 'COMPLETED' || order.status === 'CANCELLED') {
       this.logger.log(`Order ${orderCode} is already ${order.status}. Skipping status update.`);
       // Still log the transaction to keep history, but we don't update order status.
     } else if (amount >= order.totalAmount) {
-      // Amount is sufficient, update order status to PAID
-      this.logger.log(`Updating order ${orderCode} status to PAID`);
-      await this.salesService.updateOrderStatus(String(order._id), 'PAID');
+      // ✅ Ghi nhận đã nhận tiền nhưng GIỮ NGUYÊN trạng thái PENDING_CONFIRMATION
+      // Admin vẫn cần xác nhận đơn trước khi đóng gói
+      this.logger.log(`Order ${orderCode} payment received (${amount}). Keeping status at PENDING_CONFIRMATION for Admin review.`);
+      // Đánh dấu đã nhận thanh toán mà không thay đổi trạng thái workflow
+      await this.salesService.markOrderAsPaid(String(order._id));
     } else {
       this.logger.warn(`Amount ${amount} is less than order total ${order.totalAmount}. Order status not updated.`);
     }

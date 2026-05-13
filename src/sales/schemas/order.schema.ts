@@ -11,6 +11,7 @@ export type OrderChannel = (typeof ORDER_CHANNELS)[number];
  */
 export const ORDER_STATUSES = [
   'PENDING_CONFIRMATION',
+  'CONFIRMED',
   'PAID',
   'PACKING',
   'SHIPPING',
@@ -51,6 +52,8 @@ export class Order extends Document {
         productName: { type: String },
         variant: { type: String },
         imageUrl: { type: String },
+        /** Danh sách số Serial cho từng cái trong quantity */
+        serialNumbers: { type: [String], default: [] },
       },
     ],
     default: [],
@@ -62,10 +65,62 @@ export class Order extends Document {
     productName?: string;
     variant?: string;
     imageUrl?: string;
+    serialNumbers?: string[];
   }>;
 
   @Prop({ required: true })
   totalAmount: number;
+
+  @Prop()
+  voucherCode?: string;
+
+  @Prop({ default: 0 })
+  discountAmount: number;
+
+  @Prop({ default: 0 })
+  shippingFee: number;
+
+  @Prop({
+    type: {
+      fullName: { type: String },
+      phone: { type: String },
+      email: { type: String },
+      city: { type: String },
+      district: { type: String },
+      ward: { type: String },
+      addressDetail: { type: String },
+      paymentMethod: { type: String },
+    },
+    default: null,
+  })
+  customerInfo?: {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    district?: string;
+    ward?: string;
+    addressDetail?: string;
+    paymentMethod?: string;
+  };
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  confirmedBy?: Types.ObjectId;
+
+  @Prop({ type: Date })
+  confirmedAt?: Date;
+
+  /** Thời điểm nhận được tiền thanh toán (QR/chuyển khoản). Trạng thái workflow không đổi. */
+  @Prop({ type: Object, default: null })
+  shippingInfo?: {
+    carrier: string;
+    trackingNumber: string;
+    shippedAt: Date;
+    deliveredAt?: Date;
+  };
+
+  @Prop({ type: Date })
+  paidAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
