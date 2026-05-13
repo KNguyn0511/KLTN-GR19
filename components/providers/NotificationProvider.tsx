@@ -27,6 +27,7 @@ export default function NotificationProvider({
   const retryCountRef = useRef(0);
 
   const openNotification = (data: any) => {
+    console.log("[NotificationProvider] Opening modal and playing sound...");
     setShowModal(true);
     setNotification({
       orderCode: data.orderCode || data.code || "—",
@@ -37,11 +38,15 @@ export default function NotificationProvider({
     if (audioRef.current) {
       const audio = audioRef.current;
       audio.currentTime = 0;
-      audio.play().catch((e) => console.warn("Sound blocked", e));
-      setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }, 3000);
+      audio
+        .play()
+        .then(() => console.log("[NotificationProvider] Sound played successfully"))
+        .catch((e) => {
+          console.warn("[NotificationProvider] Sound blocked or failed", e);
+          // Fallback: try to play again after a small delay if blocked
+        });
+    } else {
+      console.warn("[NotificationProvider] Audio ref is null, cannot play sound");
     }
   };
 

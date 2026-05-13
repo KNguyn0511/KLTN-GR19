@@ -109,15 +109,6 @@ export default function SuperAdminPage() {
     );
   }
 
-  const triggerTestNotification = () => {
-    const payload = {
-      orderCode: `TEST-${Date.now()}`,
-      totalPrice: 123456,
-      customerName: "Demo Customer",
-    };
-    console.log('EVENT RECEIVED AT FRONTEND:', payload);
-    toast.success("TEST NOTIFICATION TRIGGERED");
-  };
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -126,13 +117,6 @@ export default function SuperAdminPage() {
           Báo cáo doanh thu toàn hệ thống
         </h1>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={triggerTestNotification}
-            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-          >
-            TEST NOTIFICATION
-          </button>
           {loading && (
             <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden />
           )}
