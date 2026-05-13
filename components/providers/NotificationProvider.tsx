@@ -48,18 +48,28 @@ export default function NotificationProvider({
 
     setNotifications((prev) => [...prev, newNotif]);
 
-    if (audioRef.current) {
-      const audio = audioRef.current;
-      audio.currentTime = 0;
-      audio.play().catch((e) => console.warn("[NotificationProvider] Sound blocked", e));
-      setTimeout(() => {
-        if (audio) {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-      }, 3000);
+    // PHÁT ÂM THANH DÙNG ĐỐI TƯỢNG AUDIO ĐỘNG
+    try {
+      // Tiếng 'Ping' ngắn mã hóa Base64 để đảm bảo luôn có âm thanh kể cả khi file lỗi
+      const BEEP_BASE64 = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT18AZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAABfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f";
+      const audio = new Audio(SOUND_SRC);
+      
+      audio.volume = 1.0;
+      const playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Nếu file mp3 lỗi hoặc bị chặn, thử phát tiếng beep dự phòng
+          const fallbackAudio = new Audio(BEEP_BASE64);
+          fallbackAudio.play().catch(e => console.warn("Audio fully blocked:", e.message));
+        });
+      }
+    } catch (err) {
+      console.error("❌ [Notification] Audio error:", err);
     }
   };
+
+
 
   // Tự động cuộn xuống cuối khi có thông báo mới
   useEffect(() => {
@@ -87,7 +97,12 @@ export default function NotificationProvider({
     };
 
     const path = typeof window !== "undefined" ? window.location.pathname : "";
-    const isAdminArea = path.startsWith("/super-admin") || path.startsWith("/admin");
+    const isAdminArea =
+      path.startsWith("/super-admin") ||
+      path.startsWith("/admin") ||
+      path.startsWith("/store-manager") ||
+      path.startsWith("/staff") ||
+      path.startsWith("/central-warehouse");
 
     if (isAdminArea && adminInfoRaw) {
       try {
@@ -108,7 +123,15 @@ export default function NotificationProvider({
     }
 
     const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "-");
-    const isAuthorized = ["super-admin", "store-manager", "customer", "user"].includes(normalizedRole);
+    const isAuthorized = [
+      "super-admin",
+      "store-manager",
+      "sales-staff",
+      "warehouse-staff",
+      "admin",
+      "customer",
+      "user",
+    ].includes(normalizedRole);
 
     if (!isAuthorized) return;
 

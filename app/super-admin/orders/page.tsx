@@ -215,9 +215,10 @@ export default function SuperAdminOrdersPage() {
       await packOrder(selectedOrder._id, itemsToSubmit);
       toast.success(`Đã đóng gói đơn hàng ${selectedOrder.orderCode}.`);
       setIsPackOpen(false);
-      // Mở tiếp Modal Giao hàng
-      setIsShipOpen(true);
+      // Giữ lại selectedOrder để nếu Admin muốn bấm Giao hàng ngay thì ID vẫn còn đó
       await load();
+
+
     } catch (e) {
       console.error(e);
       toast.error("Lỗi khi đóng gói đơn hàng.");
@@ -255,7 +256,11 @@ export default function SuperAdminOrdersPage() {
   };
 
   const handleShipOrder = async () => {
-    if (!selectedOrder) return;
+    if (!selectedOrder?._id) {
+      toast.error("Lỗi: Không tìm thấy ID đơn hàng hợp lệ.");
+      return;
+    }
+    console.log("🚀 [SHIPPING] Sending request for OrderID:", selectedOrder._id);
     setIsProcessing(true);
     try {
       await shipOrder(selectedOrder._id, selectedCarrier);
@@ -264,6 +269,8 @@ export default function SuperAdminOrdersPage() {
       setSelectedOrder(null);
       await load();
     } catch (e: any) {
+
+
       console.error(e);
       toast.error(e.response?.data?.message || e.message || "Lỗi khi kết nối với bưu cục.");
     } finally {
