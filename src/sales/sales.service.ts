@@ -694,6 +694,7 @@ export class SalesService {
       shippingFee: Number(raw.shippingFee) || 0,
       shippingInfo: raw.shippingInfo || null,
       customerInfo: raw.customerInfo || null,
+      paidAt: raw.paidAt || null,
     };
   }
 
