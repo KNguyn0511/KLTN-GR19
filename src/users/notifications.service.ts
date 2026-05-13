@@ -10,17 +10,21 @@ export class NotificationsService {
   ) {}
 
   async createNotification(data: {
-    userId: Types.ObjectId;
+    userId: any;
     title: string;
     message: string;
-    orderId?: Types.ObjectId;
+    orderId?: any;
     type?: string;
   }) {
+    console.log('--- [DB] CREATING NOTIFICATION FOR:', data.userId);
     const notification = new this.notificationModel({
       ...data,
+      userId: new Types.ObjectId(data.userId.toString()),
       isRead: false,
     });
-    return notification.save();
+    const saved = await notification.save();
+    console.log('--- [DB] NOTIFICATION SAVED! ID:', saved._id);
+    return saved;
   }
 
   async getNotifications(userId: string) {
@@ -32,5 +36,14 @@ export class NotificationsService {
 
   async markAsRead(notificationId: string) {
     return this.notificationModel.findByIdAndUpdate(notificationId, { isRead: true }, { new: true });
+  }
+
+  async markAllAsRead(userId: string) {
+    return this.notificationModel
+      .updateMany(
+        { userId: new Types.ObjectId(userId), isRead: false },
+        { isRead: true }
+      )
+      .exec();
   }
 }

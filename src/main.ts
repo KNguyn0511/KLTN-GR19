@@ -51,3 +51,4 @@ async function bootstrap() {
 }
 
 bootstrap().catch((err) => console.error(err));
+// Force restart to apply order status fixes
