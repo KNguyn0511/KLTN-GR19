@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Bell, Package, Truck, X, RefreshCcw } from "lucide-react";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { OrderFilterBar } from "@/features/super-admin/orders/components/OrderFilterBar";
 import {
@@ -58,7 +59,7 @@ export default function SuperAdminOrdersPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Shipping logic state
-  const [selectedCarrier, setSelectedCarrier] = useState("Giao Hàng Tiết Kiệm (GHTK)");
+  const [selectedCarrier, setSelectedCarrier] = useState("");
 
   // Packing logic state
   const [packingData, setPackingData] = useState<{[key: string]: string[]}>({});
@@ -269,6 +270,12 @@ export default function SuperAdminOrdersPage() {
       setIsProcessing(false);
     }
   };
+
+  const isPackingValid = selectedOrder?.items?.every((item, idx) => {
+    const key = `${item.product}-${idx}`;
+    const assigned = packingData[key] || [];
+    return assigned.length === item.quantity && assigned.every((sn: string) => sn !== "");
+  });
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -629,7 +636,8 @@ export default function SuperAdminOrdersPage() {
               type="button"
               className="bg-green-600 hover:bg-green-700 text-white px-10 font-bold transition-all transform active:scale-95"
               onClick={handlePackOrder}
-              disabled={isProcessing}
+              disabled={isProcessing || !isPackingValid}
+              title={!isPackingValid ? "Vui lòng quét/chọn đủ Serial cho tất cả sản phẩm" : ""}
             >
               {isProcessing ? "Đang xử lý..." : "Hoàn tất đóng gói"}
               {!isProcessing && <Truck className="ml-2 h-4 w-4" />}
@@ -681,17 +689,12 @@ export default function SuperAdminOrdersPage() {
           <DialogFooter className="gap-2">
             <Button
               type="button"
-              variant="ghost"
-              onClick={() => setIsShipOpen(false)}
-              disabled={isProcessing}
-            >
-              Để sau
-            </Button>
-            <Button
-              type="button"
-              className="bg-slate-900 hover:bg-black text-white px-8 font-bold flex-1"
+              className={cn(
+                "bg-slate-900 hover:bg-black text-white px-8 font-bold flex-1 transition-all",
+                (!selectedCarrier || isProcessing) && "opacity-50 cursor-not-allowed"
+              )}
               onClick={handleShipOrder}
-              disabled={isProcessing}
+              disabled={isProcessing || !selectedCarrier}
             >
               {isProcessing ? "Đang kết nối API..." : "Xác nhận & Đẩy đơn"}
             </Button>

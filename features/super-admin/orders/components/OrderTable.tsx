@@ -133,8 +133,9 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                             statusLabel === "Chờ xác nhận",
                           "bg-blue-100 text-blue-700":
                             statusLabel === "Đã xác nhận",
-                          "bg-indigo-100 text-indigo-700":
-                            statusLabel === "Đang đóng gói" ||
+                          "bg-orange-100 text-orange-700 border border-orange-200":
+                            statusLabel === "Đang đóng gói",
+                          "bg-indigo-100 text-indigo-700 border border-indigo-200":
                             statusLabel === "Đang giao hàng",
                           "bg-green-100 text-green-700":
                             statusLabel === "Hoàn thành",
@@ -163,9 +164,9 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                           )}
                           onClick={() => onAdvance(order)}
                         >
-                          {order.status === "PENDING" || order.status === "PENDING_CONFIRMATION" ? "XỬ LÝ" : 
+                          {order.status === "PENDING" || order.status === "PENDING_CONFIRMATION" ? "XÁC NHẬN" : 
                            order.status === "CONFIRMED" ? "ĐÓNG GÓI" :
-                           order.status === "PACKING" ? "GIAO HÀNG" : "HOÀN TẤT"}
+                           order.status === "PACKING" ? "ĐẨY BƯU CỤC" : "HOÀN TẤT"}
                         </Button>
                         
                         {order.status === "SHIPPING" && (

@@ -6,9 +6,11 @@ import { formatDashboardOrderTotal } from "@/features/super-admin/dashboard/util
 function statusPillClass(status: string): string {
   const s = status === "PENDING" ? "PENDING_CONFIRMATION" : status;
   if (s === "COMPLETED") return "bg-green-100 text-green-600";
-  if (s === "PENDING_CONFIRMATION") return "bg-orange-100 text-orange-600";
-  if (s === "SHIPPING") return "bg-blue-100 text-blue-700";
-  if (s === "CANCELLED") return "bg-gray-100 text-gray-600";
+  if (s === "PENDING_CONFIRMATION") return "bg-yellow-100 text-yellow-700";
+  if (s === "CONFIRMED") return "bg-blue-100 text-blue-700";
+  if (s === "PACKING") return "bg-orange-100 text-orange-700";
+  if (s === "SHIPPING") return "bg-indigo-100 text-indigo-700";
+  if (s === "CANCELLED") return "bg-red-100 text-red-700";
   return "bg-slate-100 text-slate-600";
 }
 
