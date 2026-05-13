@@ -129,7 +129,10 @@ export class SalesService {
         (savedOrder as any).customerName || (savedOrder as any).customer?.name || customerName || 'Khách hàng',
     };
 
-    const paymentMethod = data.customerInfo?.paymentMethod || 'COD';
+    const paymentMethod = data.customerInfo?.paymentMethod || data.paymentMethod || 'COD';
+
+    console.log(`[SalesService] checkoutData received paymentMethod: ${paymentMethod}`);
+    console.log(`[SalesService] Full checkout data:`, JSON.stringify(data, null, 2));
 
     if (paymentMethod === 'COD') {
       console.log('Emitting to admin-room...');
