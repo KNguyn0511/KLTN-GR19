@@ -110,6 +110,7 @@ export interface MyOrderApi {
   channel: "ONLINE" | "O2O";
   totalAmount: number;
   items: MyOrderLineApi[];
+  paidAt?: string | null;
 }
 
 function formatOrderDateVi(iso: string): string {

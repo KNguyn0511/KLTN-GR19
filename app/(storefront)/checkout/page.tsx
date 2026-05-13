@@ -98,7 +98,7 @@ export default function CheckoutPage() {
         try {
           const res = await getMyOrders({ t: Date.now() });
           const order = res.orders.find(o => o.orderCode === orderResult.orderId.replace("#", ""));
-          if (order && order.status === 'PAID') {
+          if (order && (order.status === 'PAID' || order.paidAt)) {
             setIsWaitingPayment(false);
             setIsSuccess(true);
             toast.success("Thanh toán thành công!", { autoClose: 3000 });
