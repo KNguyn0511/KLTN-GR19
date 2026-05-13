@@ -6,7 +6,12 @@ export const maxDuration = 60;
 
 const vertex = createVertex({
   googleAuthOptions: {
-    keyFilename: "./nettech-ai-key.json",
+    credentials: {
+      client_email: process.env.GCP_CLIENT_EMAIL,
+      private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    },
+    projectId: process.env.GOOGLE_VERTEX_PROJECT,
+    location: process.env.GOOGLE_VERTEX_LOCATION || "global",
   },
 });
 
@@ -52,7 +57,7 @@ QUY TẮC BẮT BUỘC:
               if (category) params.append("category", category);
               if (budget) params.append("maxPrice", budget.toString());
 
-              const apiUrl = "http://127.0.0.1:3001/products?" + params.toString();
+              const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001"}/products?` + params.toString();
               console.log("TOOL CALL URL:", apiUrl);
               
               const res = await fetch(apiUrl, { cache: "no-store" });
@@ -65,7 +70,7 @@ QUY TẮC BẮT BUỘC:
                 let imageUrl = "http://localhost:3000/images/pink.jpg";
                 if (p.images && p.images.length > 0) {
                   const img = p.images[0];
-                  imageUrl = img.startsWith("http") ? img : "http://localhost:3001/" + img.replace(/^\//, "");
+                  imageUrl = img.startsWith("http") ? img : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/` + img.replace(/^\//, "");
                 }
 
                 const productData = {

@@ -29,6 +29,16 @@ export interface AdminOrderRow {
   voucherCode?: string | null;
   discountAmount?: number;
   shippingFee?: number;
+  customerInfo?: {
+    fullName?: string;
+    phone?: string;
+    email?: string;
+    city?: string;
+    district?: string;
+    ward?: string;
+    addressDetail?: string;
+    paymentMethod?: string;
+  } | null;
 }
 
 export interface AdminOrdersResponse {

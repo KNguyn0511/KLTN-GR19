@@ -219,6 +219,8 @@ export default function CheckoutPage() {
           totalAmount: finalPrice,
           channel: "ONLINE",
           voucherCode: appliedVoucher,
+          discountAmount: totalDiscount,
+          shippingFee: CHECKOUT_FEES.SHIPPING_FEE,
           customerInfo: {
             fullName: data.fullName,
             phone: data.phone,

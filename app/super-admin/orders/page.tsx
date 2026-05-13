@@ -205,15 +205,29 @@ export default function SuperAdminOrdersPage() {
             return (
             <div className="flex flex-col gap-5 py-4">
               {/* Customer Info Mini Card */}
-              <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
-                <div className="flex flex-col">
-                  <span className="text-slate-400 uppercase font-bold">Mã đơn</span>
-                  <span className="font-bold text-blue-600">{selectedOrder.orderCode}</span>
+              <div className="flex flex-col gap-1 border-b border-slate-100 pb-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-slate-400 uppercase font-bold">Mã đơn</span>
+                    <span className="font-bold text-blue-600">{selectedOrder.orderCode}</span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-slate-400 uppercase font-bold text-right">Khách hàng</span>
+                    <span className="font-semibold text-slate-800">{selectedOrder.customerName}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-slate-400 uppercase font-bold text-right">Khách hàng</span>
-                  <span className="font-semibold text-slate-800">{selectedOrder.customerName}</span>
-                </div>
+                {selectedOrder.customerInfo && (
+                  <div className="mt-1 flex flex-col gap-0.5 text-slate-600">
+                    {selectedOrder.customerInfo.phone && (
+                      <span>📞 {selectedOrder.customerInfo.phone}</span>
+                    )}
+                    {selectedOrder.customerInfo.addressDetail && (
+                      <span className="text-[10px] text-slate-500">
+                        📍 {selectedOrder.customerInfo.addressDetail}, {selectedOrder.customerInfo.ward}, {selectedOrder.customerInfo.district}, {selectedOrder.customerInfo.city}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 1. Product List (TOP) */}
