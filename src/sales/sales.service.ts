@@ -508,6 +508,7 @@ export class SalesService {
       channel: raw.channel === 'O2O' ? 'O2O' : 'ONLINE',
       totalAmount: Number(raw.totalAmount) || 0,
       items,
+      paidAt: raw.paidAt || null,
     };
   }
 
