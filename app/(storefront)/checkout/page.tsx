@@ -97,7 +97,9 @@ export default function CheckoutPage() {
       interval = setInterval(async () => {
         try {
           const res = await getMyOrders({ t: Date.now() });
-          const order = res.orders.find(o => o.orderCode === orderResult.orderId.replace("#", ""));
+          const order = res.orders.find(o => 
+            o.orderCode && o.orderCode.replace(/^#/, "") === orderResult.orderId.replace(/^#/, "")
+          );
           if (order && (order.status === 'PAID' || order.paidAt)) {
             setIsWaitingPayment(false);
             setIsSuccess(true);
