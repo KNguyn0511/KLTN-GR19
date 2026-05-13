@@ -338,47 +338,37 @@ export class ProductsService {
     // 1. Xóa sạch
     await this.productRepository.clearAllItems();
 
-    // 2. Lấy 1 chi nhánh mặc định để gán locationId (cho đúng mẫu data sếp gửi)
-    let defaultLocationId: any = null;
-    try {
-      // Giả sử có module branches, nếu không có ta sẽ để null
-      // Ở đây tôi sẽ thử tìm trong DB xem có branch nào không
-      const branches = await (this as any).categoriesService.findAllRaw ? [] : []; 
-      // Tạm thời hardcode hoặc lấy từ env nếu cần, nhưng tốt nhất là lấy cái đầu tiên trong DB
-    } catch(e) {}
-
-    // 3. Lấy tất cả sản phẩm
+    // 2. Lấy tất cả sản phẩm
     const allProducts = await this.productRepository.findAllRaw();
-    let totalItemsCreated = 0;
+    const allItemsToInsert: any[] = [];
 
     for (const product of allProducts) {
       const stock = product.totalStock || 0;
       if (stock > 0) {
-        const items = [];
         for (let i = 1; i <= stock; i++) {
           const skuClean = (product.sku || 'PROD').replace(/\s+/g, '-');
-          items.push({
+          allItemsToInsert.push({
             productId: product._id,
-            serialNumber: `SN-${skuClean}-${String(i).padStart(3, '0')}`, // Bỏ phần random cho đẹp như mẫu
+            serialNumber: `SN-${skuClean}-${String(i).padStart(3, '0')}`,
             status: 'In Stock',
             importPrice: product.importPrice || Math.round(product.price * 0.75),
             importDate: new Date(),
-            // Nếu bạn có ID chi nhánh cụ thể, hãy thay vào đây
             locationId: new Types.ObjectId('65af10000000000000000001'), 
           });
-        }
-        if (items.length > 0) {
-          await this.productRepository.insertManyItems(items);
-          totalItemsCreated += items.length;
         }
       }
     }
 
-    console.log(`[ProductsService] Sync complete! Created ${totalItemsCreated} items.`);
+    // 3. Lưu toàn bộ mảng khủng vào DB trong 1 nốt nhạc
+    if (allItemsToInsert.length > 0) {
+      await this.productRepository.insertManyItems(allItemsToInsert);
+    }
+
+    console.log(`[ProductsService] Sync complete! Created ${allItemsToInsert.length} items.`);
     return {
       message: 'Đồng bộ mã Series thành công!',
       totalProducts: allProducts.length,
-      totalItemsCreated,
+      totalItemsCreated: allItemsToInsert.length,
     };
   }
 
@@ -388,7 +378,7 @@ export class ProductsService {
     count: number,
     importPrice: number,
   ) {
-    const items = [];
+    const items: any[] = [];
     const skuClean = (sku || 'PROD').replace(/\s+/g, '-');
     for (let i = 1; i <= count; i++) {
       items.push({
