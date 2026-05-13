@@ -4,17 +4,28 @@ import { z } from "zod";
 
 export const maxDuration = 60;
 
-const vertex = createVertex({
-  project: process.env.GOOGLE_VERTEX_PROJECT,
-  location: process.env.GOOGLE_VERTEX_LOCATION || "global",
-  googleAuthOptions: {
+const getAuthOptions = () => {
+  if (process.env.GCP_SERVICE_ACCOUNT_JSON) {
+    try {
+      return { credentials: JSON.parse(process.env.GCP_SERVICE_ACCOUNT_JSON) };
+    } catch (e) {
+      console.error("Failed to parse GCP_SERVICE_ACCOUNT_JSON:", e);
+    }
+  }
+  return {
     credentials: {
       client_email: process.env.GCP_CLIENT_EMAIL,
       private_key: process.env.GCP_PRIVATE_KEY
         ? process.env.GCP_PRIVATE_KEY.replace(/\\n/g, "\n").replace(/"/g, "").trim()
         : undefined,
     },
-  },
+  };
+};
+
+const vertex = createVertex({
+  project: process.env.GOOGLE_VERTEX_PROJECT,
+  location: process.env.GOOGLE_VERTEX_LOCATION || "global",
+  googleAuthOptions: getAuthOptions(),
 });
 
 export async function POST(req: Request) {
