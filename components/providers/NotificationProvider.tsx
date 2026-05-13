@@ -8,9 +8,11 @@ const SOUND_SRC = "/sounds/notification.mp3";
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
 
 export type NotificationPayload = {
+  id: string;
   orderCode: string;
   totalPrice: number;
   customerName: string;
+  timestamp: Date;
 };
 
 export default function NotificationProvider({
@@ -19,20 +21,32 @@ export default function NotificationProvider({
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [notification, setNotification] = useState<NotificationPayload | null>(null);
+  const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const retryTimerRef = useRef<number | null>(null);
   const retryCountRef = useRef(0);
 
+  const removeNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   const openNotification = (data: any) => {
-    console.log("[NotificationProvider] Opening modal and playing sound...");
-    setShowModal(true);
-    setNotification({
+    console.log("[NotificationProvider] Adding new notification to stack...");
+    
+    const newId = `${data.orderCode || "ORDER"}-${Date.now()}`;
+    const newNotif: NotificationPayload = {
+      id: newId,
       orderCode: data.orderCode || data.code || "—",
       totalPrice: Number(data.totalPrice || data.totalAmount || 0),
       customerName: data.customerName || data.customer?.name || "Khách hàng",
+      timestamp: new Date(),
+    };
+
+    setNotifications((prev) => {
+      // Giữ tối đa 5 thông báo mới nhất để tránh tràn màn hình
+      const updated = [newNotif, ...prev].slice(0, 8);
+      return updated;
     });
 
     if (audioRef.current) {
@@ -42,7 +56,7 @@ export default function NotificationProvider({
         .play()
         .then(() => {
           console.log("[NotificationProvider] Sound played successfully");
-          // Chỉ cho phép chạy 3 giây rồi ngắt (vì âm thanh gốc dài 6s)
+          // Tự động ngắt sau 3s nếu cần
           setTimeout(() => {
             if (audio) {
               audio.pause();
@@ -50,44 +64,26 @@ export default function NotificationProvider({
             }
           }, 3000);
         })
-        .catch((e) => {
-          console.warn("[NotificationProvider] Sound blocked or failed", e);
-        });
-    } else {
-      console.warn("[NotificationProvider] Audio ref is null, cannot play sound");
+        .catch((e) => console.warn("[NotificationProvider] Sound blocked", e));
     }
   };
 
   const connectSocket = () => {
     if (socketRef.current) return;
 
-    console.log("[NotificationProvider] runtime SOCKET_URL =", SOCKET_URL);
-    console.log(
-      "[NotificationProvider] runtime NEXT_PUBLIC_SOCKET_URL =",
-      process.env.NEXT_PUBLIC_SOCKET_URL,
-    );
-
     const adminInfoRaw = localStorage.getItem("admin_info");
-    console.log("DEBUG: Current admin_info from storage:", adminInfoRaw);
-
     let userRole = "";
     if (adminInfoRaw) {
       try {
-        const parsed = JSON.parse(adminInfoRaw) as {
-          role?: string;
-          user?: { role?: string };
-        };
+        const parsed = JSON.parse(adminInfoRaw);
         userRole = parsed.role || parsed.user?.role || "";
       } catch (e) {
         console.error("Failed to parse admin_info", e);
       }
     }
 
-    console.log("DEBUG: Detected Role is:", userRole);
-
     const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "-");
     if (normalizedRole !== "super-admin" && normalizedRole !== "store-manager") {
-      console.log("Role not authorized");
       return;
     }
 
@@ -101,27 +97,11 @@ export default function NotificationProvider({
     });
 
     socketRef.current = socket;
-    (window as any).socket = socket;
-    console.log("--- SOCKET FORCED TO WINDOW ---", socket);
-    console.log("!!! WINDOW.SOCKET HAS BEEN ASSIGNED:", (window as any).socket);
-
+    
     socket.on("connect", () => {
-      (window as any).socket = socket;
-      console.log("SOCKET CONNECTED SUCCESSFULLY! ID:", socket.id);
+      console.log("SOCKET CONNECTED! ID:", socket.id);
     });
-    socket.on("connect_error", (err) => {
-      console.error("SOCKET CONNECTION ERROR:", err);
-      console.error("[NotificationProvider] connect_error details:", {
-        url: SOCKET_URL,
-        transport: socket.io?.engine?.transport?.name,
-      });
-    });
-    socket.on("disconnect", (reason) => {
-      console.warn("[NotificationProvider] socket disconnected:", reason);
-    });
-    socket.on("reconnect", (attempt) => {
-      console.log("[NotificationProvider] socket reconnect attempt:", attempt);
-    });
+    
     socket.on("NEW_ORDER_RECEIVED", (data) => {
       console.log("[NotificationProvider] NEW_ORDER_RECEIVED:", data);
       openNotification(data);
@@ -130,15 +110,11 @@ export default function NotificationProvider({
 
   useEffect(() => {
     setMounted(true);
-
     const tryConnect = () => {
       if (socketRef.current) return;
       const adminInfoRaw = localStorage.getItem("admin_info");
       if (!adminInfoRaw) {
         retryCountRef.current += 1;
-        console.log(
-          `[NotificationProvider] admin_info not ready, retry ${retryCountRef.current}/10`,
-        );
         if (retryCountRef.current <= 10) {
           retryTimerRef.current = window.setTimeout(tryConnect, 500);
         }
@@ -151,7 +127,6 @@ export default function NotificationProvider({
 
     const handleStorage = (e: StorageEvent) => {
       if (e.key === "admin_info" && !socketRef.current && e.newValue) {
-        console.log("[NotificationProvider] admin_info appeared in storage, connecting...");
         connectSocket();
       }
     };
@@ -160,9 +135,7 @@ export default function NotificationProvider({
 
     return () => {
       window.removeEventListener("storage", handleStorage);
-      if (retryTimerRef.current) {
-        window.clearTimeout(retryTimerRef.current);
-      }
+      if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current);
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
@@ -172,50 +145,66 @@ export default function NotificationProvider({
     <>
       <audio ref={audioRef} src={SOUND_SRC} preload="auto" />
       {children}
-      {mounted && showModal && notification && typeof document !== "undefined"
+      {mounted && notifications.length > 0 && typeof document !== "undefined"
         ? createPortal(
-            <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 px-4 backdrop-blur-md">
-              <div className="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900 p-6 text-white shadow-2xl shadow-black/40">
-                <div className="mb-4">
-                  <p className="text-sm uppercase tracking-[0.24em] text-blue-300">
-                    BẠN CÓ ĐƠN HÀNG MỚI!
-                  </p>
-                  <h2 className="mt-2 text-2xl font-bold">Thông báo đơn hàng</h2>
-                </div>
-
-                <div className="space-y-3 rounded-xl bg-slate-800/70 p-4 text-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Order Code</span>
-                    <span className="font-semibold text-white">{notification.orderCode}</span>
+            <div className="pointer-events-none fixed right-4 bottom-4 z-[99999] flex flex-col gap-3 sm:right-6 sm:bottom-6">
+              {notifications.map((notif) => (
+                <div
+                  key={notif.id}
+                  className="pointer-events-auto w-[350px] animate-in slide-in-from-right-full duration-500 overflow-hidden rounded-xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md"
+                >
+                  <div className="mb-3 flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
+                        ĐƠN HÀNG MỚI
+                      </p>
+                      <h4 className="mt-1 font-bold text-white">#{notif.orderCode}</h4>
+                    </div>
+                    <button
+                      onClick={() => removeNotification(notif.id)}
+                      className="rounded-lg p-1 text-slate-400 hover:bg-white/10 hover:text-white"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Amount</span>
-                    <span className="font-semibold text-emerald-400">
-                      {notification.totalPrice.toLocaleString("vi-VN")} ₫
+
+                  <div className="space-y-2 rounded-lg bg-white/5 p-3 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Khách hàng:</span>
+                      <span className="font-medium">{notif.customerName}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Tổng tiền:</span>
+                      <span className="font-bold text-emerald-400">
+                        {notif.totalPrice.toLocaleString("vi-VN")} ₫
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500">
+                      {notif.timestamp.toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-slate-400">Customer</span>
-                    <span className="font-semibold text-white">{notification.customerName}</span>
+                    <a
+                      href={`/super-admin/orders?search=${notif.orderCode}`}
+                      className="rounded-lg bg-blue-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-blue-500"
+                      onClick={() => removeNotification(notif.id)}
+                    >
+                      Chi tiết
+                    </a>
                   </div>
                 </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Close
-                  </button>
-                  <a
-                    href="/super-admin/orders"
-                    className="rounded-xl bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-blue-500"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Go to Orders
-                  </a>
+              ))}
+              
+              {notifications.length >= 8 && (
+                <div className="text-center">
+                  <p className="text-[11px] font-medium text-slate-400">
+                    ... và thêm các đơn hàng khác đang chờ
+                  </p>
                 </div>
-              </div>
+              )}
             </div>,
             document.body,
           )
