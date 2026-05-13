@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useChatStore } from "@/store/useChatStore";
 import { useChat } from "@ai-sdk/react";
 import { UIMessage } from "ai";
+import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useCartStore } from "@/store/useCartStore";
@@ -40,6 +41,7 @@ export const AIChatBox = () => {
   const { user } = useAuthStore();
   const currentUserId = user?.id || "guest";
   const { histories, setHistory } = useChatStore();
+  const router = useRouter();
   const { addItem } = useCartStore();
 
   const handleAddToCart = async (urlStr: string) => {
@@ -213,16 +215,19 @@ export const AIChatBox = () => {
                           );
                         }
 
-                        // Case 2: Internal product links (use Next.js Link)
+                        // Case 2: Internal product links (use router.push)
                         if (href.includes("/products/")) {
                           const relativePath = href.split("/products/")[1];
                           return (
-                            <Link
-                              href={`/products/${relativePath}`}
-                              className="font-medium text-blue-600 hover:underline"
+                            <span
+                              className="font-medium text-blue-600 hover:underline cursor-pointer"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                router.push(`/products/${relativePath}`);
+                              }}
                             >
                               {props.children}
-                            </Link>
+                            </span>
                           );
                         }
 
