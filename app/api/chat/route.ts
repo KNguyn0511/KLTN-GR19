@@ -10,7 +10,9 @@ const vertex = createVertex({
   googleAuthOptions: {
     credentials: {
       client_email: process.env.GCP_CLIENT_EMAIL,
-      private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+      private_key: process.env.GCP_PRIVATE_KEY
+        ? process.env.GCP_PRIVATE_KEY.replace(/\\n/g, "\n").replace(/^"(.*)"$/, "$1")
+        : undefined,
     },
   },
 });
