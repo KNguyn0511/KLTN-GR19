@@ -161,7 +161,7 @@ export class SalesService {
     const sf = statusFilter?.trim().toUpperCase();
     if (
       sf &&
-      ['PENDING_CONFIRMATION', 'SHIPPING', 'COMPLETED', 'CANCELLED'].includes(
+      ['PENDING_CONFIRMATION', 'PAID', 'SHIPPING', 'COMPLETED', 'CANCELLED'].includes(
         sf,
       )
     ) {
@@ -182,6 +182,10 @@ export class SalesService {
       .exec();
 
     return { orders: rows.map((doc) => this.mapOrderDoc(doc)) };
+  }
+
+  async findOrderByCode(orderCode: string) {
+    return this.orderModel.findOne({ orderCode }).lean().exec();
   }
 
   private mapOrderDoc(raw: any) {
@@ -378,6 +382,7 @@ export class SalesService {
     }
     const allowed = new Set([
       'PENDING_CONFIRMATION',
+      'PAID',
       'PACKING',
       'SHIPPING',
       'COMPLETED',

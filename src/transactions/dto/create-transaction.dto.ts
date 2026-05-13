@@ -1,5 +1,5 @@
 import { IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { PaymentMethod, TransactionType } from '../schemas/transaction.schema';
+import { PaymentMethod, TransactionType, TransactionStatus } from '../schemas/transaction.schema';
 
 export class CreateTransactionDto {
   @IsMongoId()
@@ -26,4 +26,15 @@ export class CreateTransactionDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  @IsOptional()
+  @IsEnum(TransactionStatus)
+  status?: TransactionStatus;
+
+  @IsOptional()
+  gatewayResponse?: any;
+
+  @IsOptional()
+  @IsString()
+  providerTransactionId?: string;
 }
