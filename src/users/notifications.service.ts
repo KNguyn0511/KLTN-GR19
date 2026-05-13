@@ -16,13 +16,40 @@ export class NotificationsService {
     orderId?: any;
     type?: string;
   }) {
-    console.log('--- [DB] CREATING NOTIFICATION FOR:', data.userId);
+    // Kiểm tra và ép kiểu an toàn cho userId và orderId
+    let validUserId: Types.ObjectId | null = null;
+    let validOrderId: Types.ObjectId | null = null;
+
+    try {
+      // Nếu userId là object (do populate), lấy _id của nó, nếu không dùng trực tiếp
+      const rawUserId = data.userId?._id ? data.userId._id.toString() : data.userId?.toString();
+      if (rawUserId && Types.ObjectId.isValid(rawUserId)) {
+        validUserId = new Types.ObjectId(rawUserId);
+      }
+
+      const rawOrderId = data.orderId?._id ? data.orderId._id.toString() : data.orderId?.toString();
+      if (rawOrderId && Types.ObjectId.isValid(rawOrderId)) {
+        validOrderId = new Types.ObjectId(rawOrderId);
+      }
+    } catch (e) {
+      console.warn('--- [DB] ID CAST ERROR:', e.message);
+    }
+
+    if (!validUserId) {
+      console.warn('--- [DB] SKIPPING NOTIFICATION: No valid userId');
+      return null;
+    }
+
     const notification = new this.notificationModel({
       ...data,
-      userId: new Types.ObjectId(data.userId.toString()),
+      userId: validUserId,
+      orderId: validOrderId,
       isRead: false,
     });
     const saved = await notification.save();
+
+
+
     console.log('--- [DB] NOTIFICATION SAVED! ID:', saved._id);
     return saved;
   }

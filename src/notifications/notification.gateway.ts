@@ -28,10 +28,19 @@ export class NotificationGateway
 
     console.log(`--- [SOCKET CONNECT] ROLE: ${normalizedRole}, USERID: ${userId} ---`);
 
-    if (normalizedRole === 'super-admin' || normalizedRole === 'store-manager') {
+    const isAdmin = [
+      'super-admin',
+      'store-manager',
+      'sales-staff',
+      'warehouse-staff',
+      'admin',
+    ].includes(normalizedRole);
+
+    if (isAdmin) {
       client.join('admin-room');
-      console.log('--- [SOCKET] ADMIN JOINED ADMIN-ROOM ---', client.id);
+      console.log(`--- [SOCKET] ADMIN/STAFF (${normalizedRole}) JOINED ADMIN-ROOM ---`, client.id);
     } else if (normalizedRole === 'customer' && userId) {
+
       const roomName = userId.toString();
       client.join(roomName);
       console.log(`--- [SOCKET] CUSTOMER ${roomName} JOINED ROOM ---`, client.id);

@@ -142,13 +142,11 @@ export class SalesService {
     console.log(`[SalesService] checkoutData received paymentMethod: ${paymentMethod}`);
     console.log(`[SalesService] Full checkout data:`, JSON.stringify(data, null, 2));
 
-    if (paymentMethod === 'COD') {
-      console.log('Emitting to admin-room...');
-      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
-      console.log('Order event emitted for:', payload.orderCode);
-    } else {
-      console.log(`Skipping order event emission. Payment method is ${paymentMethod}, waiting for payment confirmation.`);
-    }
+    // Luôn gửi thông báo cho admin khi có đơn hàng mới, bất kể phương thức thanh toán
+    console.log('Emitting to admin-room...');
+    this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+    console.log('Order event emitted for:', payload.orderCode);
+
 
     // 2. ✅ BƯỚC THẦN THÁNH: Tăng số lượng voucher đã dùng lên 1
     if (data.voucherCode) {
@@ -254,13 +252,17 @@ export class SalesService {
     order.status = 'PACKING';
     const savedOrder = await order.save();
 
-    // Gửi thông báo cho khách hàng
-    await this.notificationsService.createNotification({
-      userId: savedOrder.user as any,
-      title: 'Đơn hàng đã đóng gói 📦',
-      message: `Đơn hàng #${savedOrder.orderCode || savedOrder._id} đã được đóng gói xong và đang chờ bàn giao cho đơn vị vận chuyển.`,
-      type: 'ORDER_UPDATE',
-    });
+    // Gửi thông báo cho khách hàng (Nếu có user)
+    if (savedOrder.user) {
+      await this.notificationsService.createNotification({
+        userId: savedOrder.user as any,
+        title: 'Đơn hàng đã đóng gói 📦',
+        message: `Đơn hàng #${savedOrder.orderCode || savedOrder._id} đã được đóng gói xong và đang chờ bàn giao cho đơn vị vận chuyển.`,
+        orderId: savedOrder._id,
+        type: 'ORDER_UPDATE',
+      });
+    }
+
 
     return savedOrder;
   }
@@ -269,6 +271,8 @@ export class SalesService {
   async shipOrder(orderId: string, carrier: string) {
     const order = await this.orderModel.findById(orderId).populate('user');
     if (!order) throw new Error('Không tìm thấy đơn hàng');
+
+
 
     // Bây giờ hệ thống chỉ hỗ trợ duy nhất GHN
     try {
@@ -331,13 +335,15 @@ export class SalesService {
 
       await order.save();
 
-      // 4. Thông báo khách hàng
-      await this.notificationsService.createNotification({
-        userId: order.user as any,
-        title: 'Hàng đã được gửi đi!',
-        message: `Đơn hàng #${order.orderCode} đã được bàn giao cho GHN. Mã vận đơn: ${trackingNumber}.`,
-        type: 'ORDER_UPDATE',
-      });
+      // 4. Thông báo khách hàng (Chỉ gửi nếu có user)
+      if (order.user) {
+        await this.notificationsService.createNotification({
+          userId: order.user as any,
+          title: 'Hàng đã được gửi đi!',
+          message: `Đơn hàng #${order.orderCode} đã được bàn giao cho GHN. Mã vận đơn: ${trackingNumber}.`,
+          type: 'ORDER_UPDATE',
+        });
+      }
 
       return { success: true, trackingNumber };
 
