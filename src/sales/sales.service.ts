@@ -129,9 +129,15 @@ export class SalesService {
         (savedOrder as any).customerName || (savedOrder as any).customer?.name || customerName || 'Khách hàng',
     };
 
-    console.log('Emitting to admin-room...');
-    this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
-    console.log('Order event emitted for:', payload.orderCode);
+    const paymentMethod = data.customerInfo?.paymentMethod || 'COD';
+
+    if (paymentMethod === 'COD') {
+      console.log('Emitting to admin-room...');
+      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+      console.log('Order event emitted for:', payload.orderCode);
+    } else {
+      console.log(`Skipping order event emission. Payment method is ${paymentMethod}, waiting for payment confirmation.`);
+    }
 
     // 2. ✅ BƯỚC THẦN THÁNH: Tăng số lượng voucher đã dùng lên 1
     if (data.voucherCode) {
@@ -147,6 +153,23 @@ export class SalesService {
     }
 
     return savedOrder;
+  }
+
+  async emitOrderNotification(orderId: string) {
+    try {
+      const order = await this.orderModel.findById(orderId).populate('user', 'fullName').lean().exec();
+      if (!order) return;
+      const customerName = (order as any).user?.fullName || 'Khách hàng';
+      const payload = {
+        orderCode: (order as any).orderCode || 'N/A',
+        totalPrice: order.totalAmount || 0,
+        customerName: customerName,
+      };
+      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+      console.log('Order event emitted for (from emitOrderNotification):', payload.orderCode);
+    } catch (err) {
+      console.error('Failed to emit order notification:', err);
+    }
   }
 
   async findMyOrders(userId: string, statusFilter?: string) {

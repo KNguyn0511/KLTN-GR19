@@ -54,6 +54,7 @@ export class SepayService {
       // Amount is sufficient, update order status to PAID
       this.logger.log(`Updating order ${orderCode} status to PAID`);
       await this.salesService.updateOrderStatus(String(order._id), 'PAID');
+      await this.salesService.emitOrderNotification(String(order._id));
     } else {
       this.logger.warn(`Amount ${amount} is less than order total ${order.totalAmount}. Order status not updated.`);
     }
