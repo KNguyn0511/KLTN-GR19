@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Pencil, Lock, Unlock, Loader2 } from "lucide-react";
+import { Pencil, Lock, Unlock, Loader2, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Product,

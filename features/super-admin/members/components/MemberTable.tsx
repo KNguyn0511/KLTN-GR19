@@ -1,6 +1,6 @@
 "use client";
 
-import { Star, Circle, Loader2 } from "lucide-react";
+import { Star, Circle, Loader2, Users } from "lucide-react";
 import Link from "next/link";
 import { Member } from "@/lib/api/memberApi";
 
