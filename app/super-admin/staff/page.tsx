@@ -24,12 +24,17 @@ export default function SuperAdminStaffPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Quản lý Nhân sự & Phân quyền (RBAC)
-        </h1>
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Nhân sự & Phân quyền
+          </h1>
+          <p className="text-sm font-medium text-slate-500">
+            Quản lý đội ngũ nhân viên, vai trò truy cập và quyền hạn hệ thống (RBAC)
+          </p>
+        </div>
       </div>
 
       {/* Truyền hàm onOpenAdd xuống FilterBar */}

@@ -8,26 +8,31 @@ export function InventoryHeader(props: {
   const { onImport, onAudit } = props;
 
   return (
-    <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-      <h1 className="text-2xl font-bold text-slate-800">
-        Quản lý Kho hàng Toàn hệ thống
-      </h1>
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between pb-6 border-b border-slate-100">
+      <div>
+        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+          Quản lý Kho hàng
+        </h1>
+        <p className="text-sm font-medium text-slate-500">
+          Theo dõi tồn kho, nhập hàng và kiểm kê toàn hệ thống chi nhánh
+        </p>
+      </div>
       <div className="flex items-center gap-3">
         <Button
           type="button"
           variant="outline"
-          className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
+          className="group flex items-center gap-2 rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95"
           onClick={onImport}
         >
-          <Import className="mr-2 h-4 w-4 text-blue-600" />
+          <Import className="h-3.5 w-3.5 text-blue-600 transition-transform group-hover:-translate-y-0.5" />
           Nhập kho
         </Button>
         <Button
           type="button"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+          className="group flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 active:scale-95"
           onClick={onAudit}
         >
-          <ClipboardCheck className="mr-2 h-4 w-4 text-yellow-300" />
+          <ClipboardCheck className="h-3.5 w-3.5 text-amber-400" />
           Kiểm kê
         </Button>
       </div>

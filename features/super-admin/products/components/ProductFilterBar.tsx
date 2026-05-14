@@ -10,29 +10,23 @@ export function ProductFilterBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // 1. Quản lý trạng thái search cục bộ để gõ cho mượt (không bị lag khi fetch data)
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
 
-  // 2. Hàm cập nhật URL Params (Trái tim của phần lọc)
   const updateQuery = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     
-    if (value) {
+    if (value && value !== "all") {
       params.set(key, value);
     } else {
       params.delete(key);
     }
     
-    // Luôn reset về trang 1 khi thực hiện lọc/tìm kiếm mới
     params.set("page", "1"); 
-    
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  // 3. Logic DEBOUNCE: Đợi người dùng ngừng gõ 500ms mới cập nhật URL
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      // Chỉ cập nhật nếu giá trị search thực sự thay đổi so với URL hiện tại
       if (searchTerm !== (searchParams.get("search") || "")) {
         updateQuery("search", searchTerm);
       }
@@ -41,28 +35,35 @@ export function ProductFilterBar() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    router.push(pathname);
+  };
+
+  const hasFilters = searchParams.toString().length > 0;
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl bg-white p-4 shadow-sm md:flex-row md:items-center">
-      {/* Ô tìm kiếm */}
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+    <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:flex-row md:items-center">
+      {/* Search Input */}
+      <div className="relative flex-1 group">
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
         <Input
           type="text"
-          placeholder="Tìm theo tên, SKU..."
+          placeholder="Tìm kiếm theo tên hoặc SKU..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm text-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-xl border-none bg-slate-50 py-2.5 pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-50/50 focus:shadow-sm"
         />
       </div>
       
-      {/* Bộ lọc Dropdown */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        {/* Lọc danh mục */}
-        <div className="relative">
+      {/* Filters Container */}
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Category Select */}
+        <div className="relative group">
           <select 
             onChange={(e) => updateQuery("category", e.target.value)}
             defaultValue={searchParams.get("category") || ""}
-            className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-4 pr-10 text-sm text-slate-700 focus:border-blue-500 focus:outline-none sm:w-auto"
+            className="h-10 min-w-[160px] appearance-none rounded-xl border-none bg-slate-50 pl-4 pr-10 text-xs font-bold text-slate-600 outline-none transition-all hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-50/50"
           >
             <option value="">Danh mục: Tất cả</option>
             <option value="cpu">Vi xử lý (CPU)</option>
@@ -70,37 +71,46 @@ export function ProductFilterBar() {
             <option value="laptop">Laptop</option>
             <option value="vga">Card đồ họa (VGA)</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 pointer-events-none text-slate-500" />
+          <ChevronDown className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-slate-600" />
         </div>
 
-        {/* Lọc thương hiệu */}
-        <div className="relative">
+        {/* Brand Select */}
+        <div className="relative group">
           <select 
              onChange={(e) => updateQuery("brand", e.target.value)}
              defaultValue={searchParams.get("brand") || ""}
-             className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-4 pr-10 text-sm text-slate-700 focus:border-blue-500 focus:outline-none sm:w-auto"
+             className="h-10 min-w-[140px] appearance-none rounded-xl border-none bg-slate-50 pl-4 pr-10 text-xs font-bold text-slate-600 outline-none transition-all hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-50/50"
           >
             <option value="">Thương hiệu</option>
             <option value="intel">Intel</option>
             <option value="asus">Asus</option>
             <option value="dell">Dell</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 pointer-events-none text-slate-500" />
+          <ChevronDown className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-slate-600" />
         </div>
 
-        {/* Lọc trạng thái */}
-        <div className="relative">
+        {/* Status Select */}
+        <div className="relative group">
           <select 
             onChange={(e) => updateQuery("isActive", e.target.value)}
             defaultValue={searchParams.get("isActive") || "all"}
-            className="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-4 pr-10 text-sm text-slate-700 focus:border-blue-500 focus:outline-none sm:w-auto"
+            className="h-10 min-w-[140px] appearance-none rounded-xl border-none bg-slate-50 pl-4 pr-10 text-xs font-bold text-slate-600 outline-none transition-all hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-50/50"
           >
             <option value="all">Trạng thái: Tất cả</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
+            <option value="true">Đang hiển thị</option>
+            <option value="false">Đang ẩn</option>
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 pointer-events-none text-slate-500" />
+          <ChevronDown className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-slate-600" />
         </div>
+
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="h-10 px-4 text-xs font-black text-rose-500 hover:text-rose-600 transition-colors"
+          >
+            XÓA LỌC
+          </button>
+        )}
       </div>
     </div>
   );

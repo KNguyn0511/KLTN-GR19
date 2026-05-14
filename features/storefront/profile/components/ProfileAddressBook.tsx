@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { addressApi, UserAddress } from "@/features/storefront/address/api/addressApi";
 import { AddressFormModal } from "@/features/storefront/address/components/AddressFormModal";
 import { Button } from "@/components/ui/button";
+import { MapPin, Phone, User, Edit3, Trash2, Plus, CheckCircle2, Home, Briefcase, Navigation, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const ProfileAddressBook = () => {
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -15,9 +17,12 @@ export const ProfileAddressBook = () => {
 
   const fetchAddresses = async () => {
     setIsLoading(true);
-    const data = await addressApi.getSavedAddresses();
-    setAddresses(data);
-    setIsLoading(false);
+    try {
+      const data = await addressApi.getSavedAddresses();
+      setAddresses(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -57,58 +62,118 @@ export const ProfileAddressBook = () => {
   };
 
   return (
-    <div className="flex w-full flex-col rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+    <div className="flex w-full flex-col gap-8">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-100 p-5 md:p-8">
-        <h1 className="text-[20px] font-bold text-heading">Địa Chỉ Của Tôi</h1>
-        <Button onClick={handleOpenAdd} className="h-10 px-4 text-[14px] font-bold text-white shadow-sm">+ Thêm địa chỉ mới</Button>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">Sổ địa chỉ</h1>
+          <p className="text-sm font-medium text-slate-400">Quản lý các địa chỉ nhận hàng của bạn</p>
+        </div>
+        <Button 
+          onClick={handleOpenAdd} 
+          className="group h-11 rounded-2xl bg-blue-600 px-6 text-[13px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-100 transition-all hover:bg-blue-700 hover:shadow-blue-200 active:scale-95"
+        >
+          <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
+          Thêm mới
+        </Button>
       </div>
 
       {/* List */}
-      <div className="flex flex-col p-5 md:p-8 pt-0 md:pt-0">
+      <div className="grid gap-6">
         {isLoading ? (
-          <div className="py-10 text-center text-gray-500">Đang tải dữ liệu...</div>
+          <div className="flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+            <span className="mt-4 text-sm font-black uppercase tracking-widest">Đang tải địa chỉ...</span>
+          </div>
         ) : addresses.length === 0 ? (
-          <div className="py-10 text-center text-gray-500">Bạn chưa lưu địa chỉ nào.</div>
+          <div className="flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-200">
+              <MapPin className="h-10 w-10" />
+            </div>
+            <span className="mt-4 text-sm font-black uppercase tracking-widest">Chưa có địa chỉ nào</span>
+            <p className="mt-1 text-[13px] font-medium text-slate-400">Vui lòng thêm địa chỉ để nhận hàng nhanh hơn!</p>
+          </div>
         ) : (
-          addresses.map((addr, idx) => (
-            <div key={addr.id} className={`flex flex-col gap-4 md:flex-row md:items-start md:justify-between py-6 ${idx !== 0 ? 'border-t border-gray-100' : ''}`}>
+          addresses.map((addr) => (
+            <div 
+              key={addr.id} 
+              className={cn(
+                "group relative flex flex-col gap-6 rounded-3xl border p-6 transition-all duration-300 md:flex-row md:items-start md:justify-between",
+                addr.isDefault 
+                  ? "border-blue-100 bg-blue-50/30 shadow-[0_8px_30px_rgb(59,130,246,0.08)]" 
+                  : "border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)]"
+              )}
+            >
               {/* Address Content */}
-              <div className="flex flex-col gap-1.5 flex-1 pr-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[15px] font-bold text-heading border-r border-gray-300 pr-2">{addr.fullName}</span>
-                  <span className="text-[14px] text-gray-500 font-medium">{"(+84) " + (addr.phone.startsWith("0") ? addr.phone.substring(1) : addr.phone)}</span>
+              <div className="flex flex-1 items-start gap-5">
+                <div className={cn(
+                  "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-colors",
+                  addr.isDefault ? "bg-blue-600 text-white shadow-lg shadow-blue-100" : "bg-slate-50 text-slate-400 group-hover:bg-white group-hover:text-blue-600"
+                )}>
+                  {addr.addressDetail.toLowerCase().includes("văn phòng") || addr.addressDetail.toLowerCase().includes("công ty") 
+                    ? <Briefcase className="h-6 w-6" /> 
+                    : <Home className="h-6 w-6" />
+                  }
                 </div>
-                <span className="text-[14px] text-gray-600 leading-snug">{addr.addressDetail}</span>
-                <span className="text-[14px] text-gray-600 leading-snug">{addr.ward}, {addr.district}, {addr.city}</span>
 
-                {addr.isDefault && (
-                  <div className="mt-2 w-fit rounded-[4px] border border-destructive bg-white px-2 py-0.5 text-[12px] font-medium text-destructive">
-                    Mặc định
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-base font-black text-slate-800">{addr.fullName}</span>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-400">
+                      <Phone className="h-3.5 w-3.5" />
+                      {"(+84) " + (addr.phone.startsWith("0") ? addr.phone.substring(1) : addr.phone)}
+                    </span>
+                    {addr.isDefault && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-tighter text-white shadow-sm">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Mặc định
+                      </span>
+                    )}
                   </div>
-                )}
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-start gap-2">
+                      <Navigation className="mt-1 h-3.5 w-3.5 shrink-0 text-slate-300" />
+                      <span className="text-sm font-medium leading-relaxed text-slate-600">{addr.addressDetail}</span>
+                    </div>
+                    <span className="ml-5 text-sm font-bold text-slate-400">
+                      {addr.ward}, {addr.district}, {addr.city}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              {/* Actions Right */}
-              <div className="flex flex-col md:items-end gap-3 mt-2 md:mt-0 md:w-32 shrink-0">
-                <div className="flex items-center gap-3">
-                  <Button onClick={() => handleOpenEdit(addr)} className="text-[14px] font-medium text-primary hover:underline">
-                    Cập nhật
-                  </Button>
-                  <Button onClick={() => handleDelete(addr.id)} className="text-[14px] font-medium text-destructive hover:underline">
-                    Xóa
-                  </Button>
-                </div>
-
+              {/* Actions */}
+              <div className="flex items-center gap-2 self-end md:self-start">
                 {!addr.isDefault && (
                   <Button 
-                    variant="outline" 
                     onClick={() => handleSetDefault(addr.id)} 
-                    className="h-8 md:h-9 text-[13px] border-gray-200 text-gray-600 font-medium bg-white hover:bg-gray-50 px-3 w-fit md:w-full"
+                    variant="outline"
+                    className="h-10 rounded-xl border-slate-200 px-4 text-[11px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50"
                   >
-                    Thiết lập mặc định
+                    Mặc định
                   </Button>
                 )}
+                <div className="flex h-10 items-center gap-1 rounded-xl bg-slate-50 p-1 group-hover:bg-white/50">
+                  <Button 
+                    onClick={() => handleOpenEdit(addr)} 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600"
+                    title="Chỉnh sửa"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    onClick={() => handleDelete(addr.id)} 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"
+                    title="Xóa"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))

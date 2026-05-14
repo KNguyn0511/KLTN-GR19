@@ -7,13 +7,19 @@ import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { MemberFilterBar } from "@/features/super-admin/members/components/MemberFilterBar";
 import { MemberTable } from "@/features/super-admin/members/components/MemberTable";
 import { getMembers, getMemberStats, Member, MemberStats } from "@/lib/api/memberApi";
+import { Pagination } from "@/components/shared/Pagination";
+import { usePathname, useRouter } from "next/navigation";
 
 function SuperAdminMembersContent() {
   const searchParams = useSearchParams();
 
   const [members, setMembers] = useState<Member[]>([]);
   const [stats, setStats] = useState<MemberStats | null>(null);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Lấy params từ URL (Đã bổ sung lấy status)
   const page = Number(searchParams.get("page")) || 1;
@@ -37,6 +43,7 @@ function SuperAdminMembersContent() {
       ]);
       setStats(statsData);
       setMembers(listData.data);
+      setTotalItems(listData.pagination?.totalItems || 0);
     } catch (error) {
       console.error("Lỗi fetch dữ liệu Member:", error);
     } finally {
@@ -50,12 +57,17 @@ function SuperAdminMembersContent() {
   }, [page, search, tier, status]); // <-- Khi đổi status thì tự fetch lại data
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Danh sách Khách hàng Thành viên
-        </h1>
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Khách hàng Thành viên
+          </h1>
+          <p className="text-sm font-medium text-slate-500">
+            Quản lý thông tin hội viên, hạng thẻ và lịch sử chi tiêu
+          </p>
+        </div>
       </div>
 
       {/* Cards Row */}
@@ -92,7 +104,18 @@ function SuperAdminMembersContent() {
       <MemberFilterBar />
 
       {/* Data Table */}
-      <MemberTable data={members} isLoading={loading} />
+      <MemberTable data={members} isLoading={loading}>
+        <Pagination 
+          currentPage={page}
+          totalItems={totalItems}
+          itemsPerPage={10}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", newPage.toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+        />
+      </MemberTable>
     </div>
   );
 }

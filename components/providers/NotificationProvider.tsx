@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { io, type Socket } from "socket.io-client";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 const SOUND_SRC = "/sounds/notification.mp3";
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
@@ -20,6 +21,7 @@ export default function NotificationProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { fetchNotifications } = useNotificationStore();
   const [mounted, setMounted] = useState(false);
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -46,18 +48,28 @@ export default function NotificationProvider({
 
     setNotifications((prev) => [...prev, newNotif]);
 
-    if (audioRef.current) {
-      const audio = audioRef.current;
-      audio.currentTime = 0;
-      audio.play().catch((e) => console.warn("[NotificationProvider] Sound blocked", e));
-      setTimeout(() => {
-        if (audio) {
-          audio.pause();
-          audio.currentTime = 0;
-        }
-      }, 3000);
+    // PHÁT ÂM THANH DÙNG ĐỐI TƯỢNG AUDIO ĐỘNG
+    try {
+      // Tiếng 'Ping' ngắn mã hóa Base64 để đảm bảo luôn có âm thanh kể cả khi file lỗi
+      const BEEP_BASE64 = "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YTdvT18AZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAABfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f";
+      const audio = new Audio(SOUND_SRC);
+      
+      audio.volume = 1.0;
+      const playPromise = audio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Nếu file mp3 lỗi hoặc bị chặn, thử phát tiếng beep dự phòng
+          const fallbackAudio = new Audio(BEEP_BASE64);
+          fallbackAudio.play().catch(e => console.warn("Audio fully blocked:", e.message));
+        });
+      }
+    } catch (err) {
+      console.error("❌ [Notification] Audio error:", err);
     }
   };
+
+
 
   // Tự động cuộn xuống cuối khi có thông báo mới
   useEffect(() => {
@@ -71,36 +83,98 @@ export default function NotificationProvider({
 
   const connectSocket = () => {
     if (socketRef.current) return;
+
     const adminInfoRaw = localStorage.getItem("admin_info");
+    const authStorageRaw = localStorage.getItem("auth-storage");
+    
     let userRole = "";
-    if (adminInfoRaw) {
+    let token = "";
+    let userId = "";
+
+    const getUserId = (obj: any) => {
+      if (!obj) return "";
+      return obj.id || obj._id || obj.userId || obj.user?.id || obj.user?._id || obj.user?.userId || "";
+    };
+
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    const isAdminArea =
+      path.startsWith("/super-admin") ||
+      path.startsWith("/admin") ||
+      path.startsWith("/store-manager") ||
+      path.startsWith("/staff") ||
+      path.startsWith("/central-warehouse");
+
+    if (isAdminArea && adminInfoRaw) {
       try {
         const parsed = JSON.parse(adminInfoRaw);
-        userRole = parsed.role || parsed.user?.role || "";
+        userId = getUserId(parsed);
+        userRole = parsed.role || parsed.user?.role || "super-admin";
+        token = localStorage.getItem("admin_token") || "";
       } catch (e) {
         console.error("Failed to parse admin_info", e);
       }
+    } else if (authStorageRaw) {
+      try {
+        const parsed = JSON.parse(authStorageRaw);
+        userId = getUserId(parsed.state) || getUserId(parsed.state?.user);
+        userRole = parsed.state?.user?.role || "customer";
+        token = parsed.state?.access_token || "";
+      } catch (e) {}
     }
+
     const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "-");
-    if (normalizedRole !== "super-admin" && normalizedRole !== "store-manager") return;
+    const isAuthorized = [
+      "super-admin",
+      "store-manager",
+      "sales-staff",
+      "warehouse-staff",
+      "admin",
+      "customer",
+      "user",
+    ].includes(normalizedRole);
+
+    if (!isAuthorized) return;
+
+    if (userId && normalizedRole === "customer") fetchNotifications(userId);
 
     const socket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
-      auth: { role: normalizedRole, token: localStorage.getItem("admin_token") },
+      auth: { role: normalizedRole, token, userId },
+      query: { userId, role: normalizedRole },
       withCredentials: true,
     });
 
     socketRef.current = socket;
-    socket.on("NEW_ORDER_RECEIVED", (data) => openNotification(data));
+
+    socket.on("connect", () => {
+      console.log("SOCKET CONNECTED! ID:", socket.id);
+    });
+
+    socket.on("NEW_ORDER_RECEIVED", (data) => {
+      console.log("🔔 [ADMIN] NEW ORDER EVENT RECEIVED!!", data);
+      openNotification(data);
+    });
+
+    socket.on("NOTIFICATION_RECEIVED", (data) => {
+      console.log("REAL-TIME NOTIFICATION RECEIVED:", data);
+      if (userId) {
+        fetchNotifications(userId);
+      }
+    });
   };
 
   useEffect(() => {
     setMounted(true);
     const tryConnect = () => {
       if (socketRef.current) return;
-      if (!localStorage.getItem("admin_info")) {
-        retryCountRef.current += 1;
-        if (retryCountRef.current <= 10) retryTimerRef.current = window.setTimeout(tryConnect, 500);
+      const adminInfoRaw = localStorage.getItem("admin_info");
+      const authStorageRaw = localStorage.getItem("auth-storage");
+      
+      if (!adminInfoRaw && !authStorageRaw) {
+        if (retryCountRef.current < 10) {
+          retryCountRef.current += 1;
+          retryTimerRef.current = window.setTimeout(tryConnect, 1000);
+        }
         return;
       }
       connectSocket();

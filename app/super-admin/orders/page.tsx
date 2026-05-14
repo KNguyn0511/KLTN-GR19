@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Bell, Package, Truck, X, RefreshCcw } from "lucide-react";
 import { toast } from "react-toastify";
+import { cn } from "@/lib/utils";
 import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { OrderFilterBar } from "@/features/super-admin/orders/components/OrderFilterBar";
 import {
@@ -11,6 +12,7 @@ import {
   nextApiStatus,
   getPaymentMethodBadge,
 } from "@/features/super-admin/orders/components/OrderTable";
+import { Pagination } from "@/components/shared/Pagination";
 import {
   fetchAdminOrders,
   patchOrderStatus,
@@ -41,12 +43,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function SuperAdminOrdersPage() {
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+function OrdersPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [tab, setTab] = useState<AdminOrderTab>("all");
   const [channel, setChannel] = useState<AdminOrderChannel>("all");
-  const [date, setDate] = useState<AdminOrderDate>("today");
+  const [date, setDate] = useState<AdminOrderDate>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  const page = Number(searchParams.get("page")) || 1;
+  const [total, setTotal] = useState(0);
 
   const [stats, setStats] = useState<AdminOrderStats | null>(null);
   const [orders, setOrders] = useState<AdminOrderRow[]>([]);
@@ -59,7 +70,7 @@ export default function SuperAdminOrdersPage() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Shipping logic state
-  const [selectedCarrier, setSelectedCarrier] = useState("Giao Hàng Tiết Kiệm (GHTK)");
+  const [selectedCarrier, setSelectedCarrier] = useState("");
 
   // Packing logic state
   const [packingData, setPackingData] = useState<{[key: string]: string[]}>({});
@@ -76,16 +87,19 @@ export default function SuperAdminOrdersPage() {
         channel,
         date,
         q: debouncedSearch,
+        page,
+        limit: 10,
       });
       setStats(data.stats);
       setOrders(data.orders);
+      setTotal(data.total);
     } catch (e) {
       console.error(e);
       toast.error("Không tải được danh sách đơn (cần quyền Super Admin).");
       setStats(null);
       setOrders([]);
     }
-  }, [tab, channel, date, debouncedSearch]);
+  }, [tab, channel, date, debouncedSearch, page]);
 
   useEffect(() => {
     void load();
@@ -215,9 +229,10 @@ export default function SuperAdminOrdersPage() {
       await packOrder(selectedOrder._id, itemsToSubmit);
       toast.success(`Đã đóng gói đơn hàng ${selectedOrder.orderCode}.`);
       setIsPackOpen(false);
-      // Mở tiếp Modal Giao hàng
-      setIsShipOpen(true);
+      // Giữ lại selectedOrder để nếu Admin muốn bấm Giao hàng ngay thì ID vẫn còn đó
       await load();
+
+
     } catch (e) {
       console.error(e);
       toast.error("Lỗi khi đóng gói đơn hàng.");
@@ -255,7 +270,11 @@ export default function SuperAdminOrdersPage() {
   };
 
   const handleShipOrder = async () => {
-    if (!selectedOrder) return;
+    if (!selectedOrder?._id) {
+      toast.error("Lỗi: Không tìm thấy ID đơn hàng hợp lệ.");
+      return;
+    }
+    console.log("🚀 [SHIPPING] Sending request for OrderID:", selectedOrder._id);
     setIsProcessing(true);
     try {
       await shipOrder(selectedOrder._id, selectedCarrier);
@@ -264,6 +283,8 @@ export default function SuperAdminOrdersPage() {
       setSelectedOrder(null);
       await load();
     } catch (e: any) {
+
+
       console.error(e);
       toast.error(e.response?.data?.message || e.message || "Lỗi khi kết nối với bưu cục.");
     } finally {
@@ -271,30 +292,41 @@ export default function SuperAdminOrdersPage() {
     }
   };
 
+  const isPackingValid = selectedOrder?.items?.every((item, idx) => {
+    const key = `${item.product}-${idx}`;
+    const assigned = packingData[key] || [];
+    return assigned.length === item.quantity && assigned.every((sn: string) => sn !== "");
+  });
+
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Quản lý đơn hàng (O2O Fulfillment)
-        </h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Quản lý đơn hàng
+          </h1>
+          <p className="text-sm font-medium text-slate-500">
+            Hệ thống xử lý đơn hàng O2O Fulfillment & Vận chuyển
+          </p>
+        </div>
+        <div className="flex gap-3">
           <Button
             type="button"
-            className="flex items-center gap-2 rounded-md border border-[#F27024] px-4 py-2 text-sm font-semibold text-[#F27024] transition-colors hover:bg-orange-50"
+            className="group flex items-center gap-2 rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95"
             onClick={handleSyncAll}
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <RefreshCcw className="h-4 w-4 animate-spin" />
+              <RefreshCcw className="h-3.5 w-3.5 animate-spin text-blue-600" />
             ) : (
-              <RefreshCcw className="h-4 w-4" />
+              <RefreshCcw className="h-3.5 w-3.5 text-[#F27024]" />
             )}
             ĐỒNG BỘ BƯU CỤC
           </Button>
           <Button
             type="button"
-            className="flex items-center gap-2 rounded-md border border-green-600 px-4 py-2 text-sm font-semibold text-green-600 transition-colors hover:bg-green-50"
+            className="group flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 active:scale-95"
             onClick={() =>
               console.log("[XUẤT EXCEL] filters:", {
                 tab,
@@ -305,7 +337,7 @@ export default function SuperAdminOrdersPage() {
             }
           >
             XUẤT EXCEL
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -367,7 +399,18 @@ export default function SuperAdminOrdersPage() {
       />
 
       {/* Data Table */}
-      <OrderTable orders={orders} onAdvance={handleAdvance} />
+      <OrderTable orders={orders || []} onAdvance={handleAdvance}>
+        <Pagination 
+          currentPage={page}
+          totalItems={total || 0}
+          itemsPerPage={10}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", newPage.toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+        />
+      </OrderTable>
 
       {/* Confirmation Modal */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
@@ -633,7 +676,8 @@ export default function SuperAdminOrdersPage() {
               type="button"
               className="bg-green-600 hover:bg-green-700 text-white px-10 font-bold transition-all transform active:scale-95"
               onClick={handlePackOrder}
-              disabled={isProcessing}
+              disabled={isProcessing || !isPackingValid}
+              title={!isPackingValid ? "Vui lòng quét/chọn đủ Serial cho tất cả sản phẩm" : ""}
             >
               {isProcessing ? "Đang xử lý..." : "Hoàn tất đóng gói"}
               {!isProcessing && <Truck className="ml-2 h-4 w-4" />}
@@ -685,17 +729,12 @@ export default function SuperAdminOrdersPage() {
           <DialogFooter className="gap-2">
             <Button
               type="button"
-              variant="ghost"
-              onClick={() => setIsShipOpen(false)}
-              disabled={isProcessing}
-            >
-              Để sau
-            </Button>
-            <Button
-              type="button"
-              className="bg-slate-900 hover:bg-black text-white px-8 font-bold flex-1"
+              className={cn(
+                "bg-slate-900 hover:bg-black text-white px-8 font-bold flex-1 transition-all",
+                (!selectedCarrier || isProcessing) && "opacity-50 cursor-not-allowed"
+              )}
               onClick={handleShipOrder}
-              disabled={isProcessing}
+              disabled={isProcessing || !selectedCarrier}
             >
               {isProcessing ? "Đang kết nối API..." : "Xác nhận & Đẩy đơn"}
             </Button>
@@ -703,5 +742,13 @@ export default function SuperAdminOrdersPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function SuperAdminOrdersPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Đang tải quản lý đơn hàng...</div>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

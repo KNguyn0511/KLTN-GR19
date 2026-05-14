@@ -5,7 +5,7 @@ import { homeCategories } from "@/features/storefront/home/utils/category";
 
 const CategoryFilter = () => {
   return (
-    <div className="mt-6 flex gap-3 overflow-x-auto pb-4 pt-2 sm:gap-4 lg:mt-7 [&::-webkit-scrollbar]:hidden">
+    <div className="mt-8 flex gap-4 overflow-x-auto pb-6 pt-2 [&::-webkit-scrollbar]:hidden">
       {homeCategories.map((item) => (
         <Link
           key={item.id}
@@ -13,15 +13,15 @@ const CategoryFilter = () => {
           className="group shrink-0"
           aria-label={`Xem danh mục ${item.name}`}
         >
-          <div className="flex w-[72px] flex-col items-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:border-primary/45 sm:w-[84px]">
-            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-slate-100 sm:h-9 sm:w-9">
+          <div className="flex w-[80px] flex-col items-center gap-3 rounded-2xl border border-white/40 bg-white/60 p-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:bg-white hover:shadow-[0_12px_24px_rgba(59,130,246,0.12)] sm:w-[96px] sm:p-4">
+            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 shadow-inner sm:h-12 sm:w-12 transition-transform group-hover:scale-110">
               <img
                 src={item.imageUrl}
                 alt={item.name}
-                className="h-full w-full object-cover object-center"
+                className="h-8 w-8 object-contain transition-transform duration-500 group-hover:rotate-6 sm:h-10 sm:w-10"
               />
             </div>
-            <span className="line-clamp-2 text-center text-[10px] font-semibold text-gray-700 group-hover:text-primary sm:text-[11px]">
+            <span className="line-clamp-1 text-center text-[10px] font-black uppercase tracking-tight text-slate-600 transition-colors group-hover:text-blue-600 sm:text-[11px]">
               {item.name}
             </span>
           </div>

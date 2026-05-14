@@ -12,12 +12,12 @@ export function InventoryFilterBar(props: {
   const { branch, onBranchChange, searchValue, onSearchChange } = props;
 
   return (
-    <div className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-sm md:flex-row md:items-center">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+    <div className="flex flex-col gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 md:flex-row md:items-center justify-between">
+      <div className="relative flex-1 group">
+        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-blue-500" />
         <Input
           placeholder="Tìm SKU, Tên SP..."
-          className="pl-9 h-10 w-full md:max-w-md bg-slate-50 border-slate-200"
+          className="w-full max-w-lg rounded-xl border-none bg-slate-50 py-2.5 pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-blue-50/50 focus:shadow-sm"
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
         />
@@ -28,14 +28,14 @@ export function InventoryFilterBar(props: {
           value={branch}
           onValueChange={(v) => onBranchChange(v as InventoryBranch)}
         >
-          <SelectTrigger className="w-[200px] h-10 bg-slate-50 border-slate-200">
+          <SelectTrigger className="h-11 min-w-[220px] rounded-xl border-none bg-slate-50 px-4 text-[11px] font-black uppercase tracking-wider text-slate-600 outline-none transition-all hover:bg-slate-100 focus:bg-white focus:ring-2 focus:ring-blue-50/50">
             <SelectValue placeholder="Chọn kho" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Kho: Tất cả chi nhánh</SelectItem>
-            <SelectItem value="q5">Chi nhánh Quận 5</SelectItem>
-            <SelectItem value="q1">Chi nhánh Quận 1</SelectItem>
-            <SelectItem value="q10">Chi nhánh Quận 10</SelectItem>
+          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+            <SelectItem value="all" className="text-xs font-bold uppercase tracking-tight">Kho: Tất cả chi nhánh</SelectItem>
+            <SelectItem value="q5" className="text-xs font-bold uppercase tracking-tight">Chi nhánh Quận 5</SelectItem>
+            <SelectItem value="q1" className="text-xs font-bold uppercase tracking-tight">Chi nhánh Quận 1</SelectItem>
+            <SelectItem value="q10" className="text-xs font-bold uppercase tracking-tight">Chi nhánh Quận 10</SelectItem>
           </SelectContent>
         </Select>
       </div>

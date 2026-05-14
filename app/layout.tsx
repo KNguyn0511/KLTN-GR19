@@ -6,6 +6,7 @@ import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import { CartProvider } from "@/features/storefront/cart/context/CartContext";
 import AuthProvider from "@/features/auth/components/AuthProvider";
+import NotificationProvider from "@/components/providers/NotificationProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +35,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <AuthProvider>
-          <CartProvider>
-            {children}
-          </CartProvider>
+          <NotificationProvider>
+            <CartProvider>
+              {children}
+            </CartProvider>
+          </NotificationProvider>
         </AuthProvider>
         <ToastContainer />
       </body>
