@@ -48,6 +48,8 @@ const CountdownTimer = ({ targetDate }: { targetDate: Date }) => {
 const PromotionsPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [promotions, setPromotions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Set target date for countdown (e.g., end of today)
   const [targetDate] = useState(() => {
@@ -56,11 +58,45 @@ const PromotionsPage = () => {
     return date;
   });
 
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      setLoading(true);
+      try {
+        const { getPromotions } = await import("@/lib/api/promotionApi");
+        const data = await getPromotions();
+        setPromotions(data);
+      } catch (error) {
+        console.error("Failed to fetch promotions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPromotions();
+  }, []);
+
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
+  };
+
+  const activePromotions = promotions.filter(p => {
+    if (!p.isActive) return false;
+    
+    // Check if expired
+    const now = new Date();
+    const endDate = new Date(p.endDate);
+    if (now > endDate) return false;
+    
+    // Check if usage limit reached
+    if (p.usageLimit > 0 && p.usedCount >= p.usageLimit) return false;
+
+    return true;
+  });
 
   return (
     <main className="px-4 py-4 md:px-8 md:py-6 lg:px-12 xl:px-16 lg:py-7.5">
@@ -158,86 +194,97 @@ const PromotionsPage = () => {
       </div>
 
       {/* Deals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        {/* Card 1: 20% OFF */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow">
-          <div className="bg-blue-100 p-8 flex flex-col items-center justify-center text-center relative h-48">
-            <span className="absolute top-4 left-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md">
-              HOT DEAL
-            </span>
-            <h3 className="text-4xl font-bold text-blue-900">20% OFF</h3>
-          </div>
-          <div className="p-6 flex flex-col grow">
-            <h4 className="text-lg font-bold text-gray-900 mb-2">Giảm 20% Đơn Đầu Tiên</h4>
-            <p className="text-sm text-gray-500 mb-6 line-clamp-2">Tối đa 50k cho khách hàng mới.</p>
-            
-            <div className="mt-auto">
-              <div className="flex items-center justify-between border-2 border-dashed border-gray-200 bg-gray-50 rounded-xl p-3 mb-4">
-                <span className="font-bold tracking-wider text-gray-800">CHAOBANMOI</span>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleCopy("CHAOBANMOI")}
-                  className="text-blue-600 font-bold hover:text-blue-700 hover:bg-blue-50/50"
-                >
-                  {copiedCode === "CHAOBANMOI" ? "ĐÃ COPY" : "COPY"}
-                </Button>
-              </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-6 rounded-xl">
-                Dùng Ngay
-              </Button>
-            </div>
-          </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-48 text-gray-500 font-medium">
+          Đang tải danh sách khuyến mãi...
         </div>
-
-        {/* Card 2: FREESHIP */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow">
-          <div className="bg-green-100 p-8 flex flex-col items-center justify-center text-center relative h-48">
-            <span className="absolute top-4 left-4 bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-md">
-              TOÀN QUỐC
-            </span>
-            <h3 className="text-4xl font-bold text-emerald-800">FREESHIP</h3>
-          </div>
-          <div className="p-6 flex flex-col grow">
-            <h4 className="text-lg font-bold text-gray-900 mb-2">Miễn Phí Vận Chuyển</h4>
-            <p className="text-sm text-gray-500 mb-6 line-clamp-2">Đơn từ 500k. Áp dụng toàn sàn.</p>
-            
-            <div className="mt-auto">
-              <div className="flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl p-3 mb-4 font-medium text-sm border-2 border-transparent">
-                Tự động áp dụng
-              </div>
-              <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-6 rounded-xl">
-                Mua Ngay
-              </Button>
-            </div>
-          </div>
+      ) : activePromotions.length === 0 ? (
+        <div className="flex justify-center items-center h-48 text-gray-500 font-medium">
+          Hiện tại chưa có khuyến mãi nào.
         </div>
-
-        {/* Card 3: MUA 1 TẶNG 1 */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow">
-          <div className="bg-pink-100 p-8 flex flex-col items-center justify-center text-center relative h-48">
-            <span className="absolute top-4 left-4 bg-pink-600 text-white text-xs font-bold px-3 py-1 rounded-md">
-              QUÀ TẶNG HOT
-            </span>
-            <h3 className="text-3xl font-bold text-pink-800">MUA 1 TẶNG 1</h3>
-          </div>
-          <div className="p-6 flex flex-col grow">
-            <h4 className="text-lg font-bold text-gray-900 mb-2">Tặng Chuột Gaming</h4>
-            <p className="text-sm text-gray-500 mb-6 line-clamp-2">Khi mua Laptop Gaming Asus ROG.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {activePromotions.map((promo) => {
+            const isFreeship = promo.code.toLowerCase().includes('ship') || promo.description.toLowerCase().includes('vận chuyển');
+            const isGift = promo.code.toLowerCase().includes('tang') || promo.description.toLowerCase().includes('tặng');
             
-            <div className="mt-auto">
-              <div className="flex items-center justify-center gap-2 border border-orange-200 bg-orange-50/50 text-orange-600 rounded-xl p-3 mb-4 font-semibold text-sm">
-                <Gift className="w-4 h-4" /> Gift: Logitech G102
-              </div>
-              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-6 rounded-xl">
-                Xem Sản Phẩm
-              </Button>
-            </div>
-          </div>
-        </div>
+            // Dynamic styling logic based on content
+            let theme = {
+              badgeBg: "bg-red-500",
+              badgeText: "HOT DEAL",
+              cardBg: "bg-blue-100",
+              titleColor: "text-blue-900",
+              titleIcon: null as React.ReactNode,
+              mainTitle: promo.discountType === 'Percentage' ? `${promo.discountValue}% OFF` : `GIẢM ${promo.discountValue / 1000}K`,
+              buttonColor: "bg-blue-600 hover:bg-blue-700",
+            };
 
-      </div>
+            if (isFreeship) {
+              theme = {
+                badgeBg: "bg-emerald-600",
+                badgeText: "TOÀN QUỐC",
+                cardBg: "bg-green-100",
+                titleColor: "text-emerald-800",
+                titleIcon: <Truck className="w-8 h-8 mb-2" />,
+                mainTitle: "FREESHIP",
+                buttonColor: "bg-emerald-500 hover:bg-emerald-600",
+              };
+            } else if (isGift) {
+              theme = {
+                badgeBg: "bg-pink-600",
+                badgeText: "QUÀ TẶNG HOT",
+                cardBg: "bg-pink-100",
+                titleColor: "text-pink-800",
+                titleIcon: <Gift className="w-8 h-8 mb-2" />,
+                mainTitle: "QUÀ TẶNG",
+                buttonColor: "bg-orange-500 hover:bg-orange-600",
+              };
+            }
+
+            return (
+              <div key={promo._id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full hover:shadow-md transition-shadow">
+                <div className={`${theme.cardBg} p-8 flex flex-col items-center justify-center text-center relative h-48`}>
+                  <span className={`absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-md ${theme.badgeBg}`}>
+                    {theme.badgeText}
+                  </span>
+                  {theme.titleIcon}
+                  <h3 className={`text-4xl font-bold ${theme.titleColor}`}>{theme.mainTitle}</h3>
+                </div>
+                <div className="p-6 flex flex-col grow">
+                  <h4 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{promo.description}</h4>
+                  <p className="text-sm text-gray-500 mb-6 line-clamp-2">
+                    {promo.minOrderValue > 0 ? `Đơn từ ${formatCurrency(promo.minOrderValue)}.` : "Áp dụng toàn sàn."}
+                    {promo.maxDiscount > 0 && ` Tối đa ${formatCurrency(promo.maxDiscount)}.`}
+                  </p>
+                  
+                  <div className="mt-auto">
+                    {isFreeship ? (
+                      <div className="flex items-center justify-center bg-gray-100 text-gray-500 rounded-xl p-3 mb-4 font-medium text-sm border-2 border-transparent">
+                        Tự động áp dụng
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between border-2 border-dashed border-gray-200 bg-gray-50 rounded-xl p-3 mb-4">
+                        <span className="font-bold tracking-wider text-gray-800 uppercase">{promo.code}</span>
+                        <Button 
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopy(promo.code)}
+                          className="text-blue-600 font-bold hover:text-blue-700 hover:bg-blue-50/50"
+                        >
+                          {copiedCode === promo.code ? "ĐÃ COPY" : "COPY"}
+                        </Button>
+                      </div>
+                    )}
+                    <Button className={`w-full text-white font-semibold py-6 rounded-xl ${theme.buttonColor}`}>
+                      Dùng Ngay
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </main>
   );
 };
