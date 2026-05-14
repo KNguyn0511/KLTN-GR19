@@ -129,13 +129,26 @@ export function OrderTable({ orders, onAdvance, children }: OrderTableProps) {
                           {order.customerName}
                         </span>
                         {order.status === "SHIPPING" || order.status === "COMPLETED" ? (
-                          <div className="flex items-center gap-2">
-                            <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tighter text-blue-600 ring-1 ring-blue-100">
-                              {order.shippingInfo?.carrier || "N/A"}
-                            </span>
-                            <span className="text-[10px] font-mono font-medium text-slate-400">
-                              {order.shippingInfo?.trackingNumber}
-                            </span>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-tighter text-blue-600 ring-1 ring-blue-100">
+                                {order.shippingInfo?.carrier || "N/A"}
+                              </span>
+                              <span className="text-[10px] font-mono font-medium text-slate-400">
+                                {order.shippingInfo?.trackingNumber}
+                              </span>
+                            </div>
+                            {order.shippingInfo?.trackingNumber && (
+                              <a 
+                                href={`https://tracking.ghn.dev/?order_code=${order.shippingInfo.trackingNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] font-black text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 uppercase tracking-tighter"
+                              >
+                                Theo dõi đơn hàng
+                                <Globe className="h-2.5 w-2.5" />
+                              </a>
+                            )}
                           </div>
                         ) : (
                           <span className="text-[10px] font-medium italic text-slate-300">Chờ vận chuyển</span>
