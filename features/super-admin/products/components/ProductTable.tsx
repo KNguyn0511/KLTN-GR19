@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Pencil, Lock, Unlock, Loader2 } from "lucide-react";
+import { Pencil, Lock, Unlock, Loader2, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Product,
@@ -141,32 +141,34 @@ export function ProductTable({ data, isLoading, onRefresh }: ProductTableProps) 
 
   return (
     <>
-      <div className="relative min-h-[400px] rounded-xl bg-white shadow-sm">
+      <div className="relative min-h-[400px] rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
             <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           </div>
         )}
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50 text-xs tracking-wider text-slate-500 uppercase">
-                <th className="px-6 py-4 font-semibold">SẢN PHẨM</th>
-                <th className="px-6 py-4 font-semibold">DANH MỤC</th>
-                <th className="px-6 py-4 font-semibold">GIÁ BÁN</th>
-                <th className="px-6 py-4 font-semibold">TỒN KHO</th>
-                <th className="px-6 py-4 font-semibold">
-                  THÔNG SỐ BUILD PC (AI)
-                </th>
-                <th className="px-6 py-4 text-right font-semibold">HÀNH ĐỘNG</th>
+              <tr className="border-b border-slate-50 bg-slate-50/50 text-[11px] font-black tracking-widest text-slate-400 uppercase">
+                <th className="px-0 w-1"></th>
+                <th className="px-6 py-5">SẢN PHẨM</th>
+                <th className="px-6 py-5">DANH MỤC</th>
+                <th className="px-6 py-5">GIÁ BÁN</th>
+                <th className="px-6 py-5">TỒN KHO</th>
+                <th className="px-6 py-5">THÔNG SỐ (AI)</th>
+                <th className="px-6 py-5 text-right">HÀNH ĐỘNG</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-50">
               {data.length === 0 && !isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
-                    Không tìm thấy sản phẩm nào.
+                  <td colSpan={7} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Package className="h-10 w-10 text-slate-200" />
+                      <p className="text-sm font-medium text-slate-400">Không tìm thấy sản phẩm nào</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -183,71 +185,89 @@ export function ProductTable({ data, isLoading, onRefresh }: ProductTableProps) 
                     <tr
                       key={product._id}
                       className={cn(
-                        "transition-colors hover:bg-slate-50",
-                        !isActive && "bg-slate-50 opacity-65",
+                        "group transition-all duration-300 hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:z-10 relative",
+                        !isActive && "bg-slate-50/80 opacity-70",
                       )}
                     >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md bg-slate-100">
-                            {product.images?.[0] && (
+                      <td className="px-0 w-1 relative">
+                        <div className="absolute inset-y-2 left-0 w-1 bg-blue-600 rounded-r-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-full group-hover:translate-x-0" />
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-slate-50 shadow-sm ring-1 ring-slate-100 group-hover:scale-110 transition-transform duration-300">
+                            {product.images?.[0] ? (
                               <img
                                 src={product.images[0]}
                                 alt={product.name}
-                                className="max-h-full max-w-full object-cover"
+                                className="h-full w-full object-cover"
                               />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+                                <Package className="h-5 w-5" />
+                              </div>
                             )}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="line-clamp-1 font-semibold text-blue-600">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="line-clamp-1 max-w-[200px] text-sm font-bold text-slate-800 transition-colors group-hover:text-blue-600">
                               {product.name}
                             </span>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-[10px] font-black tracking-tight text-slate-400 uppercase">
                               SKU: {product.sku}
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-600">
-                        {(product.category as any)?.name || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-slate-800">
-                        {new Intl.NumberFormat("vi-VN").format(product.price || 0)}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={cn(
-                            "font-bold",
-                            (product.totalStock || 0) > 10
-                              ? "text-green-600"
-                              : "text-red-600",
-                          )}
-                        >
-                          {product.totalStock}
+                      <td className="px-6 py-5">
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 uppercase tracking-tight">
+                          {(product.category as any)?.name || "N/A"}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {badges.map((badge, idx) => (
+                      <td className="px-6 py-5 text-sm font-black text-slate-900">
+                        {new Intl.NumberFormat("vi-VN").format(product.price || 0)}
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "h-1.5 w-1.5 rounded-full",
+                            (product.totalStock || 0) > 10 ? "bg-emerald-500" : "bg-rose-500"
+                          )} />
+                          <span
+                            className={cn(
+                              "text-sm font-black",
+                              (product.totalStock || 0) > 10
+                                ? "text-slate-700"
+                                : "text-rose-600",
+                            )}
+                          >
+                            {product.totalStock}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-wrap gap-1">
+                          {badges.slice(0, 3).map((badge, idx) => (
                             <span
                               key={idx}
-                              className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-500"
+                              className="rounded-md border border-slate-100 bg-white px-2 py-0.5 text-[10px] font-bold text-slate-500 shadow-sm"
                             >
                               {badge}
                             </span>
                           ))}
+                          {badges.length > 3 && (
+                            <span className="text-[10px] font-bold text-slate-400">+{badges.length - 3}</span>
+                          )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                      <td className="px-6 py-5 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => openEditModal(product)}
-                            className="h-8 w-8 rounded text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
+                            className="h-8 w-8 rounded-lg text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600"
                             title="Chỉnh sửa sản phẩm"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
 
                           <Button
@@ -256,19 +276,19 @@ export function ProductTable({ data, isLoading, onRefresh }: ProductTableProps) 
                             onClick={() => handleToggleVisibility(product)}
                             disabled={isToggling === product._id}
                             className={cn(
-                              "h-8 w-8 rounded transition-colors",
+                              "h-8 w-8 rounded-lg transition-all",
                               isActive
-                                ? "text-slate-400 hover:bg-yellow-50 hover:text-yellow-600"
-                                : "text-red-500 hover:bg-green-50 hover:text-green-600",
+                                ? "text-slate-400 hover:bg-amber-50 hover:text-amber-600"
+                                : "text-rose-500 hover:bg-emerald-50 hover:text-emerald-600",
                             )}
                             title={isActive ? "Ẩn sản phẩm" : "Hiện sản phẩm"}
                           >
                             {isToggling === product._id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             ) : isActive ? (
-                              <Lock className="h-4 w-4" />
+                              <Lock className="h-3.5 w-3.5" />
                             ) : (
-                              <Unlock className="h-4 w-4" />
+                              <Unlock className="h-3.5 w-3.5" />
                             )}
                           </Button>
                         </div>

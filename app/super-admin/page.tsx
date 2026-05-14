@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { DollarSign, Package, User, AlertTriangle, Loader2 } from "lucide-react";
+import { DollarSign, Package, User, AlertTriangle, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "react-toastify";
 import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { DashboardChart } from "@/features/super-admin/dashboard/components/DashboardChart";
@@ -12,6 +12,7 @@ import {
   fetchRevenueChart,
   fetchTopProducts,
   fetchRecentOrders,
+  syncInventorySerials,
   type DashboardStats,
   type RevenueChartWeek,
   type TopProductRow,
@@ -21,6 +22,7 @@ import {
   buildMonthOptions,
   formatDashboardMoney,
 } from "@/features/super-admin/dashboard/utils/format";
+import { cn } from "@/lib/utils";
 
 export default function SuperAdminPage() {
   console.log('Dashboard Rendering...');
@@ -36,6 +38,7 @@ export default function SuperAdminPage() {
   const [chartWeeks, setChartWeeks] = useState<RevenueChartWeek[]>([]);
   const [topProducts, setTopProducts] = useState<TopProductRow[]>([]);
   const [recentOrders, setRecentOrders] = useState<RecentOrderRow[]>([]);
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +103,22 @@ export default function SuperAdminPage() {
   const growthTrend = (pct: number): "up" | "down" =>
     pct >= 0 ? "up" : "down";
 
+  const handleSyncInventory = async () => {
+    if (!confirm("Bạn có chắc chắn muốn đồng bộ lại toàn bộ mã Series? Hành động này sẽ xóa các mã cũ và sinh lại mới dựa trên tồn kho hiện tại.")) {
+      return;
+    }
+    setSyncLoading(true);
+    try {
+      const res = await syncInventorySerials();
+      toast.success(res.message || "Đồng bộ mã Series thành công!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi đồng bộ mã Series");
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   if (loading && !stats && !chartWeeks.length && !topProducts.length && !recentOrders.length) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-8 text-slate-500">
@@ -109,49 +128,70 @@ export default function SuperAdminPage() {
     );
   }
 
-  const triggerTestNotification = () => {
-    const payload = {
-      orderCode: `TEST-${Date.now()}`,
-      totalPrice: 123456,
-      customerName: "Demo Customer",
-    };
-    console.log('EVENT RECEIVED AT FRONTEND:', payload);
-    toast.success("TEST NOTIFICATION TRIGGERED");
-  };
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Báo cáo doanh thu toàn hệ thống
-        </h1>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={triggerTestNotification}
-            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
-          >
-            TEST NOTIFICATION
-          </button>
-          {loading && (
-            <Loader2 className="h-5 w-5 animate-spin text-slate-400" aria-hidden />
-          )}
-          <select
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            value={`${sel.year}-${sel.month}`}
-            onChange={(e) => {
-              const opt = monthOptions.find(
-                (o) => `${o.year}-${o.month}` === e.target.value,
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Tổng quan hệ thống
+          </h1>
+          <p className="mt-1 text-sm font-medium text-slate-500">
+            Chào mừng trở lại! Đây là báo cáo kinh doanh của bạn.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3 rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-slate-100">
+            {monthOptions.map((o) => {
+              const isActive = `${sel.year}-${sel.month}` === `${o.year}-${o.month}`;
+              return (
+                <button
+                  key={`${o.year}-${o.month}`}
+                  onClick={() => setSel(o)}
+                  className={cn(
+                    "rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    isActive 
+                      ? "bg-slate-900 text-white shadow-lg shadow-slate-200" 
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                  )}
+                >
+                  {o.label}
+                </button>
               );
-              if (opt) setSel(opt);
-            }}
+            }).slice(0, 3)} {/* Hiển thị 3 tháng gần nhất dưới dạng tab, còn lại dùng select nếu cần hoặc chỉ hiển thị select */}
+            
+            <select
+              className="ml-2 rounded-xl border-none bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-slate-200 outline-none"
+              value={`${sel.year}-${sel.month}`}
+              onChange={(e) => {
+                const opt = monthOptions.find(
+                  (o) => `${o.year}-${o.month}` === e.target.value,
+                );
+                if (opt) setSel(opt);
+              }}
+            >
+              {monthOptions.map((o) => (
+                <option key={`${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="h-10 w-[1px] bg-slate-200 hidden md:block" />
+
+          <button
+            onClick={handleSyncInventory}
+            disabled={syncLoading}
+            className="group flex items-center gap-2 rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50"
           >
-            {monthOptions.map((o) => (
-              <option key={`${o.year}-${o.month}`} value={`${o.year}-${o.month}`}>
-                {o.label}
-              </option>
-            ))}
-          </select>
+            {syncLoading ? (
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-600" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+            )}
+            Đồng bộ kho
+          </button>
         </div>
       </div>
 

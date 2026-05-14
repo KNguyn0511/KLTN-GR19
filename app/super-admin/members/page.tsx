@@ -57,12 +57,17 @@ function SuperAdminMembersContent() {
   }, [page, search, tier, status]); // <-- Khi đổi status thì tự fetch lại data
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Danh sách Khách hàng Thành viên
-        </h1>
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Khách hàng Thành viên
+          </h1>
+          <p className="text-sm font-medium text-slate-500">
+            Quản lý thông tin hội viên, hạng thẻ và lịch sử chi tiêu
+          </p>
+        </div>
       </div>
 
       {/* Cards Row */}

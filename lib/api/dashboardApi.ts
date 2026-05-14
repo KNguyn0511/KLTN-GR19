@@ -80,3 +80,10 @@ export async function fetchRecentOrders(year: number, month: number) {
   );
   return data.orders;
 }
+
+export async function syncInventorySerials() {
+  const { data } = await axiosInstance.post("/products/sync-serials", {}, {
+    timeout: 60000 // Tăng lên 60 giây vì xử lý kho hàng lớn có thể lâu
+  });
+  return data;
+}

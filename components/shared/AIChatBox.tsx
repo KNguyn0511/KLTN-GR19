@@ -126,7 +126,7 @@ export const AIChatBox = () => {
       {/* Chat Window */}
       <div
         className={cn(
-          "fixed bottom-[6.5rem] right-6 z-50 flex h-[650px] w-[450px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl transition-all duration-300 origin-bottom-right",
+          "fixed bottom-[6.5rem] right-6 z-50 flex h-[500px] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border bg-white shadow-2xl transition-all duration-300 origin-bottom-right",
           isOpen
             ? "scale-100 opacity-100"
             : "pointer-events-none scale-90 opacity-0"

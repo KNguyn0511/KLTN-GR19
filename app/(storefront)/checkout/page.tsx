@@ -97,8 +97,10 @@ export default function CheckoutPage() {
       interval = setInterval(async () => {
         try {
           const res = await getMyOrders({ t: Date.now() });
-          const order = res.orders.find(o => o.orderCode === orderResult.orderId.replace("#", ""));
-          if (order && order.status === 'PAID') {
+          const order = res.orders.find(o => 
+            o.orderCode && o.orderCode.replace(/^#/, "") === orderResult.orderId.replace(/^#/, "")
+          );
+          if (order && (order.status === 'PAID' || order.paidAt)) {
             setIsWaitingPayment(false);
             setIsSuccess(true);
             toast.success("Thanh toán thành công!", { autoClose: 3000 });
