@@ -91,10 +91,12 @@ export const OrderItem = ({ order, onRefresh }: OrderItemProps) => {
     order.products.forEach((p) => {
       addItem({
         id: p.id,
+        cartItemId: `${p.id}-${p.variant || 'default'}`, // Tạo ID duy nhất cho giỏ hàng
         name: p.name,
         price: p.price,
         quantity: p.quantity,
         image: p.imageUrl,
+        configName: p.variant,
       });
     });
     toast.success("Đã thêm các sản phẩm vào giỏ hàng");
