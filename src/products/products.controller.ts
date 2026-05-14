@@ -28,6 +28,12 @@ import { productImagesMulterOptions } from './multer-product-upload';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Post('sync-serials')
+  @ApiOperation({ summary: 'Đồng bộ lại mã Series cho toàn bộ sản phẩm (Xóa cũ - Sinh mới)' })
+  syncSerials() {
+    return this.productsService.cleanupAndSyncSerialNumbers();
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách sản phẩm' })
   findAll(@Query() query: any) {

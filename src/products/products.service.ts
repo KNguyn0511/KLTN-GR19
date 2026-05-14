@@ -304,12 +304,91 @@ export class ProductsService {
       );
     }
 
-    return await this.productRepository.update(id, { totalStock: newStock });
+    const updated = await this.productRepository.update(id, {
+      totalStock: newStock,
+    });
+
+    // Nếu tăng kho, tự động sinh thêm series
+    if (quantityChange > 0) {
+      await this.autoGenerateSerials(
+        id,
+        (product as any).sku,
+        quantityChange,
+        (product as any).importPrice || (product as any).price * 0.75,
+      );
+    }
+
+    return updated;
   }
 
   async remove(id: string) {
     const result = await this.productRepository.delete(id);
     if (!result) throw new NotFoundException('Không tìm thấy sản phẩm để xóa!');
     return { message: 'Xóa sản phẩm thành công!' };
+  }
+
+  // --- SERIAL NUMBER MANAGEMENT ---
+
+  /**
+   * Xóa sạch productitems và sinh lại toàn bộ dựa trên totalStock hiện tại
+   */
+  async cleanupAndSyncSerialNumbers() {
+    console.log('[ProductsService] Starting cleanup and sync serial numbers...');
+
+    // 1. Xóa sạch
+    await this.productRepository.clearAllItems();
+
+    // 2. Lấy tất cả sản phẩm
+    const allProducts = await this.productRepository.findAllRaw();
+    const allItemsToInsert: any[] = [];
+
+    for (const product of allProducts) {
+      const stock = product.totalStock || 0;
+      if (stock > 0) {
+        for (let i = 1; i <= stock; i++) {
+          const skuClean = (product.sku || 'PROD').replace(/\s+/g, '-');
+          allItemsToInsert.push({
+            productId: product._id,
+            serialNumber: `SN-${skuClean}-${String(i).padStart(3, '0')}`,
+            status: 'In Stock',
+            importPrice: product.importPrice || Math.round(product.price * 0.75),
+            importDate: new Date(),
+            locationId: new Types.ObjectId('65af10000000000000000001'), 
+          });
+        }
+      }
+    }
+
+    // 3. Lưu toàn bộ mảng khủng vào DB trong 1 nốt nhạc
+    if (allItemsToInsert.length > 0) {
+      await this.productRepository.insertManyItems(allItemsToInsert);
+    }
+
+    console.log(`[ProductsService] Sync complete! Created ${allItemsToInsert.length} items.`);
+    return {
+      message: 'Đồng bộ mã Series thành công!',
+      totalProducts: allProducts.length,
+      totalItemsCreated: allItemsToInsert.length,
+    };
+  }
+
+  async autoGenerateSerials(
+    productId: string,
+    sku: string,
+    count: number,
+    importPrice: number,
+  ) {
+    const items: any[] = [];
+    const skuClean = (sku || 'PROD').replace(/\s+/g, '-');
+    for (let i = 1; i <= count; i++) {
+      items.push({
+        productId: new Types.ObjectId(productId),
+        serialNumber: `SN-${skuClean}-NEW-${Date.now()}-${i}`,
+        status: 'In Stock',
+        importPrice: importPrice,
+        importDate: new Date(),
+      });
+    }
+    return await this.productRepository.insertManyItems(items);
   }
 }

@@ -19,49 +19,57 @@ export class NotificationGateway
   server!: Server;
 
   handleConnection(client: Socket) {
-    console.log('--- NEW ADMIN CONNECTED ---', client.id);
-    console.log('Client connected:', client.id);
-    console.log('Handshake Query:', client.handshake.query);
-
-    const role = String(
-      client.handshake.auth?.role ?? client.handshake.query?.role ?? '',
-    ).toLowerCase();
+    const auth = client.handshake.auth;
+    const query = client.handshake.query;
+    
+    const role = String(auth?.role ?? query?.role ?? '').toLowerCase();
+    const userId = auth?.userId || query?.userId;
     const normalizedRole = role.replace(/\s+/g, '-');
 
-    const userId = client.handshake.query?.userId as string;
-    if (userId) {
-      client.join(`user-${userId}`);
-      console.log(`User ${userId} joined their notification room.`);
+    console.log(`--- [SOCKET CONNECT] ROLE: ${normalizedRole}, USERID: ${userId} ---`);
+
+    const isAdmin = [
+      'super-admin',
+      'store-manager',
+      'sales-staff',
+      'warehouse-staff',
+      'admin',
+    ].includes(normalizedRole);
+
+    if (isAdmin) {
+      client.join('admin-room');
+      console.log(`--- [SOCKET] ADMIN/STAFF (${normalizedRole}) JOINED ADMIN-ROOM ---`, client.id);
     }
 
-    if (normalizedRole === 'super-admin' || normalizedRole === 'store-manager') {
-      client.join('admin-room');
-      console.log('CLIENT JOINED ADMIN-ROOM:', client.id, 'role:', normalizedRole);
+    if (userId) {
+      const uIdStr = userId.toString();
+      client.join(uIdStr);
+      client.join(`user-${uIdStr}`);
+      console.log(`--- [SOCKET] USER ${uIdStr} JOINED ROOMS ---`, client.id);
+    } else if (normalizedRole === 'customer') {
+      console.warn('--- [SOCKET] CUSTOMER CONNECTED BUT NO USERID PROVIDED ---', client.id);
     }
   }
 
   handleDisconnect(client: Socket) {
-    client.leave('admin-room');
-    if (client.handshake.query?.userId) {
-      client.leave(`user-${client.handshake.query.userId}`);
-    }
+    console.log('--- [SOCKET] CLIENT DISCONNECTED ---', client.id);
   }
 
   // --- GENERIC NOTIFICATIONS ---
 
-  /** Gửi thông báo tới toàn bộ Admin (Super Admin, Store Manager) */
+  /** Gửi thông báo tới toàn bộ Admin (Super Admin, Store Manager, Staff) */
   notifyAdmins(event: string, payload: any) {
     console.log(`[Socket] Sending ${event} to admins`);
     this.server.to('admin-room').emit(event, payload);
   }
 
-  /** Gửi thông báo tới một user cụ thể (nếu họ đang online và join room tương ứng) */
+  /** Gửi thông báo tới một user cụ thể (convention: user-${userId}) */
   notifyUser(userId: string, event: string, payload: any) {
-    console.log(`[Socket] Sending ${event} to user ${userId}`);
+    console.log(`[Socket] Sending ${event} to user ${userId} (room: user-${userId})`);
     this.server.to(`user-${userId}`).emit(event, payload);
   }
 
-  // --- LEGACY HELPERS ---
+  // --- HELPERS ---
 
   sendNewOrderNotification(payload: {
     orderCode: string;
@@ -69,5 +77,11 @@ export class NotificationGateway
     customerName: string;
   }) {
     this.notifyAdmins('NEW_ORDER_RECEIVED', payload);
+  }
+
+  sendNotification(userId: any, payload: { title: string; message: string }) {
+    const targetRoom = userId.toString();
+    console.log(`--- [SOCKET] SENDING TO ROOM: ${targetRoom} ---`, payload.title);
+    this.server.to(targetRoom).emit('NOTIFICATION_RECEIVED', payload);
   }
 }

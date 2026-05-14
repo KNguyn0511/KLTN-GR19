@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Patch, Param, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SalesService } from './sales.service';
@@ -7,6 +7,12 @@ import { OptionalJwtAuthGuard } from '../users/guards/auth.guard';
 @ApiTags('Sales')
 @Controller('sales')
 export class SalesController {
+  @Get('orders')
+  @ApiOperation({ summary: 'Lấy toàn bộ danh sách đơn hàng' })
+  async getAllOrders() {
+    return await this.salesService.getAllOrders();
+  }
+
   constructor(private readonly salesService: SalesService) {}
 
   @UseGuards(OptionalJwtAuthGuard)

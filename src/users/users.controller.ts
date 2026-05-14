@@ -9,13 +9,29 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { NotificationsService } from './notifications.service';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Quản lý User')
-@Controller() // Bạn có thể cân nhắc đổi thành @Controller('users') sau này để code chuẩn RESTful hơn
+@Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
+
+  @Get('notifications/:userId')
+  @ApiOperation({ summary: 'Lấy danh sách thông báo của User' })
+  getNotifications(@Param('userId') userId: string, @Query('limit') limit = 10) {
+    return this.notificationsService.getNotifications(userId);
+  }
+
+  @Patch('notifications/:userId/read-all')
+  @ApiOperation({ summary: 'Đánh dấu tất cả thông báo là đã đọc' })
+  markAllAsRead(@Param('userId') userId: string) {
+    return this.notificationsService.markAllAsRead(userId);
+  }
 
   // ============================================
   // NHÓM API QUẢN LÝ USERS (Nhánh connect-db)

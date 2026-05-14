@@ -1,23 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Product } from './schemas/product.schema';
+import { ProductItem } from './schemas/product-item.schema';
 
 @Injectable()
 export class ProductsRepository {
   constructor(
     @InjectModel(Product.name) private readonly productModel: Model<Product>,
+    @InjectModel(ProductItem.name)
+    private readonly productItemModel: Model<ProductItem>,
   ) {}
 
-  // Trong file products.repository.ts, sửa lại hàm findAll một chút:
   async findAll(filter: any, sort: any, skip: number, limit: number) {
     return await this.productModel
       .find(filter)
-      .populate('category', 'name') // <== THÊM DÒNG NÀY (lấy cột 'name' của bảng Category)
+      .populate('category', 'name')
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .exec();
+  }
+
+  async findAllRaw() {
+    return await this.productModel.find().lean().exec();
   }
 
   async count(filter: any) {
@@ -43,8 +49,24 @@ export class ProductsRepository {
     return !!result;
   }
 
+  // --- PRODUCT ITEM OPERATIONS ---
+
   async findItemsByProductId(productId: string): Promise<any[]> {
-    console.log('Checking items for product:', productId);
-    return await Promise.resolve([]);
+    return await this.productItemModel
+      .find({ productId: new Types.ObjectId(productId) })
+      .lean()
+      .exec();
+  }
+
+  async createItem(data: any) {
+    return await this.productItemModel.create(data);
+  }
+
+  async clearAllItems() {
+    return await this.productItemModel.deleteMany({}).exec();
+  }
+
+  async insertManyItems(items: any[]) {
+    return await this.productItemModel.insertMany(items);
   }
 }
