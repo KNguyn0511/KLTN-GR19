@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { updateWarrantyStatusAdmin } from "@/lib/warrantyApi";
 import { toast } from "react-toastify";
-import { ShieldAlert, Send } from "lucide-react";
+import { ShieldAlert, Send, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface UpdateWarrantyModalProps {
