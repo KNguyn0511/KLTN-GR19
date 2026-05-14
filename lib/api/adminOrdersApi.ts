@@ -52,6 +52,9 @@ export interface AdminOrderRow {
 export interface AdminOrdersResponse {
   stats: AdminOrderStats;
   orders: AdminOrderRow[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export async function fetchAdminOrders(params: {
@@ -59,6 +62,8 @@ export async function fetchAdminOrders(params: {
   channel: AdminOrderChannel;
   date: AdminOrderDate;
   q?: string;
+  page?: number;
+  limit?: number;
 }): Promise<AdminOrdersResponse> {
   const { data } = await axiosInstance.get<AdminOrdersResponse>("/orders/admin", {
     params: {
@@ -66,6 +71,8 @@ export async function fetchAdminOrders(params: {
       channel: params.channel,
       date: params.date,
       q: params.q?.trim() || undefined,
+      page: params.page || 1,
+      limit: params.limit || 10,
     },
   });
   return data;

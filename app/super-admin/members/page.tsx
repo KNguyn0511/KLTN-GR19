@@ -7,13 +7,19 @@ import { StatCard } from "@/features/super-admin/shared/components/StatCard";
 import { MemberFilterBar } from "@/features/super-admin/members/components/MemberFilterBar";
 import { MemberTable } from "@/features/super-admin/members/components/MemberTable";
 import { getMembers, getMemberStats, Member, MemberStats } from "@/lib/api/memberApi";
+import { Pagination } from "@/components/shared/Pagination";
+import { usePathname, useRouter } from "next/navigation";
 
 function SuperAdminMembersContent() {
   const searchParams = useSearchParams();
 
   const [members, setMembers] = useState<Member[]>([]);
   const [stats, setStats] = useState<MemberStats | null>(null);
+  const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Lấy params từ URL (Đã bổ sung lấy status)
   const page = Number(searchParams.get("page")) || 1;
@@ -37,6 +43,7 @@ function SuperAdminMembersContent() {
       ]);
       setStats(statsData);
       setMembers(listData.data);
+      setTotalItems(listData.pagination?.totalItems || 0);
     } catch (error) {
       console.error("Lỗi fetch dữ liệu Member:", error);
     } finally {
@@ -92,7 +99,18 @@ function SuperAdminMembersContent() {
       <MemberFilterBar />
 
       {/* Data Table */}
-      <MemberTable data={members} isLoading={loading} />
+      <MemberTable data={members} isLoading={loading}>
+        <Pagination 
+          currentPage={page}
+          totalItems={totalItems}
+          itemsPerPage={10}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", newPage.toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+        />
+      </MemberTable>
     </div>
   );
 }

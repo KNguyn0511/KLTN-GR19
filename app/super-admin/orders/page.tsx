@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Bell, Package, Truck, X, RefreshCcw } from "lucide-react";
 import { toast } from "react-toastify";
@@ -10,6 +10,7 @@ import {
   OrderTable,
   nextApiStatus,
 } from "@/features/super-admin/orders/components/OrderTable";
+import { Pagination } from "@/components/shared/Pagination";
 import {
   fetchAdminOrders,
   patchOrderStatus,
@@ -40,12 +41,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function SuperAdminOrdersPage() {
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+function OrdersPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [tab, setTab] = useState<AdminOrderTab>("all");
   const [channel, setChannel] = useState<AdminOrderChannel>("all");
-  const [date, setDate] = useState<AdminOrderDate>("today");
+  const [date, setDate] = useState<AdminOrderDate>("all");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  const page = Number(searchParams.get("page")) || 1;
+  const [total, setTotal] = useState(0);
 
   const [stats, setStats] = useState<AdminOrderStats | null>(null);
   const [orders, setOrders] = useState<AdminOrderRow[]>([]);
@@ -75,16 +85,19 @@ export default function SuperAdminOrdersPage() {
         channel,
         date,
         q: debouncedSearch,
+        page,
+        limit: 10,
       });
       setStats(data.stats);
       setOrders(data.orders);
+      setTotal(data.total);
     } catch (e) {
       console.error(e);
       toast.error("Không tải được danh sách đơn (cần quyền Super Admin).");
       setStats(null);
       setOrders([]);
     }
-  }, [tab, channel, date, debouncedSearch]);
+  }, [tab, channel, date, debouncedSearch, page]);
 
   useEffect(() => {
     void load();
@@ -366,7 +379,18 @@ export default function SuperAdminOrdersPage() {
       />
 
       {/* Data Table */}
-      <OrderTable orders={orders} onAdvance={handleAdvance} />
+      <OrderTable orders={orders || []} onAdvance={handleAdvance}>
+        <Pagination 
+          currentPage={page}
+          totalItems={total || 0}
+          itemsPerPage={10}
+          onPageChange={(newPage) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", newPage.toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+        />
+      </OrderTable>
 
       {/* Confirmation Modal */}
       <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
@@ -699,5 +723,13 @@ export default function SuperAdminOrdersPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function SuperAdminOrdersPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-500">Đang tải quản lý đơn hàng...</div>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

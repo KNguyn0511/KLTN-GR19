@@ -7,6 +7,7 @@ import { Member } from "@/lib/api/memberApi";
 interface MemberTableProps {
   data: Member[];
   isLoading: boolean;
+  children?: React.ReactNode;
 }
 
 const formatCurrency = (value: unknown): string => {
@@ -15,9 +16,9 @@ const formatCurrency = (value: unknown): string => {
   return `${new Intl.NumberFormat("vi-VN").format(safeValue)}đ`;
 };
 
-export function MemberTable({ data, isLoading }: MemberTableProps) {
+export function MemberTable({ data, isLoading, children }: MemberTableProps) {
   return (
-    <div className="relative min-h-[400px] overflow-hidden rounded-xl bg-white shadow-sm">
+    <div className="relative min-h-[400px] overflow-hidden rounded-xl bg-white shadow-sm border border-slate-100">
       {isLoading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
@@ -111,6 +112,7 @@ export function MemberTable({ data, isLoading }: MemberTableProps) {
           </tbody>
         </table>
       </div>
+      {children}
     </div>
   );
 }

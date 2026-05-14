@@ -35,11 +35,12 @@ function formatOrderDate(iso: string): string {
 export type OrderTableProps = {
   orders: AdminOrderRow[];
   onAdvance: (order: AdminOrderRow) => void;
+  children?: React.ReactNode;
 };
 
-export function OrderTable({ orders, onAdvance }: OrderTableProps) {
+export function OrderTable({ orders, onAdvance, children }: OrderTableProps) {
   return (
-    <div className="rounded-xl bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl bg-white shadow-sm overflow-hidden border border-slate-100">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
@@ -195,6 +196,7 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
           </tbody>
         </table>
       </div>
+      {children}
     </div>
   );
 }

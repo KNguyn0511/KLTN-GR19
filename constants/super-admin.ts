@@ -6,5 +6,6 @@ export const SUPER_ADMIN_NAV_ITEMS = [
   { name: "Quản lý Kho hàng", href: "/super-admin/inventory" },
   { name: "Nhân viên & Phân quyền", href: "/super-admin/staff" },
   { name: "Khuyến mãi & Voucher", href: "/super-admin/promotions" },
+  { name: "Quản lý Bảo hành", href: "/super-admin/warranty" },
   { name: "Cấu hình hệ thống", href: "/super-admin/settings" },
 ];
