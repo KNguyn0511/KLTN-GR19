@@ -47,22 +47,22 @@ export const OrderItem = ({ order, onRefresh }: OrderItemProps) => {
     { label: string; className: string; icon: any }
   > = {
     pending: {
-      label: "Đang xử lý",
-      className: "bg-amber-50 text-amber-600 ring-amber-100",
+      label: "ĐANG XỬ LÝ",
+      className: "bg-blue-50 text-blue-600 ring-blue-100",
       icon: Package,
     },
     shipping: {
-      label: "Đang giao",
+      label: "ĐANG GIAO",
       className: "bg-indigo-50 text-indigo-600 ring-indigo-100",
       icon: Truck,
     },
     completed: {
-      label: "Hoàn thành",
+      label: "HOÀN THÀNH",
       className: "bg-emerald-50 text-emerald-600 ring-emerald-100",
       icon: CheckCircle2,
     },
     cancelled: {
-      label: "Đã hủy",
+      label: "ĐÃ HỦY",
       className: "bg-slate-50 text-slate-400 ring-slate-100",
       icon: XCircle,
     },
