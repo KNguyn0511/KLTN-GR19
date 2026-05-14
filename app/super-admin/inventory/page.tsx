@@ -75,7 +75,7 @@ export default function SuperAdminInventoryPage() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       <InventoryHeader onImport={onImport} onAudit={onAudit} />
       <InventorySummary stats={stats} loading={loading} />
       <InventoryFilterBar

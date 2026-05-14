@@ -37,7 +37,7 @@ export default function SuperAdminPromotionsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Truyền hàm fetchPromotions để Modal gọi lại sau khi tạo thành công */}
       <PromotionHeader refreshData={fetchPromotions} />
       

@@ -285,29 +285,34 @@ export default function SuperAdminOrdersPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-8">
+    <div className="flex flex-col gap-8 bg-slate-50/50 p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Quản lý đơn hàng (O2O Fulfillment)
-        </h1>
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900">
+            Quản lý đơn hàng
+          </h1>
+          <p className="text-sm font-medium text-slate-500">
+            Hệ thống xử lý đơn hàng O2O Fulfillment & Vận chuyển
+          </p>
+        </div>
+        <div className="flex gap-3">
           <Button
             type="button"
-            className="flex items-center gap-2 rounded-md border border-[#F27024] px-4 py-2 text-sm font-semibold text-[#F27024] transition-colors hover:bg-orange-50"
+            className="group flex items-center gap-2 rounded-2xl bg-white border border-slate-200 px-5 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95"
             onClick={handleSyncAll}
             disabled={isProcessing}
           >
             {isProcessing ? (
-              <RefreshCcw className="h-4 w-4 animate-spin" />
+              <RefreshCcw className="h-3.5 w-3.5 animate-spin text-blue-600" />
             ) : (
-              <RefreshCcw className="h-4 w-4" />
+              <RefreshCcw className="h-3.5 w-3.5 text-[#F27024]" />
             )}
             ĐỒNG BỘ BƯU CỤC
           </Button>
           <Button
             type="button"
-            className="flex items-center gap-2 rounded-md border border-green-600 px-4 py-2 text-sm font-semibold text-green-600 transition-colors hover:bg-green-50"
+            className="group flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 active:scale-95"
             onClick={() =>
               console.log("[XUẤT EXCEL] filters:", {
                 tab,
@@ -318,7 +323,7 @@ export default function SuperAdminOrdersPage() {
             }
           >
             XUẤT EXCEL
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
