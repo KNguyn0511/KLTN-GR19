@@ -269,9 +269,20 @@ export class SalesService {
 
   /** Tích hợp Giao Hàng Nhanh Sandbox API */
   async shipOrder(orderId: string, carrier: string) {
-    const order = await this.orderModel.findById(orderId).populate('user');
-    if (!order) throw new Error('Không tìm thấy đơn hàng');
+    console.log('--- [BACKEND] shipOrder START ---');
+    console.log('--- [BACKEND] orderId:', orderId);
+    console.log('--- [BACKEND] carrier:', carrier);
+    
+    let order;
+    try {
+      order = await this.orderModel.findById(orderId).populate('user');
+      console.log('--- [BACKEND] Order found:', order?._id);
+    } catch (e) {
+      console.error('--- [BACKEND] findById ERROR:', e.message);
+      throw new BadRequestException(`Lỗi truy vấn đơn hàng: ${e.message}`);
+    }
 
+    if (!order) throw new Error('Không tìm thấy đơn hàng');
 
 
     // Bây giờ hệ thống chỉ hỗ trợ duy nhất GHN
