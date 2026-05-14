@@ -30,6 +30,12 @@ export class AdminOrdersQueryDto {
   @IsString()
   @IsIn(ADMIN_DATES)
   date?: (typeof ADMIN_DATES)[number];
+
+  @IsOptional()
+  page?: string;
+
+  @IsOptional()
+  limit?: string;
 }
 
 const UPDATE_STATUSES = [

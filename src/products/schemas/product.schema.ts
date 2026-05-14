@@ -50,6 +50,9 @@ export class Product extends Document {
 
   @Prop({ unique: true, sparse: true }) // Mã định danh sản phẩm (Ví dụ: CPU-INTEL-14900K)
   sku: string;
+
+  @Prop({ default: 12 }) // Thời gian bảo hành mặc định (tháng)
+  warrantyMonths: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -13,6 +13,8 @@ import { InventoryModule } from './inventory/inventory.module';
 
 import { CartModule } from './cart/cart.module';
 import { SepayModule } from './sepay/sepay.module';
+import { WarrantyModule } from './warranty/warranty.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { SepayModule } from './sepay/sepay.module';
     InventoryModule,
     SepayModule,
     CartModule,
+    WarrantyModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

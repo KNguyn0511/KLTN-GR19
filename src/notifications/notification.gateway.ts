@@ -28,26 +28,46 @@ export class NotificationGateway
     ).toLowerCase();
     const normalizedRole = role.replace(/\s+/g, '-');
 
+    const userId = client.handshake.query?.userId as string;
+    if (userId) {
+      client.join(`user-${userId}`);
+      console.log(`User ${userId} joined their notification room.`);
+    }
+
     if (normalizedRole === 'super-admin' || normalizedRole === 'store-manager') {
       client.join('admin-room');
       console.log('CLIENT JOINED ADMIN-ROOM:', client.id, 'role:', normalizedRole);
-      return;
     }
-
-    console.log('Join room failed. User role was:', normalizedRole);
-    client.disconnect(true);
   }
 
   handleDisconnect(client: Socket) {
     client.leave('admin-room');
+    if (client.handshake.query?.userId) {
+      client.leave(`user-${client.handshake.query.userId}`);
+    }
   }
+
+  // --- GENERIC NOTIFICATIONS ---
+
+  /** Gửi thông báo tới toàn bộ Admin (Super Admin, Store Manager) */
+  notifyAdmins(event: string, payload: any) {
+    console.log(`[Socket] Sending ${event} to admins`);
+    this.server.to('admin-room').emit(event, payload);
+  }
+
+  /** Gửi thông báo tới một user cụ thể (nếu họ đang online và join room tương ứng) */
+  notifyUser(userId: string, event: string, payload: any) {
+    console.log(`[Socket] Sending ${event} to user ${userId}`);
+    this.server.to(`user-${userId}`).emit(event, payload);
+  }
+
+  // --- LEGACY HELPERS ---
 
   sendNewOrderNotification(payload: {
     orderCode: string;
     totalPrice: number;
     customerName: string;
   }) {
-    console.log('Order event emitted for:', payload.orderCode);
-    this.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+    this.notifyAdmins('NEW_ORDER_RECEIVED', payload);
   }
 }

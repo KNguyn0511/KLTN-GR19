@@ -624,25 +624,31 @@ export class SalesService {
 
     const filter = and.length === 0 ? {} : { $and: and };
 
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.max(1, Number(query.limit) || 10);
+    const skip = (page - 1) * limit;
+
+    const total = await this.orderModel.countDocuments(filter);
     const rows = await this.orderModel
       .find(filter)
       .populate('user', 'fullName phone email')
       .sort({ createdAt: -1 })
-      .limit(500)
+      .skip(skip)
+      .limit(limit)
       .lean()
       .exec();
 
     const orders = await Promise.all(rows.map((doc) => this.mapAdminRow(doc)));
-    return orders;
+    return { orders, total, page, limit };
   }
 
   async getAdminOrdersPage(query: AdminOrdersQueryDto) {
     const dateForStats = query.date ?? 'all';
-    const [stats, orders] = await Promise.all([
+    const [stats, result] = await Promise.all([
       this.getAdminStats(dateForStats),
       this.findAdminOrders(query),
     ]);
-    return { stats, orders };
+    return { stats, orders: result.orders, total: result.total, page: result.page, limit: result.limit };
   }
 
   private async mapAdminRow(raw: any) {
