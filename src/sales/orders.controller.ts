@@ -45,6 +45,34 @@ export class OrdersController {
     return this.salesService.findMyOrders(userId, status);
   }
 
+  @UseGuards(AuthGuard)
+  @Get('detail/:code')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lấy chi tiết đơn hàng (dành cho người mua)' })
+  async getDetail(
+    @Req()
+    req: Request & { user: { id?: string; sub?: string } },
+    @Param('code') code: string,
+  ) {
+    const u = req.user;
+    const userId = String(u?.id ?? u?.sub ?? '');
+    return this.salesService.findOrderByCodeForUser(userId, code);
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch(':id/user-cancel')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Người mua tự hủy đơn hàng' })
+  async userCancel(
+    @Req()
+    req: Request & { user: { id?: string; sub?: string } },
+    @Param('id') id: string,
+  ) {
+    const u = req.user;
+    const userId = String(u?.id ?? u?.sub ?? '');
+    return this.salesService.cancelOrderByUser(userId, id);
+  }
+
   @UseGuards(AuthGuard, AdminDashboardGuard)
   @Get('admin')
   @ApiBearerAuth()

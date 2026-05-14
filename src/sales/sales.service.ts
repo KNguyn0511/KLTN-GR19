@@ -139,13 +139,17 @@ export class SalesService {
 
     const paymentMethod = data.customerInfo?.paymentMethod || data.paymentMethod || 'COD';
 
-    console.log(`[SalesService] checkoutData received paymentMethod: ${paymentMethod}`);
-    console.log(`[SalesService] Full checkout data:`, JSON.stringify(data, null, 2));
+    // Chỉ bắn thông báo ngay nếu là COD hoặc Mua tại quầy (O2O)
+    // Các loại thanh toán Online (BANK_TRANSFER, VNPAY, MOMO) sẽ đợi Webhook xác nhận rồi mới bắn sau.
+    const isOnlinePayment = ['BANK_TRANSFER', 'VNPAY', 'MOMO'].includes(paymentMethod);
 
-    // Luôn gửi thông báo cho admin khi có đơn hàng mới, bất kể phương thức thanh toán
-    console.log('Emitting to admin-room...');
-    this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
-    console.log('Order event emitted for:', payload.orderCode);
+    if (paymentMethod === 'COD' || data.channel === 'O2O' || !isOnlinePayment) {
+      console.log('Emitting to admin-room...');
+      this.notificationGateway.server.to('admin-room').emit('NEW_ORDER_RECEIVED', payload);
+      console.log('Order event emitted for:', payload.orderCode);
+    } else {
+      console.log(`Skipping immediate notification. Payment method is ${paymentMethod}, waiting for webhook confirmation.`);
+    }
 
 
     // 2. ✅ BƯỚC THẦN THÁNH: Tăng số lượng voucher đã dùng lên 1
@@ -546,6 +550,7 @@ export class SalesService {
     }));
 
     return {
+      _id: String(raw._id),
       orderCode: codeRaw,
       createdAt: raw.createdAt,
       status,
@@ -858,6 +863,40 @@ export class SalesService {
     }
 
     const populated = await this.orderModel.findById(orderId).populate('user', 'fullName phone email').lean().exec();
-    return this.mapAdminRow(populated);
+    return await this.mapAdminRow(populated);
+  }
+
+  async findOrderByCodeForUser(userId: string, orderCode: string) {
+    const doc = await this.orderModel
+      .findOne({ orderCode, user: userId })
+      .populate('user', 'fullName phone email')
+      .lean()
+      .exec();
+    if (!doc) {
+      throw new NotFoundException('Không tìm thấy đơn hàng');
+    }
+    return await this.mapAdminRow(doc);
+  }
+
+  async cancelOrderByUser(userId: string, orderId: string) {
+    const order = await this.orderModel.findOne({
+      _id: orderId,
+      user: userId,
+    });
+
+    if (!order) {
+      throw new NotFoundException('Không tìm thấy đơn hàng');
+    }
+
+    if (order.status !== 'PENDING_CONFIRMATION' && order.status !== 'PENDING') {
+      throw new BadRequestException(
+        'Chỉ có thể hủy đơn hàng đang ở trạng thái chờ xác nhận',
+      );
+    }
+
+    order.status = 'CANCELLED';
+    await order.save();
+
+    return { success: true };
   }
 }
