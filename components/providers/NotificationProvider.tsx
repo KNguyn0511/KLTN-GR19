@@ -58,7 +58,13 @@ export default function NotificationProvider({
       const playPromise = audio.play();
 
       if (playPromise !== undefined) {
-        playPromise.catch(() => {
+        playPromise.then(() => {
+          // GIỚI HẠN SOUND CHỈ CHẠY 3 GIÂY
+          setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+          }, 3000);
+        }).catch(() => {
           // Nếu file mp3 lỗi hoặc bị chặn, thử phát tiếng beep dự phòng
           const fallbackAudio = new Audio(BEEP_BASE64);
           fallbackAudio.play().catch(e => console.warn("Audio fully blocked:", e.message));
@@ -150,10 +156,13 @@ export default function NotificationProvider({
       console.log("SOCKET CONNECTED! ID:", socket.id);
     });
 
-    socket.on("NEW_ORDER_RECEIVED", (data) => {
-      console.log("🔔 [ADMIN] NEW ORDER EVENT RECEIVED!!", data);
-      openNotification(data);
-    });
+    // CHỈ CHO PHÉP SUPER-ADMIN VÀ STORE-MANAGER NHẬN THÔNG BÁO ĐƠN HÀNG MỚI
+    if (["super-admin", "store-manager"].includes(normalizedRole)) {
+      socket.on("NEW_ORDER_RECEIVED", (data) => {
+        console.log("🔔 [ADMIN] NEW ORDER EVENT RECEIVED!!", data);
+        openNotification(data);
+      });
+    }
 
     socket.on("NOTIFICATION_RECEIVED", (data) => {
       console.log("REAL-TIME NOTIFICATION RECEIVED:", data);
