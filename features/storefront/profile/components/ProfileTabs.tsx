@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-
 import React from "react";
 import { cn } from "@/lib/utils";
 
@@ -13,24 +11,23 @@ interface ProfileTabsProps<T extends string> {
 
 export function ProfileTabs<T extends string>({ tabs, activeTab, onChange }: ProfileTabsProps<T>) {
   return (
-    <div className="w-full flex h-14 overflow-x-auto overflow-y-hidden rounded-xl border border-gray-100 bg-[#FAFAFA] px-2 shadow-sm hide-scrollbar">
-      <div className="flex w-fit items-center h-full min-w-full">
+    <div className="w-full flex h-14 overflow-x-auto overflow-y-hidden rounded-2xl border border-slate-100 bg-slate-50/50 p-1.5 shadow-inner hide-scrollbar">
+      <div className="flex w-full items-center h-full gap-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab;
           return (
-            <Button
+            <button
               key={tab}
               onClick={() => onChange(tab)}
               className={cn(
-                "relative flex h-full items-center justify-center whitespace-nowrap px-6 text-[14px] font-bold transition-colors",
-                isActive ? "text-primary" : "text-gray-500 hover:text-heading"
+                "relative flex h-full flex-1 items-center justify-center whitespace-nowrap px-6 rounded-xl text-[13px] font-black uppercase tracking-widest transition-all duration-300",
+                isActive 
+                  ? "bg-white text-blue-600 shadow-sm shadow-blue-100" 
+                  : "text-slate-400 hover:text-slate-600 hover:bg-white/40"
               )}
             >
               {tab}
-              {isActive && (
-                <div className="absolute bottom-0 left-0 h-[2px] w-full bg-primary" />
-              )}
-            </Button>
+            </button>
           );
         })}
       </div>

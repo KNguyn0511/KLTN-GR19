@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ArrowRight, Flame } from "lucide-react";
 
 // --- Hero banner background URLs (edit these three) ---
 const HERO_BACK_TO_SCHOOL_BG =
@@ -14,57 +15,85 @@ const HERO_GAMING_GEAR_BG =
 
 const HeroSection = () => {
   return (
-    <section className="flex w-full flex-col gap-5 lg:h-100 lg:flex-row">
-      <div className="relative flex min-h-64 flex-col justify-center overflow-hidden rounded-xl lg:min-h-0 lg:w-[60%]">
+    <section className="flex w-full flex-col gap-5 lg:h-110 lg:flex-row">
+      {/* Main Banner */}
+      <div className="group relative flex min-h-80 flex-col justify-center overflow-hidden rounded-3xl lg:min-h-0 lg:w-[62%] shadow-2xl shadow-sky-100/50">
         <Image
           src={HERO_BACK_TO_SCHOOL_BG}
-          alt=""
+          alt="Back to School"
           fill
           sizes="(min-width: 1024px) 60vw, 100vw"
-          className="object-cover"
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#E0F2FE]/93 via-[#E0F2FE]/82 to-sky-100/72" />
-        <div className="relative z-10 flex flex-col items-center justify-center gap-6 p-8 text-center text-primary lg:items-start lg:gap-11 lg:pl-12.5 lg:text-left">
-          <h2 className="text-3xl font-bold lg:text-[48px]">BACK TO SCHOOL</h2>
-          <p className="text-lg lg:text-2xl">
-            Build PC thông minh - Nhận quà cực đỉnh
-          </p>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-transparent lg:from-white/90 lg:via-white/60" />
+        
+        <div className="relative z-10 flex flex-col items-center justify-center gap-4 p-8 text-center lg:items-start lg:gap-8 lg:p-16 lg:text-left">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-4 py-1.5 text-xs font-black tracking-widest text-blue-600 uppercase ring-1 ring-blue-600/20">
+            <Flame className="h-3.5 w-3.5 animate-pulse text-orange-500 fill-orange-500" />
+            Seasonal Deals
+          </div>
+          
+          <div className="space-y-2">
+            <h2 className="text-4xl font-black tracking-tight text-slate-900 lg:text-6xl xl:text-7xl">
+              BACK TO <span className="text-blue-600">SCHOOL</span>
+            </h2>
+            <p className="text-lg font-medium text-slate-600 lg:text-2xl max-w-md leading-relaxed">
+              Build PC thông minh - Nhận ngay bộ quà tặng Gaming cực đỉnh.
+            </p>
+          </div>
+
           <Button
             className={cn(
-              "hover:bg-primary-hover/90 h-11 w-40 cursor-pointer rounded-4xl text-base text-white lg:h-12.5 lg:w-50 lg:text-xl",
+              "group/btn relative h-12 w-48 overflow-hidden rounded-2xl bg-blue-600 px-8 text-base font-bold text-white shadow-xl shadow-blue-200 transition-all hover:bg-blue-700 hover:shadow-blue-300 active:scale-95 lg:h-14 lg:w-56 lg:text-lg",
             )}
           >
-            Xem ngay
+            <span className="relative z-10 flex items-center gap-2">
+              Săn Deal Ngay
+              <ArrowRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
+            </span>
           </Button>
         </div>
       </div>
-      <div className="flex flex-col gap-5 text-xl font-bold lg:w-[40%] lg:text-2xl">
-        <div className="relative flex min-h-30 flex-col justify-center overflow-hidden rounded-xl pl-8 text-white lg:min-h-0 lg:flex-1 lg:pl-7.5">
+
+      {/* Side Banners */}
+      <div className="flex flex-col gap-5 lg:w-[38%]">
+        {/* RTX 4090 */}
+        <div className="group relative flex min-h-40 flex-col justify-center overflow-hidden rounded-3xl px-8 text-white shadow-xl shadow-slate-200/50 lg:min-h-0 lg:flex-1 lg:px-10">
           <Image
             src={HERO_RTX_4090_BG}
-            alt=""
+            alt="RTX 4090"
             fill
             sizes="(min-width: 1024px) 40vw, 100vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/25" />
-          <span className="relative z-10 drop-shadow-sm">RTX 4090 Series</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-transparent transition-opacity group-hover:opacity-80" />
+          
+          <div className="relative z-10 space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Next-Gen Performance</span>
+            <h3 className="text-2xl font-black lg:text-3xl">RTX 4090 <span className="text-blue-500">Series</span></h3>
+            <p className="text-sm font-medium text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sức mạnh tối thượng cho Game thủ</p>
+          </div>
         </div>
-        <div className="relative flex min-h-30 flex-col justify-center overflow-hidden rounded-xl pl-8 lg:min-h-0 lg:flex-1 lg:pl-7.5">
+
+        {/* Gaming Gear */}
+        <div className="group relative flex min-h-40 flex-col justify-center overflow-hidden rounded-3xl px-8 lg:min-h-0 lg:flex-1 lg:px-10">
           <Image
             src={HERO_GAMING_GEAR_BG}
-            alt=""
+            alt="Gaming Gear"
             fill
             sizes="(min-width: 1024px) 40vw, 100vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/75 to-white/40" />
-          <span className="relative z-10 text-gray-900 drop-shadow-sm">
-            Gaming Gear
-          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent transition-all group-hover:backdrop-blur-[2px]" />
+          
+          <div className="relative z-10 space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Pro Essentials</span>
+            <h3 className="text-2xl font-black text-slate-900 lg:text-3xl">Gaming <span className="text-blue-600">Gear</span></h3>
+            <p className="text-sm font-medium text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Chinh phục mọi đấu trường</p>
+          </div>
         </div>
       </div>
     </section>

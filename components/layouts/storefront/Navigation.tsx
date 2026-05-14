@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ChevronDown, Laptop, Cpu } from "lucide-react";
+import { ChevronDown, Laptop, Cpu, Flame } from "lucide-react";
 import http from "@/lib/axiosInstance";
 
 interface Category {
@@ -89,26 +89,31 @@ const Navigation = () => {
      * The dropdown MUST be a direct child of <nav> (NOT inside the
      * overflow-x-auto inner div) so it is never clipped.
      */
-    <nav className="bg-primary relative z-10 text-sm font-bold text-white uppercase lg:text-base">
+    <nav className="bg-gradient-to-r from-blue-700 to-blue-600 relative z-[9999] text-sm font-bold text-white uppercase lg:text-base shadow-lg shadow-blue-900/10">
 
       {/* Scrollable nav bar row */}
       <div className="flex items-center gap-6 overflow-x-auto whitespace-nowrap px-4 py-3 sm:gap-10 md:px-8 lg:px-12 xl:px-16 lg:h-12.5 lg:gap-20 lg:py-0 [&::-webkit-scrollbar]:hidden">
         <button
           onMouseEnter={open}
           onMouseLeave={close}
-          className="flex shrink-0 items-center gap-1.5 transition-colors hover:text-gray-200 focus:outline-none"
+          className="flex shrink-0 items-center gap-2 transition-all hover:text-white/80 focus:outline-none py-2 group"
           aria-expanded={menuOpen}
           aria-haspopup="true"
         >
+          <div className="flex h-5 w-5 items-center justify-center rounded bg-white/20 transition-colors group-hover:bg-white/30">
+            <ChevronDown className={`h-3 w-3 transition-transform duration-300 ${menuOpen ? "rotate-180" : ""}`} />
+          </div>
           DANH MỤC SẢN PHẨM
-          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`} />
         </button>
 
-        <Link href="/build-pc" className="shrink-0 transition-colors hover:text-gray-200">
+        <Link href="/build-pc" className="shrink-0 transition-colors hover:text-white/80 py-2 border-b-2 border-transparent hover:border-white/20">
           BUILD PC
         </Link>
-        <Link href="/khuyen-mai" className="text-destructive shrink-0 transition-colors hover:text-red-400">
-          🔥 KHUYẾN MÃI HOT
+        <Link href="/khuyen-mai" className="relative shrink-0 transition-all hover:scale-105 py-2">
+          <span className="flex items-center gap-1.5 text-orange-300 drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]">
+            <Flame className="h-4 w-4 animate-bounce fill-orange-400" />
+            KHUYẾN MÃI HOT
+          </span>
         </Link>
       </div>
 

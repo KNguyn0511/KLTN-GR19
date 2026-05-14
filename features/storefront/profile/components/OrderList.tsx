@@ -22,6 +22,8 @@ const TAB_TO_API_STATUS: Partial<Record<OrderStatusTab, MyOrdersApiStatus>> = {
   "Đã hủy": "CANCELLED",
 };
 
+import { ShoppingBag, Loader2, Inbox } from "lucide-react";
+
 export const OrderList = () => {
   const [activeTab, setActiveTab] = useState<OrderStatusTab>("Tất cả");
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -74,10 +76,16 @@ export const OrderList = () => {
   }, [fetchOrders]);
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full flex-col gap-8">
       {/* Page Title */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-[24px] font-bold text-heading">Lịch sử đơn hàng (O2O)</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">Lịch sử đơn hàng</h1>
+          <p className="text-sm font-medium text-slate-400">Xem và quản lý các đơn hàng bạn đã đặt</p>
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <ShoppingBag className="h-5 w-5" />
+        </div>
       </div>
 
       {/* Tabs */}
@@ -86,14 +94,19 @@ export const OrderList = () => {
       {/* List */}
       <div className="flex flex-col gap-6">
         {loading ? (
-          <div className="flex h-32 w-full items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-500 shadow-sm">
-            Đang tải…
+          <div className="flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+            <span className="mt-4 text-sm font-black uppercase tracking-widest">Đang tải đơn hàng...</span>
           </div>
         ) : orders.length > 0 ? (
           orders.map((order) => <OrderItem key={order.id} order={order} />)
         ) : (
-          <div className="flex h-32 w-full items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-500 shadow-sm">
-            Không có đơn hàng nào.
+          <div className="flex h-64 w-full flex-col items-center justify-center rounded-3xl border border-slate-100 bg-white text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-200">
+              <Inbox className="h-10 w-10" />
+            </div>
+            <span className="mt-4 text-sm font-black uppercase tracking-widest">Không có đơn hàng nào</span>
+            <p className="mt-1 text-[13px] font-medium text-slate-400">Hãy bắt đầu mua sắm để nhận ưu đãi!</p>
           </div>
         )}
       </div>

@@ -108,8 +108,8 @@ function HeaderSearchBar() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => searchQuery.trim().length >= 2 && setShowSuggestions(true)}
-            placeholder="Tìm kiếm linh kiện, Laptop, VGA..."
-            className={cn("h-full w-full pr-10 lg:w-150")}
+            placeholder="Bạn đang tìm linh kiện gì?"
+            className={cn("h-full w-full rounded-full border-gray-200 bg-gray-50/50 pl-5 pr-12 transition-all focus:bg-white focus:ring-2 focus:ring-blue-100 lg:w-150")}
             autoComplete="off"
           />
           {isLoading && (
@@ -121,11 +121,11 @@ function HeaderSearchBar() {
         <Button
           type="submit"
           className={cn(
-            "bg-primary hover:bg-primary-hover/90 h-full cursor-pointer px-4 text-white lg:w-17.5",
+            "bg-blue-600 hover:bg-blue-700 h-full cursor-pointer rounded-full px-6 text-white shadow-md shadow-blue-100 transition-all active:scale-95 lg:w-24 ml-[-40px] z-10",
           )}
         >
           <Search className="h-5 w-5 lg:hidden" />
-          <span className="hidden lg:block">TÌM</span>
+          <span className="hidden lg:block font-black tracking-widest text-xs">TÌM</span>
         </Button>
       </form>
 
@@ -252,9 +252,11 @@ function Header() {
   return (
     <header className="relative z-[10000] flex flex-wrap items-center justify-between gap-4 px-4 py-4 md:px-8 lg:px-12 lg:py-6.25 xl:px-16">
       {/* Logo */}
-      <div className="text-xl font-bold md:text-2xl lg:text-[32px]">
-        <Link href={"/"}>
-          <span className="text-primary">Net</span>Tech
+      <div className="text-xl font-black md:text-2xl lg:text-[28px] tracking-tighter">
+        <Link href={"/"} className="group flex items-center gap-1">
+          <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent transition-all group-hover:from-indigo-600 group-hover:to-blue-600">Net</span>
+          <span className="text-slate-800">Tech</span>
+          <div className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse mt-3" />
         </Link>
       </div>
 
