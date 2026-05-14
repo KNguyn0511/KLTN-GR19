@@ -10,7 +10,9 @@ export interface OrderProduct {
 }
 
 export interface OrderData {
-  id: string;
+  id: string; // This is display orderCode
+  mongoId?: string; // This is the _id for API calls
+  orderCode?: string;
   createdAt: string;
   status: OrderStatus;
   totalAmount: number;

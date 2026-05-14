@@ -6,4 +6,5 @@ export * from "./OrderList";
 export * from "./ProfileAddressBook";
 export * from "./WarrantyItem";
 export * from "./WarrantyList";
+export * from "./OrderDetail";
 export * from "./ChangePasswordForm";

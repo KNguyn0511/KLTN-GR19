@@ -90,7 +90,9 @@ export const OrderList = () => {
             Đang tải…
           </div>
         ) : orders.length > 0 ? (
-          orders.map((order) => <OrderItem key={order.id} order={order} />)
+          orders.map((order) => (
+            <OrderItem key={order.id} order={order} onRefresh={fetchOrders} />
+          ))
         ) : (
           <div className="flex h-32 w-full items-center justify-center rounded-xl border border-gray-100 bg-white text-gray-500 shadow-sm">
             Không có đơn hàng nào.

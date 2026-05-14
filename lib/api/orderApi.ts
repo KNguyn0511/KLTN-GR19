@@ -104,6 +104,7 @@ export interface MyOrderLineApi {
 }
 
 export interface MyOrderApi {
+  _id?: string;
   orderCode: string;
   createdAt: string;
   status: MyOrdersApiStatus | "PENDING";
@@ -131,6 +132,8 @@ export function mapMyOrderApiToOrderData(o: MyOrderApi): OrderData {
 
   return {
     id: o.orderCode,
+    mongoId: o._id,
+    orderCode: o.orderCode,
     createdAt: formatOrderDateVi(o.createdAt),
     status: statusMap[o.status] ?? "pending",
     totalAmount: o.totalAmount,
@@ -160,6 +163,19 @@ export async function getMyOrders(params?: {
       params: queryParams,
     },
   );
+  return response.data;
+}
+
+export async function getOrderDetail(orderCode: string): Promise<any> {
+  const response = await http.get<any>(`/orders/detail/${orderCode}`);
+  return response.data;
+}
+
+export async function cancelOrder(orderId: string): Promise<{ success: boolean }> {
+  // We need to find the Mongo ID from the order. Since OrderData currently uses orderCode as id,
+  // we might need to adjust how we pass the ID.
+  // Actually, OrderItem receives the whole order object which should have the original _id if we include it.
+  const response = await http.patch<{ success: boolean }>(`/orders/${orderId}/user-cancel`);
   return response.data;
 }
 

@@ -1,14 +1,26 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 import { OrderData } from "../types/order";
+import { cancelOrder } from "@/lib/api/orderApi";
+import { useCartStore } from "@/store/useCartStore";
 
 interface OrderItemProps {
   order: OrderData;
+  onRefresh?: () => void;
 }
 
-export const OrderItem = ({ order }: OrderItemProps) => {
+export const OrderItem = ({ order, onRefresh }: OrderItemProps) => {
+  const router = useRouter();
+  const { addItem } = useCartStore();
+  const [cancelling, setCancelling] = useState(false);
+
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -39,6 +51,37 @@ export const OrderItem = ({ order }: OrderItemProps) => {
   };
 
   const currentStatus = statusConfig[order.status];
+
+  const handleCancel = async () => {
+    if (!order.mongoId) return;
+    if (!confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) return;
+
+    setCancelling(true);
+    try {
+      await cancelOrder(order.mongoId);
+      toast.success("Đã hủy đơn hàng thành công");
+      onRefresh?.();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Không thể hủy đơn hàng");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const handleReorder = () => {
+    order.products.forEach((p) => {
+      addItem({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: p.quantity,
+        image: p.imageUrl,
+        // variant attributes are not fully stored in OrderProduct, but we try our best
+      });
+    });
+    toast.success("Đã thêm các sản phẩm vào giỏ hàng");
+    router.push("/cart");
+  };
 
   return (
     <div className="flex flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -96,63 +139,34 @@ export const OrderItem = ({ order }: OrderItemProps) => {
         </div>
 
         <div className="flex items-center gap-3">
-          {(order.status === "pending" || order.status === "shipping") && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 font-bold text-heading hover:bg-gray-50 bg-white"
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                Chi tiết
-              </Button>
-              <Button
-                type="button"
-                className="h-9 px-6 font-bold text-white shadow-sm hover:opacity-90"
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                Theo dõi
-              </Button>
-            </>
-          )}
-
-          {order.status === "completed" && (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 font-bold text-heading hover:bg-gray-50 bg-white"
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                Xem hóa đơn
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-9 border-primary text-primary hover:bg-blue-50 bg-white font-bold"
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                Mua lại
-              </Button>
-            </>
-          )}
-
-          {order.status === "cancelled" && (
+          <Link href={`/profile/orders/${order.id}`}>
             <Button
               type="button"
               variant="outline"
-              className="h-9 border-primary text-primary hover:bg-blue-50 bg-white font-bold px-8"
-              onClick={(e) => {
-                e.preventDefault();
-              }}
+              className="h-9 font-bold text-heading hover:bg-gray-50 bg-white"
+            >
+              Chi tiết đơn hàng
+            </Button>
+          </Link>
+
+          {order.status === "pending" && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={cancelling}
+              className="h-9 font-bold text-destructive hover:bg-red-50 border-destructive/20"
+              onClick={handleCancel}
+            >
+              {cancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Hủy đơn
+            </Button>
+          )}
+
+          {(order.status === "completed" || order.status === "cancelled") && (
+            <Button
+              type="button"
+              className="h-9 px-6 font-bold text-white shadow-sm hover:opacity-90 bg-primary"
+              onClick={handleReorder}
             >
               Mua lại
             </Button>

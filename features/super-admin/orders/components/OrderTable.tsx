@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Globe, Store, MoreHorizontal } from "lucide-react";
+import { Globe, Store, MoreHorizontal, CreditCard, Wallet, QrCode, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AdminOrderRow } from "@/lib/api/adminOrdersApi";
 
@@ -32,6 +32,36 @@ function formatOrderDate(iso: string): string {
   return `${day}/${mon} ${h}:${m}`;
 }
 
+export function getPaymentMethodBadge(method: string | undefined) {
+  const m = (method || "COD").toUpperCase();
+  if (m === "VNPAY") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-600 border border-blue-100">
+        <CreditCard className="h-3 w-3" /> VNPAY
+      </span>
+    );
+  }
+  if (m === "MOMO") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-50 px-2.5 py-1 text-[11px] font-bold text-pink-600 border border-pink-100">
+        <Wallet className="h-3 w-3" /> MoMo
+      </span>
+    );
+  }
+  if (m === "BANK_TRANSFER") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-2.5 py-1 text-[11px] font-bold text-purple-600 border border-purple-100">
+        <QrCode className="h-3 w-3" /> QR CODE
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-600 border border-amber-100">
+      <Banknote className="h-3 w-3" /> TIỀN MẶT
+    </span>
+  );
+}
+
 export type OrderTableProps = {
   orders: AdminOrderRow[];
   onAdvance: (order: AdminOrderRow) => void;
@@ -48,6 +78,7 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
               <th className="px-6 py-4 font-semibold">NGÀY ĐẶT</th>
               <th className="px-6 py-4 font-semibold">KHÁCH HÀNG</th>
               <th className="px-6 py-4 font-semibold">TỔNG TIỀN</th>
+              <th className="px-6 py-4 font-semibold">THANH TOÁN</th>
               <th className="px-6 py-4 font-semibold">NGUỒN ĐƠN (O2O)</th>
               <th className="px-6 py-4 font-semibold">TRẠNG THÁI</th>
               <th className="px-6 py-4 font-semibold text-center">HÀNH ĐỘNG</th>
@@ -110,6 +141,10 @@ export function OrderTable({ orders, onAdvance }: OrderTableProps) {
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-800">
                     {Math.round(order.totalAmount).toLocaleString("vi-VN")}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {getPaymentMethodBadge(order.customerInfo?.paymentMethod)}
                   </td>
 
                   <td className="px-6 py-4">

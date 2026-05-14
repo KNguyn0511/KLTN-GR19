@@ -9,6 +9,7 @@ import { OrderFilterBar } from "@/features/super-admin/orders/components/OrderFi
 import {
   OrderTable,
   nextApiStatus,
+  getPaymentMethodBadge,
 } from "@/features/super-admin/orders/components/OrderTable";
 import {
   fetchAdminOrders,
@@ -399,6 +400,9 @@ export default function SuperAdminOrdersPage() {
                     {selectedOrder.customerInfo.phone && (
                       <span>📞 {selectedOrder.customerInfo.phone}</span>
                     )}
+                    <div className="mt-1">
+                      {getPaymentMethodBadge(selectedOrder.customerInfo.paymentMethod)}
+                    </div>
                     {selectedOrder.customerInfo.addressDetail && (
                       <span className="text-[10px] text-slate-500">
                         📍 {selectedOrder.customerInfo.addressDetail}, {selectedOrder.customerInfo.ward}, {selectedOrder.customerInfo.district}, {selectedOrder.customerInfo.city}
